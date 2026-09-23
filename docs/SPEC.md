@@ -58,7 +58,7 @@ meu-projeto/
 
 **Aviso** (não bloqueia): um grupo com `max` maior que o número de membros é tratado como `*`, e um grupo com 1 membro só é sinalizado.
 
-**IDs.** São gerados na criação a partir do nome (minúsculas, sem acento, espaços viram `_`, sufixo `_2`, `_3`… em caso de colisão) e são **imutáveis** na primeira versão (ADR 0004).
+**IDs.** São sugeridos a partir do nome (minúsculas, sem acento, espaços viram `_`, sufixo `_2`, `_3`… em caso de colisão) e podem ser ajustados **no momento da criação**, nos diálogos "Nova filha", "Nova irmã" e "Novo projeto". Depois de criados, são **imutáveis** na primeira versão (ADR 0004).
 
 **Linguagem de expressões** (usada em restrições e condições de presença):
 
@@ -133,10 +133,11 @@ Referência de resultado: [docs/examples/produto-esperado/loja-basica/](examples
 
 ### 4.5 Edição e evolução do modelo
 
-Toda edição do modelo ou dos assets é um **Command** com `execute()` e `undo()` e entra no histórico de desfazer/refazer (ADR 0008). O histórico é zerado ao abrir outro projeto.
+Toda edição do modelo ou dos assets é um **Command** (um objeto com `label` e `run()`) executado pelo histórico de desfazer/refazer (ADR 0008). O comando não sabe se desfazer: como o estado é imutável, o histórico guarda o estado anterior de cada comando, e desfazer é voltar a ele. Depois de cada comando, o histórico confere as regras M1–M5 e A1–A3 e recusa o que as quebraria, mostrando o motivo. O histórico é zerado ao abrir outro projeto.
 
 Comandos da primeira versão:
 
+- **Modelo:** renomear.
 - **Feature:** adicionar filho, adicionar irmão, renomear (só o nome), editar descrição, mudar variabilidade, mover para outro pai, reordenar entre irmãos, excluir (com a subárvore).
 - **Grupo:** criar grupo a partir de filhos, mudar cardinalidade, desfazer grupo (os membros viram solitárias opcionais), mover para dentro ou para fora de um grupo.
 - **Atributo:** adicionar, editar, excluir.
@@ -260,7 +261,8 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
   - **XML:** `validateXml` (etapas 1 e 2 da leitura, §5)
   - **Diálogos:** `openProjectFolder`, `pickFileInProject`, `confirm`
   - **Shell:** `shell.openPath`
-  - **Projetos recentes:** os 10 últimos, gravados em `userData`
+  - **Projetos recentes:** `listRecentProjects` e `reopenProject` (os 10 últimos, gravados em `userData`; só pastas da lista podem ser reabertas sem o diálogo)
+  - **Janela:** `setUnsavedChanges` (o main pergunta antes de fechar a janela com alterações não salvas)
 
 O solver roda no renderer, de forma síncrona. Se ficar lento em modelos grandes, ele passa para um Web Worker trocando só o adapter.
 
@@ -270,7 +272,7 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 ## 7. Interface
 
-**Tela inicial:** novo projeto (escolher uma pasta vazia e um nome, o que cria `model.xml` com a raiz), abrir projeto e lista de recentes.
+**Tela inicial:** novo projeto (nome e ID da raiz, depois uma pasta sem `model.xml`; cria o `model.xml` só com a raiz), abrir projeto e lista de recentes.
 
 **Janela do projeto:**
 
@@ -341,15 +343,16 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 A aceitação de cada fase é manual e usa `docs/examples/loja-online`.
 
-| Fase                          | Entrega                                                                                                                                                                                     | Aceitação                                                                                                                                                                                                                                             |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0. Fundação**               | electron-vite + React + TS, Tailwind + shadcn/ui, ESLint + boundaries + Prettier, estrutura de pastas, IPC seguro com a raiz do projeto, empacotamento Windows                              | `npm run dev` abre a janela. Um import proibido (React dentro de `domain/`) gera erro de lint. `npm run build:win` gera o instalador.                                                                                                                 |
-| **1. Domínio e persistência** | Domínio completo do modelo, das expressões, das configurações e dos assets. Codecs XML dos três arquivos. Leitura em três etapas. Abrir e salvar projeto. Visualização provisória em lista. | Abrir o exemplo mostra a árvore. Salvar sem alterações gera arquivos idênticos byte a byte. Um ID duplicado, um ID com hífen ou `max="0"` geram erro com arquivo e linha.                                                                             |
-| **2. Editor visual**          | Diagrama, comandos, undo/redo, painéis de propriedades e de restrições, diálogo de impacto                                                                                                  | Recriar o modelo do exemplo do zero pela interface e salvar produz um arquivo igual ao exemplo. Excluir `pag_pix` mostra: 1 restrição removida, 2 assets desvinculados, 1 configuração afetada. Desfazer restaura tudo.                               |
-| **3. Configurador**           | Adapter do solver, resolução, modo configuração no diagrama, valores de atributos, lista de configurações, configuração desatualizada                                                       | `loja-basica` abre completa, com `mobile` selecionada por propagação e travada. Remover a decisão de `pag_pix` deixa `mobile` indecisa. Depois de excluir `pag_pix` no modelo e salvar, `loja-basica` abre como desatualizada, com a referência órfã. |
-| **4. Assets**                 | Aba de assets, vínculo com âncora e condição, estado do arquivo, abrir no programa padrão                                                                                                   | A aba mostra os 6 assets do exemplo. Renomear `boleto.xml` fora do app faz o asset aparecer como ausente.                                                                                                                                             |
-| **5. Geração**                | Plano, verificação, `XmlProductDeriver`, pasta temporária e troca                                                                                                                           | Gerar `loja-basica` produz o equivalente a `produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.                                                    |
-| **Depois**                    | `ModelAnalyzer`, variabilidade anotativa, renderers por mídia, restrições com atributos, clones, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes        | —                                                                                                                                                                                                                                                     |
+| Fase                          | Entrega                                                                                                                                                                                                                        | Aceitação                                                                                                                                                                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **0. Fundação**               | electron-vite + React + TS, Tailwind + shadcn/ui, ESLint + boundaries + Prettier, estrutura de pastas, IPC seguro com a raiz do projeto, empacotamento Windows                                                                 | `npm run dev` abre a janela. Um import proibido (React dentro de `domain/`) gera erro de lint. `npm run build:win` gera o instalador.                                                                                                                  |
+| **1. Domínio e persistência** | Domínio completo do modelo, das expressões, das configurações e dos assets. Codecs XML dos três arquivos. Leitura em três etapas. Abrir e salvar projeto. Visualização provisória em lista.                                    | Abrir o exemplo mostra a árvore. Salvar sem alterações gera arquivos idênticos byte a byte. Um ID duplicado, um ID com hífen ou `max="0"` geram erro com arquivo e linha.                                                                              |
+| **2A. Edição do modelo**      | Operações de edição no domínio, comandos com desfazer/refazer, árvore em lista selecionável, painéis de propriedades e de restrições, diálogos de impacto, de grupo, de conflito e de fechar, atalhos, projeto novo e recentes | Recriar o modelo do exemplo do zero pela interface (escolhendo os IDs na criação) e salvar produz um arquivo igual ao exemplo. Excluir `pag_pix` mostra: 1 restrição removida, 2 assets desvinculados, 1 configuração afetada. Desfazer restaura tudo. |
+| **2B. Diagrama**              | Diagrama com React Flow e layout automático no lugar da lista, menu de contexto, arrastar e soltar para mover, subárvores recolhíveis                                                                                          | A aceitação da 2A, feita pelo diagrama.                                                                                                                                                                                                                |
+| **3. Configurador**           | Adapter do solver, resolução, modo configuração no diagrama, valores de atributos, lista de configurações, configuração desatualizada                                                                                          | `loja-basica` abre completa, com `mobile` selecionada por propagação e travada. Remover a decisão de `pag_pix` deixa `mobile` indecisa. Depois de excluir `pag_pix` no modelo e salvar, `loja-basica` abre como desatualizada, com a referência órfã.  |
+| **4. Assets**                 | Aba de assets, vínculo com âncora e condição, estado do arquivo, abrir no programa padrão                                                                                                                                      | A aba mostra os 6 assets do exemplo. Renomear `boleto.xml` fora do app faz o asset aparecer como ausente.                                                                                                                                              |
+| **5. Geração**                | Plano, verificação, `XmlProductDeriver`, pasta temporária e troca                                                                                                                                                              | Gerar `loja-basica` produz o equivalente a `produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.                                                     |
+| **Depois**                    | `ModelAnalyzer`, variabilidade anotativa, renderers por mídia, restrições com atributos, clones, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes                                           | —                                                                                                                                                                                                                                                      |
 
 ## 10. Em aberto
 
