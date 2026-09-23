@@ -33,6 +33,14 @@ export interface TextFile {
 export type WritePrecondition =
   { kind: 'hash'; expectedHash: string } | { kind: 'must-not-exist' } | { kind: 'overwrite' }
 
+/** Schemas de docs/schemas/ usados na leitura dos arquivos do projeto. */
+export type XmlSchemaName = 'feature-model' | 'assets' | 'configuration'
+
+export interface XmlSchemaIssue {
+  line?: number
+  message: string
+}
+
 export interface MddApi {
   openProjectFolder(): Promise<IpcResult<OpenedProject | null>>
   list(relativeDir: string): Promise<IpcResult<DirectoryEntry[]>>
@@ -42,11 +50,18 @@ export interface MddApi {
     content: string,
     precondition: WritePrecondition
   ): Promise<IpcResult<{ hash: string }>>
+  /** Confere se o conteúdo é XML bem-formado e segue o XSD. Lista vazia = válido. */
+  validateXml(
+    schema: XmlSchemaName,
+    fileName: string,
+    content: string
+  ): Promise<IpcResult<XmlSchemaIssue[]>>
 }
 
 export const IpcChannel = {
   openProjectFolder: 'mdd:open-project-folder',
   list: 'mdd:list',
   readText: 'mdd:read-text',
-  writeText: 'mdd:write-text'
+  writeText: 'mdd:write-text',
+  validateXml: 'mdd:validate-xml'
 } as const

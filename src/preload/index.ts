@@ -6,7 +6,9 @@ const api: MddApi = {
   list: (relativeDir) => ipcRenderer.invoke(IpcChannel.list, relativeDir),
   readText: (relativePath) => ipcRenderer.invoke(IpcChannel.readText, relativePath),
   writeText: (relativePath, content, precondition) =>
-    ipcRenderer.invoke(IpcChannel.writeText, relativePath, content, precondition)
+    ipcRenderer.invoke(IpcChannel.writeText, relativePath, content, precondition),
+  validateXml: (schema, fileName, content) =>
+    ipcRenderer.invoke(IpcChannel.validateXml, schema, fileName, content)
 }
 
 contextBridge.exposeInMainWorld('mdd', api)

@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { ProjectRoot } from './project-root'
 import { registerFileHandlers } from './ipc/file-handlers'
 import { registerProjectHandlers } from './ipc/project-handlers'
+import { registerXmlHandlers } from './ipc/xml-handlers'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -48,6 +49,7 @@ app.whenReady().then(() => {
   const projectRoot = new ProjectRoot()
   registerProjectHandlers(projectRoot)
   registerFileHandlers(projectRoot)
+  registerXmlHandlers()
 
   createWindow()
 
