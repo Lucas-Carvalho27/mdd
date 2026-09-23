@@ -10,13 +10,18 @@ export interface LoadedFile<T> {
 }
 
 /**
- * Hash que o arquivo deve ter no disco para a gravação seguir,
- * ou `null` quando o arquivo ainda não deve existir.
+ * Como o arquivo deve estar no disco para a gravação seguir: com este hash,
+ * `null` quando ele ainda não deve existir, ou `'any'` para sobrescrever sem conferir.
  */
-export type ExpectedHash = string | null
+export type ExpectedHash = string | null | 'any'
+
+/** Conflito = o arquivo mudou fora do app; o usuário decide se sobrescreve (SPEC §8). */
+export type SaveFailure =
+  | { readonly kind: 'conflict'; readonly file: string }
+  | { readonly kind: 'error'; readonly problem: FileProblem }
 
 /** Gravação bem-sucedida devolve o novo hash do arquivo. */
-export type SaveResult = Result<string, FileProblem[]>
+export type SaveResult = Result<string, SaveFailure>
 
 export interface FeatureModelRepository {
   load(): Promise<Result<LoadedFile<FeatureModel>, FileProblem[]>>

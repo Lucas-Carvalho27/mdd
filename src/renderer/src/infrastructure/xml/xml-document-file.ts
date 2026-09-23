@@ -1,6 +1,10 @@
 import type { Element } from '@xmldom/xmldom'
 import { fileError, type FileProblem } from '@/application/file-problem'
-import type { ProjectStorage, StorageError } from '@/application/ports/project-storage'
+import type {
+  ProjectStorage,
+  StorageError,
+  WritePrecondition
+} from '@/application/ports/project-storage'
 import type { ExpectedHash, LoadedFile, SaveResult } from '@/application/ports/repositories'
 import type { XmlSchema, XmlSchemaValidator } from '@/application/ports/xml-schema-validator'
 import { err, ok, type Result } from '@/domain/shared/result'
@@ -64,15 +68,22 @@ export class XmlDocumentFile<T> {
     const written = await this.storage.writeText(
       this.path,
       this.format.encode(value),
-      expectedHash === null ? { kind: 'must-not-exist' } : { kind: 'hash', expectedHash }
+      toPrecondition(expectedHash)
     )
-    return written.ok ? written : err([this.storageProblem(written.error)])
+    if (written.ok) return written
+    if (written.error.code === 'changed-externally') {
+      return err({ kind: 'conflict', file: this.path })
+    }
+    return err({ kind: 'error', problem: this.storageProblem(written.error) })
   }
 
   private storageProblem(error: StorageError): FileProblem {
-    if (error.code === 'changed-externally') {
-      return fileError(this.path, 'O arquivo foi alterado fora do app desde a última leitura.')
-    }
     return fileError(this.path, error.message)
   }
+}
+
+function toPrecondition(expectedHash: ExpectedHash): WritePrecondition {
+  if (expectedHash === null) return { kind: 'must-not-exist' }
+  if (expectedHash === 'any') return { kind: 'overwrite' }
+  return { kind: 'hash', expectedHash }
 }

@@ -3,6 +3,8 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { ProjectRoot } from './project-root'
+import { RecentProjectsStore } from './recent-projects'
+import { confirmCloseWithUnsavedChanges, registerUnsavedChangesHandler } from './unsaved-changes'
 import { registerFileHandlers } from './ipc/file-handlers'
 import { registerProjectHandlers } from './ipc/project-handlers'
 import { registerXmlHandlers } from './ipc/xml-handlers'
@@ -26,6 +28,7 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
+  confirmCloseWithUnsavedChanges(mainWindow)
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -47,9 +50,11 @@ app.whenReady().then(() => {
   })
 
   const projectRoot = new ProjectRoot()
-  registerProjectHandlers(projectRoot)
+  const recents = new RecentProjectsStore(join(app.getPath('userData'), 'recent-projects.json'))
+  registerProjectHandlers(projectRoot, recents)
   registerFileHandlers(projectRoot)
   registerXmlHandlers()
+  registerUnsavedChangesHandler()
 
   createWindow()
 

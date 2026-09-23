@@ -1,47 +1,51 @@
-import type { Attribute, Feature, Group } from '@/domain/feature-model/feature-model'
+import type { Feature } from '@/domain/feature-model/feature-model'
+import { useProjectStore } from '@/ui/stores/project-store-context'
+import { describeGroup } from './group-label'
 
 /**
- * Visualização provisória do modelo em lista (Fase 1). O diagrama chega na Fase 2.
+ * Árvore do modelo em lista, com seleção (Fase 2A). O diagrama gráfico a substitui na Fase 2B.
  * ● obrigatória, ○ opcional; membros de grupo aparecem sob o rótulo do grupo.
  */
 export function FeatureTree({ root }: { readonly root: Feature }): React.JSX.Element {
   return (
-    <ul className="space-y-1 text-sm">
+    <ul className="space-y-0.5 text-sm" role="tree">
       <FeatureItem feature={root} />
     </ul>
   )
 }
 
 function FeatureItem({ feature }: { readonly feature: Feature }): React.JSX.Element {
+  const selected = useProjectStore((state) => state.selectedFeatureId === feature.id)
+  const selectFeature = useProjectStore((state) => state.selectFeature)
+
   return (
-    <li>
-      <div className="flex flex-wrap items-baseline gap-2">
+    <li role="treeitem" aria-selected={selected}>
+      <button
+        data-feature-id={feature.id}
+        className={`flex w-full items-baseline gap-2 rounded px-1.5 py-0.5 text-left ${
+          selected ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+        }`}
+        onClick={() => selectFeature(feature.id)}
+      >
         <span aria-hidden className="w-3 text-center">
-          {feature.variability === 'mandatory'
-            ? '●'
-            : feature.variability === 'optional'
-              ? '○'
-              : ''}
+          {variabilityMarker(feature)}
         </span>
         <span className="font-medium">{feature.name}</span>
-        <code className="text-xs text-muted-foreground">{feature.id}</code>
-        {feature.attributes.map((attribute) => (
-          <span key={attribute.id} className="rounded bg-muted px-1.5 text-xs">
-            {describeAttribute(attribute)}
-          </span>
-        ))}
-      </div>
+        <code className={`text-xs ${selected ? 'opacity-80' : 'text-muted-foreground'}`}>
+          {feature.id}
+        </code>
+      </button>
       {feature.children.length > 0 && (
-        <ul className="ml-5 space-y-1 border-l pl-3">
+        <ul className="ml-4 space-y-0.5 border-l pl-2">
           {feature.children.map((child, index) =>
             child.kind === 'feature' ? (
               <FeatureItem key={child.feature.id} feature={child.feature} />
             ) : (
               <li key={`group-${index}`}>
-                <span className="text-xs uppercase text-muted-foreground">
+                <span className="pl-1.5 text-xs uppercase text-muted-foreground">
                   grupo {describeGroup(child.group)}
                 </span>
-                <ul className="ml-2 space-y-1">
+                <ul className="ml-2 space-y-0.5">
                   {child.group.members.map((member) => (
                     <FeatureItem key={member.id} feature={member} />
                   ))}
@@ -55,14 +59,8 @@ function FeatureItem({ feature }: { readonly feature: Feature }): React.JSX.Elem
   )
 }
 
-function describeGroup(group: Group): string {
-  if (group.min === 1 && group.max === 1) return 'alternative'
-  if (group.min === 1 && group.max === '*') return 'or'
-  return `[${group.min}..${group.max}]`
-}
-
-function describeAttribute(attribute: Attribute): string {
-  const value = attribute.defaultValue !== undefined ? ` = ${attribute.defaultValue}` : ''
-  const fixed = attribute.configurable ? '' : ' (fixo)'
-  return `${attribute.name}: ${attribute.type}${value}${fixed}`
+function variabilityMarker(feature: Feature): string {
+  if (feature.variability === 'mandatory') return '●'
+  if (feature.variability === 'optional') return '○'
+  return ''
 }
