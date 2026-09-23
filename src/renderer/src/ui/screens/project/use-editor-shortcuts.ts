@@ -29,6 +29,8 @@ export function useEditorShortcuts(
   useEffect(() => {
     if (!enabled) return
     const onKeyDown = (event: KeyboardEvent): void => {
+      // A tecla já foi tratada por outro componente (por exemplo, Enter ou Tab num menu aberto).
+      if (event.defaultPrevented) return
       const state = store.getState()
       const shortcut = shortcutFor(event)
       if (shortcut === undefined || state.session === null || state.conflicts.length > 0) return
