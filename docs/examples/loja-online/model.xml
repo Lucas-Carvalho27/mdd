@@ -5,7 +5,7 @@
     <attribute id="versao" name="Versão" type="string" default="1.0" configurable="false"/>
     <feature id="catalogo" name="Catálogo" variability="mandatory"/>
     <feature id="busca" name="Busca" variability="optional">
-      <attribute id="max_resultados" name="Máx. resultados" type="number" min="10" max="500" default="50"/>
+      <attribute id="max_resultados" name="Máx. resultados" type="number" default="50" min="10" max="500"/>
     </feature>
     <feature id="mobile" name="App mobile" variability="optional">
       <attribute id="plataforma" name="Plataforma" type="enum">
