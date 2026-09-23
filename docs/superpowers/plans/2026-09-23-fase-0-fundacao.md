@@ -21,34 +21,36 @@
 
 ## Mapa de arquivos
 
-| Arquivo | Responsabilidade |
-|---|---|
-| `package.json`, `electron.vite.config.ts`, `tsconfig*.json` | Build e tipos (três bundles, alias `@/`) |
-| `electron-builder.yml` | Empacotamento Windows (NSIS) |
-| `eslint.config.mjs` | Regras de lint, incluindo as camadas |
-| `components.json` | Configuração do CLI do shadcn/ui |
-| `src/shared/ipc.ts` | Contrato tipado da API `window.mdd` (canais, tipos, resultados) |
-| `src/main/index.ts` | Janela com contextIsolation + sandbox; registra os handlers |
-| `src/main/project-root.ts` | Guarda a pasta aberta; resolve caminhos relativos e recusa fugas |
-| `src/main/ipc/results.ts` | `ok()` e `fail()` para `IpcResult` |
-| `src/main/ipc/project-handlers.ts` | Diálogo "abrir pasta do projeto" |
-| `src/main/ipc/file-handlers.ts` | `list`, `readText`, `writeText` (com pré-condição de hash) |
-| `src/preload/index.ts`, `src/preload/index.d.ts` | Publica `window.mdd` e declara o tipo global |
-| `src/renderer/src/{domain,application,infrastructure}/` | Camadas vazias (preenchidas na Fase 1) |
-| `src/renderer/src/ui/app/index.css` | Tailwind + tema do shadcn |
-| `src/renderer/src/ui/app/App.tsx` | Tela provisória que prova o IPC (substituída na Fase 1) |
-| `src/renderer/src/ui/components/ui/button.tsx` | Gerado pelo shadcn |
-| `src/renderer/src/main.tsx` | Ponto de entrada do renderer |
+| Arquivo                                                     | Responsabilidade                                                 |
+| ----------------------------------------------------------- | ---------------------------------------------------------------- |
+| `package.json`, `electron.vite.config.ts`, `tsconfig*.json` | Build e tipos (três bundles, alias `@/`)                         |
+| `electron-builder.yml`                                      | Empacotamento Windows (NSIS)                                     |
+| `eslint.config.mjs`                                         | Regras de lint, incluindo as camadas                             |
+| `components.json`                                           | Configuração do CLI do shadcn/ui                                 |
+| `src/shared/ipc.ts`                                         | Contrato tipado da API `window.mdd` (canais, tipos, resultados)  |
+| `src/main/index.ts`                                         | Janela com contextIsolation + sandbox; registra os handlers      |
+| `src/main/project-root.ts`                                  | Guarda a pasta aberta; resolve caminhos relativos e recusa fugas |
+| `src/main/ipc/results.ts`                                   | `ok()` e `fail()` para `IpcResult`                               |
+| `src/main/ipc/project-handlers.ts`                          | Diálogo "abrir pasta do projeto"                                 |
+| `src/main/ipc/file-handlers.ts`                             | `list`, `readText`, `writeText` (com pré-condição de hash)       |
+| `src/preload/index.ts`, `src/preload/index.d.ts`            | Publica `window.mdd` e declara o tipo global                     |
+| `src/renderer/src/{domain,application,infrastructure}/`     | Camadas vazias (preenchidas na Fase 1)                           |
+| `src/renderer/src/ui/app/index.css`                         | Tailwind + tema do shadcn                                        |
+| `src/renderer/src/ui/app/App.tsx`                           | Tela provisória que prova o IPC (substituída na Fase 1)          |
+| `src/renderer/src/ui/components/ui/button.tsx`              | Gerado pelo shadcn                                               |
+| `src/renderer/src/main.tsx`                                 | Ponto de entrada do renderer                                     |
 
 ---
 
 ### Tarefa 1: Scaffold do electron-vite
 
 **Arquivos:**
+
 - Criar (via template): `package.json`, `electron.vite.config.ts`, `tsconfig.json`, `tsconfig.node.json`, `tsconfig.web.json`, `eslint.config.mjs`, `electron-builder.yml`, `.gitignore`, `.editorconfig`, `.prettierrc.yaml`, `.prettierignore`, `.vscode/`, `build/`, `resources/`, `src/`
 - Substituir: `README.md`, `electron-builder.yml`
 
 **Interfaces:**
+
 - Consome: nada.
 - Produz: scripts npm `dev`, `build`, `build:win`, `typecheck`, `lint`, `format`, usados por todas as tarefas seguintes.
 
@@ -63,16 +65,16 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 - [ ] **Passo 2: Gerar o template numa pasta temporária e mover para a raiz**
 
-O CLI apaga o conteúdo da pasta de destino se ela não estiver vazia, por isso ele gera numa subpasta.
+O CLI apaga o conteúdo da pasta de destino se ela não estiver vazia, por isso ele gera numa subpasta. O nome da subpasta precisa ser um nome de pacote npm válido (sem ponto no início); senão o CLI para e pergunta o nome.
 
 ```bash
-npm create @quick-start/electron@latest .scaffold -- --template react-ts --skip < /dev/null
-rm .scaffold/README.md
-cp -r .scaffold/. .
-rm -rf .scaffold
+npm create @quick-start/electron@latest mdd-scaffold -- --template react-ts --skip < /dev/null
+rm mdd-scaffold/README.md
+cp -r mdd-scaffold/. .
+rm -rf mdd-scaffold
 ```
 
-Esperado: `Scaffolding project in ...\.scaffold... Done.` e a raiz agora tem `package.json`, `src/`, `build/`, `resources/`.
+Esperado: `Scaffolding project in ...\mdd-scaffold... Done.` e a raiz agora tem `package.json`, `src/`, `build/`, `resources/`.
 
 - [ ] **Passo 3: Ajustar o package.json**
 
@@ -86,9 +88,13 @@ npm pkg delete homepage scripts.build:mac scripts.build:linux
 ```bash
 npm install
 npm install -D electron@latest
+npm pkg set "scripts.postinstall=install-electron && electron-builder install-app-deps"
+npm run postinstall
 ```
 
-Esperado: `npm ls electron` mostra `electron@44.x`.
+O Electron 44 não baixa mais o binário no `npm install`, e o electron-vite 5 não dispara o download sozinho: ele falha com `Error: Electron uninstall`. O `install-electron` (binário do próprio pacote `electron`) baixa o executável, e colocá-lo no `postinstall` garante que um clone novo também funcione.
+
+Esperado: `npm ls electron` mostra `electron@44.x`, e `node_modules/electron/path.txt` contém `electron.exe`.
 
 - [ ] **Passo 5: Substituir `electron-builder.yml` (só Windows, nome mdd)**
 
@@ -161,12 +167,14 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Tarefa 2: Tailwind CSS 4 e shadcn/ui
 
 **Arquivos:**
+
 - Modificar: `electron.vite.config.ts`, `tsconfig.json`, `tsconfig.web.json`, `src/renderer/src/main.tsx`
 - Criar: `components.json`, `src/renderer/src/ui/app/index.css`, `src/renderer/src/ui/app/App.tsx`
 - Gerar (CLI): `src/renderer/src/ui/components/ui/button.tsx`
 - Remover: `src/renderer/src/App.tsx`, `src/renderer/src/components/`, `src/renderer/src/assets/`
 
 **Interfaces:**
+
 - Consome: scripts da Tarefa 1.
 - Produz: alias `@/` → `src/renderer/src/`; `Button` em `@/ui/components/ui/button`; comando `npx shadcn@latest add <componente> -y -o` para as próximas fases.
 
@@ -416,10 +424,12 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Tarefa 3: Camadas e lint de dependências
 
 **Arquivos:**
+
 - Criar: `src/renderer/src/domain/.gitkeep`, `src/renderer/src/application/.gitkeep`, `src/renderer/src/infrastructure/.gitkeep`
 - Substituir: `eslint.config.mjs`
 
 **Interfaces:**
+
 - Consome: alias `@/` da Tarefa 2.
 - Produz: tipos de elemento `main`, `preload`, `shared`, `domain`, `application`, `infrastructure`, `composition` (`ui/app/`) e `ui`. As regras valem para todas as fases seguintes (SPEC §6.1).
 
@@ -586,11 +596,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Tarefa 4: IPC seguro preso à pasta do projeto
 
 **Arquivos:**
+
 - Criar: `src/shared/ipc.ts`, `src/main/project-root.ts`, `src/main/ipc/results.ts`, `src/main/ipc/project-handlers.ts`, `src/main/ipc/file-handlers.ts`
 - Substituir: `src/main/index.ts`, `src/preload/index.ts`, `src/preload/index.d.ts`, `src/renderer/src/ui/app/App.tsx`
 - Modificar: `tsconfig.node.json`, `tsconfig.web.json` (incluir `src/shared`)
 
 **Interfaces:**
+
 - Consome: camadas da Tarefa 3 (`composition` pode importar `shared`).
 - Produz (usado pelo adapter `ElectronProjectStorage` na Fase 1):
   - `window.mdd: MddApi`
@@ -636,11 +648,7 @@ Em `tsconfig.web.json`, troque a lista `include` por:
  */
 
 export type IpcErrorCode =
-  | 'no-project'
-  | 'outside-project'
-  | 'not-found'
-  | 'changed-externally'
-  | 'io'
+  'no-project' | 'outside-project' | 'not-found' | 'changed-externally' | 'io'
 
 export interface IpcError {
   code: IpcErrorCode
@@ -667,9 +675,7 @@ export interface TextFile {
 }
 
 export type WritePrecondition =
-  | { kind: 'hash'; expectedHash: string }
-  | { kind: 'must-not-exist' }
-  | { kind: 'overwrite' }
+  { kind: 'hash'; expectedHash: string } | { kind: 'must-not-exist' } | { kind: 'overwrite' }
 
 export interface MddApi {
   openProjectFolder(): Promise<IpcResult<OpenedProject | null>>
@@ -1047,6 +1053,7 @@ Esperado: sem erros.
 Rode `npm run dev`, clique em **Abrir pasta de projeto** e escolha `docs/examples/loja-online`.
 
 Esperado:
+
 - aparece "loja-online", o caminho completo e a lista `assets.xml`, `configurations/`, `docs/`, `model.xml`;
 - **nenhuma** mensagem vermelha (se aparecer "ERRO: o main deixou ler fora do projeto!", a trava falhou);
 - cancelar o diálogo não muda nada.
@@ -1067,9 +1074,11 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Tarefa 5: Instalador Windows
 
 **Arquivos:**
+
 - Nenhum arquivo novo; valida o `electron-builder.yml` da Tarefa 1 com o código das Tarefas 2–4.
 
 **Interfaces:**
+
 - Consome: `npm run build:win`.
 - Produz: `dist/mdd-0.1.0-setup.exe` (ignorado pelo git).
 

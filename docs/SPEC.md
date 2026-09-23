@@ -48,13 +48,13 @@ meu-projeto/
 
 **Invariantes** (erro = o arquivo não abre, ou o comando de edição é recusado):
 
-| # | Regra |
-|---|---|
-| M1 | Os IDs de feature são únicos no modelo, seguem `[a-z][a-z0-9_]*` e não são palavras reservadas (`not and or implies iff true false`). |
-| M2 | A raiz não tem `variability`. Uma feature solitária sempre tem. Um membro de grupo nunca tem. |
-| M3 | Um grupo tem ao menos 1 membro. `min ≥ 0`. `max` é `*` ou um inteiro `≥ max(min, 1)`. `min ≤ número de membros`. |
-| M4 | As restrições têm IDs únicos, expressão sintaticamente válida e só referenciam IDs de features existentes. |
-| M5 | Os IDs de atributo são únicos dentro da feature. `min`/`max` só existem em `number`, com `min ≤ max`. `enum` tem ao menos uma `option`, sem valores repetidos. `default`, se existir, é um valor válido para o tipo. Atributo fixo (`configurable="false"`) exige `default`. |
+| #   | Regra                                                                                                                                                                                                                                                                        |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M1  | Os IDs de feature são únicos no modelo, seguem `[a-z][a-z0-9_]*` e não são palavras reservadas (`not and or implies iff true false`).                                                                                                                                        |
+| M2  | A raiz não tem `variability`. Uma feature solitária sempre tem. Um membro de grupo nunca tem.                                                                                                                                                                                |
+| M3  | Um grupo tem ao menos 1 membro. `min ≥ 0`. `max` é `*` ou um inteiro `≥ max(min, 1)`. `min ≤ número de membros`.                                                                                                                                                             |
+| M4  | As restrições têm IDs únicos, expressão sintaticamente válida e só referenciam IDs de features existentes.                                                                                                                                                                   |
+| M5  | Os IDs de atributo são únicos dentro da feature. `min`/`max` só existem em `number`, com `min ≤ max`. `enum` tem ao menos uma `option`, sem valores repetidos. `default`, se existir, é um valor válido para o tipo. Atributo fixo (`configurable="false"`) exige `default`. |
 
 **Aviso** (não bloqueia): um grupo com `max` maior que o número de membros é tratado como `*`, e um grupo com 1 membro só é sinalizado.
 
@@ -98,11 +98,11 @@ Uma configuração guarda só as **decisões manuais** (`selected` ou `deselecte
 
 **Estados calculados:**
 
-| Estado | Condição |
-|---|---|
-| Válida | Não está em conflito. |
-| Completa | Válida, sem features indecisas e com todo atributo configurável de feature selecionada tendo valor (o da configuração ou o `default`). |
-| Desatualizada | Tem referências órfãs, está em conflito, ou tem valor de atributo inválido para o tipo. |
+| Estado        | Condição                                                                                                                               |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Válida        | Não está em conflito.                                                                                                                  |
+| Completa      | Válida, sem features indecisas e com todo atributo configurável de feature selecionada tendo valor (o da configuração ou o `default`). |
+| Desatualizada | Tem referências órfãs, está em conflito, ou tem valor de atributo inválido para o tipo.                                                |
 
 **Valores de atributos.** `number` deve ser decimal dentro de `min..max`; `boolean` deve ser `true` ou `false`; `enum` deve ser uma das `option`; `string` aceita qualquer texto. Valores de features não selecionadas continuam no arquivo, mas são ignorados.
 
@@ -116,7 +116,7 @@ Um asset tem `id` único (gerado do nome do arquivo, no mesmo formato de ID de f
 
 **Inclusão.** Um asset entra no produto quando a âncora está selecionada **e** a condição (se existir) é verdadeira para a configuração. A ordem dos assets de uma mesma âncora é a ordem no `assets.xml`.
 
-**Estado do arquivo** (calculado, não salvo): *ok*, *ausente* (o arquivo não existe) ou, só para fragmentos e verificado na geração, *XML malformado*.
+**Estado do arquivo** (calculado, não salvo): _ok_, _ausente_ (o arquivo não existe) ou, só para fragmentos e verificado na geração, _XML malformado_.
 
 ### 4.4 Geração
 
@@ -157,12 +157,12 @@ Regras:
 
 ## 5. Formatos de arquivo
 
-| Arquivo | Namespace | Schema | Exemplo |
-|---|---|---|---|
-| `model.xml` | `urn:mdd:feature-model` | [feature-model.xsd](schemas/feature-model.xsd) | [model.xml](examples/loja-online/model.xml) |
-| `assets.xml` | `urn:mdd:assets` | [assets.xsd](schemas/assets.xsd) | [assets.xml](examples/loja-online/assets.xml) |
+| Arquivo                | Namespace               | Schema                                         | Exemplo                                                                |
+| ---------------------- | ----------------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
+| `model.xml`            | `urn:mdd:feature-model` | [feature-model.xsd](schemas/feature-model.xsd) | [model.xml](examples/loja-online/model.xml)                            |
+| `assets.xml`           | `urn:mdd:assets`        | [assets.xsd](schemas/assets.xsd)               | [assets.xml](examples/loja-online/assets.xml)                          |
 | `configurations/*.xml` | `urn:mdd:configuration` | [configuration.xsd](schemas/configuration.xsd) | [loja-basica.xml](examples/loja-online/configurations/loja-basica.xml) |
-| `product.xml` (gerado) | `urn:mdd:product` | [product.xsd](schemas/product.xsd) | [product.xml](examples/produto-esperado/loja-basica/product.xml) |
+| `product.xml` (gerado) | `urn:mdd:product`       | [product.xsd](schemas/product.xsd)             | [product.xml](examples/produto-esperado/loja-basica/product.xml)       |
 
 **Leitura em três etapas.** Cada etapa para no primeiro tipo de erro e reporta tudo o que encontrou:
 
@@ -214,38 +214,38 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 
 **Idioma:** identificadores de código em inglês; texto da interface e documentação em português. Mapeamento dos termos:
 
-| Glossário | Código |
-|---|---|
-| Projeto | `Project` |
-| Feature Model | `FeatureModel` |
-| Grupo | `Group` |
-| Restrição | `Constraint` |
-| Expressão | `Expression` |
-| Atributo | `Attribute` |
-| Configuração | `Configuration` |
-| Decisão manual | `ManualDecision` |
-| Decisão propagada | `PropagatedDecision` |
-| Resolução | `Resolution` |
-| Asset | `Asset` |
-| Fragmento | `fragment` |
-| Recurso | `resource` |
-| Âncora | `anchor` |
-| Condição de presença | `presenceCondition` |
-| Geração | `Generation` |
-| Produto gerado | `GeneratedProduct` |
-| Seção | `Section` |
+| Glossário            | Código               |
+| -------------------- | -------------------- |
+| Projeto              | `Project`            |
+| Feature Model        | `FeatureModel`       |
+| Grupo                | `Group`              |
+| Restrição            | `Constraint`         |
+| Expressão            | `Expression`         |
+| Atributo             | `Attribute`          |
+| Configuração         | `Configuration`      |
+| Decisão manual       | `ManualDecision`     |
+| Decisão propagada    | `PropagatedDecision` |
+| Resolução            | `Resolution`         |
+| Asset                | `Asset`              |
+| Fragmento            | `fragment`           |
+| Recurso              | `resource`           |
+| Âncora               | `anchor`             |
+| Condição de presença | `presenceCondition`  |
+| Geração              | `Generation`         |
+| Produto gerado       | `GeneratedProduct`   |
+| Seção                | `Section`            |
 
 ### 6.2 Ports (em `application/ports`)
 
-| Port | Responsabilidade | Adapter v1 |
-|---|---|---|
-| `ProjectStorage` | Ler, escrever, listar, copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8). | `ElectronProjectStorage` |
-| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5). | `Xml*Repository` (codecs + `ProjectStorage`) |
-| `ConstraintSolver` | Receber uma `Formula` e responder a satisfatibilidade sob suposições, devolvendo uma solução. | `LogicSolverConstraintSolver` |
-| `ProductDeriver` | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado. | `XmlProductDeriver` |
-| `AssetOpener` | Abrir um arquivo no programa padrão do sistema. | `ElectronAssetOpener` |
-| `FileDialogs` | Escolher a pasta do projeto e escolher um arquivo dentro do projeto. | `ElectronFileDialogs` |
-| `Clock` | Data e hora atuais (para `generatedAt`). | `SystemClock` |
+| Port                                                                          | Responsabilidade                                                                                                                                              | Adapter v1                                   |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `ProjectStorage`                                                              | Ler, escrever, listar, copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8). | `ElectronProjectStorage`                     |
+| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                        | `Xml*Repository` (codecs + `ProjectStorage`) |
+| `ConstraintSolver`                                                            | Receber uma `Formula` e responder a satisfatibilidade sob suposições, devolvendo uma solução.                                                                 | `LogicSolverConstraintSolver`                |
+| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                 | `XmlProductDeriver`                          |
+| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                               | `ElectronAssetOpener`                        |
+| `FileDialogs`                                                                 | Escolher a pasta do projeto e escolher um arquivo dentro do projeto.                                                                                          | `ElectronFileDialogs`                        |
+| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                      | `SystemClock`                                |
 
 ### 6.3 Processo main e IPC
 
@@ -269,12 +269,14 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 **Tela inicial:** novo projeto (escolher uma pasta vazia e um nome, o que cria `model.xml` com a raiz), abrir projeto e lista de recentes.
 
 **Janela do projeto:**
+
 - barra lateral com as abas **Modelo**, **Configurações** e **Assets**;
 - área central com o diagrama;
 - painel direito de propriedades;
 - barra de status.
 
 **Modelo (editor):**
+
 - Diagrama com React Flow e layout elkjs de cima para baixo (ADR 0007). A notação é a clássica:
   - círculo cheio = obrigatória, círculo vazio = opcional;
   - arco vazio = alternative, arco cheio = or, rótulo `[n..m]` nos demais grupos.
@@ -291,17 +293,18 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
   - a restrição só é confirmada quando é válida.
 - Atalhos:
 
-  | Ação | Atalho |
-  |---|---|
-  | Adicionar filho | Tab |
-  | Adicionar irmão | Enter |
-  | Renomear | F2 |
-  | Excluir | Delete |
-  | Reordenar | Alt+↑ / Alt+↓ |
+  | Ação               | Atalho          |
+  | ------------------ | --------------- |
+  | Adicionar filho    | Tab             |
+  | Adicionar irmão    | Enter           |
+  | Renomear           | F2              |
+  | Excluir            | Delete          |
+  | Reordenar          | Alt+↑ / Alt+↓   |
   | Desfazer / refazer | Ctrl+Z / Ctrl+Y |
-  | Salvar | Ctrl+S |
+  | Salvar             | Ctrl+S          |
 
 **Configurações:**
+
 - Lista com criar, renomear, duplicar e excluir (com confirmação).
 - Abrir uma configuração mostra **o mesmo diagrama em modo configuração**, com a estrutura só para leitura. Estados dos nós:
   - selecionada manual;
@@ -317,6 +320,7 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 - Botão **Gerar produto**, habilitado só quando a configuração está completa.
 
 **Assets:**
+
 - Lista agrupada por âncora, com o estado de cada arquivo (ok / ausente) e ações para abrir, editar, reordenar e desvincular.
 - Para vincular, o arquivo é escolhido em um diálogo que começa na pasta do projeto. Um arquivo fora do projeto é recusado com a orientação de copiá-lo para dentro.
 - O tipo é sugerido pela extensão (`.xml` → fragmento, demais → recurso).
@@ -333,15 +337,15 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 A aceitação de cada fase é manual e usa `docs/examples/loja-online`.
 
-| Fase | Entrega | Aceitação |
-|---|---|---|
-| **0. Fundação** | electron-vite + React + TS, Tailwind + shadcn/ui, ESLint + boundaries + Prettier, estrutura de pastas, IPC seguro com a raiz do projeto, empacotamento Windows | `npm run dev` abre a janela. Um import proibido (React dentro de `domain/`) gera erro de lint. `npm run build:win` gera o instalador. |
-| **1. Domínio e persistência** | Domínio completo do modelo, das expressões, das configurações e dos assets. Codecs XML dos três arquivos. Leitura em três etapas. Abrir e salvar projeto. Visualização provisória em lista. | Abrir o exemplo mostra a árvore. Salvar sem alterações gera arquivos idênticos byte a byte. Um ID duplicado, um ID com hífen ou `max="0"` geram erro com arquivo e linha. |
-| **2. Editor visual** | Diagrama, comandos, undo/redo, painéis de propriedades e de restrições, diálogo de impacto | Recriar o modelo do exemplo do zero pela interface e salvar produz um arquivo igual ao exemplo. Excluir `pag_pix` mostra: 1 restrição removida, 2 assets desvinculados, 1 configuração afetada. Desfazer restaura tudo. |
-| **3. Configurador** | Adapter do solver, resolução, modo configuração no diagrama, valores de atributos, lista de configurações, configuração desatualizada | `loja-basica` abre completa, com `mobile` selecionada por propagação e travada. Remover a decisão de `pag_pix` deixa `mobile` indecisa. Depois de excluir `pag_pix` no modelo e salvar, `loja-basica` abre como desatualizada, com a referência órfã. |
-| **4. Assets** | Aba de assets, vínculo com âncora e condição, estado do arquivo, abrir no programa padrão | A aba mostra os 6 assets do exemplo. Renomear `boleto.xml` fora do app faz o asset aparecer como ausente. |
-| **5. Geração** | Plano, verificação, `XmlProductDeriver`, pasta temporária e troca | Gerar `loja-basica` produz o equivalente a `produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada. |
-| **Depois** | `ModelAnalyzer`, variabilidade anotativa, renderers por mídia, restrições com atributos, clones, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes | — |
+| Fase                          | Entrega                                                                                                                                                                                     | Aceitação                                                                                                                                                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0. Fundação**               | electron-vite + React + TS, Tailwind + shadcn/ui, ESLint + boundaries + Prettier, estrutura de pastas, IPC seguro com a raiz do projeto, empacotamento Windows                              | `npm run dev` abre a janela. Um import proibido (React dentro de `domain/`) gera erro de lint. `npm run build:win` gera o instalador.                                                                                                                 |
+| **1. Domínio e persistência** | Domínio completo do modelo, das expressões, das configurações e dos assets. Codecs XML dos três arquivos. Leitura em três etapas. Abrir e salvar projeto. Visualização provisória em lista. | Abrir o exemplo mostra a árvore. Salvar sem alterações gera arquivos idênticos byte a byte. Um ID duplicado, um ID com hífen ou `max="0"` geram erro com arquivo e linha.                                                                             |
+| **2. Editor visual**          | Diagrama, comandos, undo/redo, painéis de propriedades e de restrições, diálogo de impacto                                                                                                  | Recriar o modelo do exemplo do zero pela interface e salvar produz um arquivo igual ao exemplo. Excluir `pag_pix` mostra: 1 restrição removida, 2 assets desvinculados, 1 configuração afetada. Desfazer restaura tudo.                               |
+| **3. Configurador**           | Adapter do solver, resolução, modo configuração no diagrama, valores de atributos, lista de configurações, configuração desatualizada                                                       | `loja-basica` abre completa, com `mobile` selecionada por propagação e travada. Remover a decisão de `pag_pix` deixa `mobile` indecisa. Depois de excluir `pag_pix` no modelo e salvar, `loja-basica` abre como desatualizada, com a referência órfã. |
+| **4. Assets**                 | Aba de assets, vínculo com âncora e condição, estado do arquivo, abrir no programa padrão                                                                                                   | A aba mostra os 6 assets do exemplo. Renomear `boleto.xml` fora do app faz o asset aparecer como ausente.                                                                                                                                             |
+| **5. Geração**                | Plano, verificação, `XmlProductDeriver`, pasta temporária e troca                                                                                                                           | Gerar `loja-basica` produz o equivalente a `produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.                                                    |
+| **Depois**                    | `ModelAnalyzer`, variabilidade anotativa, renderers por mídia, restrições com atributos, clones, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes        | —                                                                                                                                                                                                                                                     |
 
 ## 10. Em aberto
 
