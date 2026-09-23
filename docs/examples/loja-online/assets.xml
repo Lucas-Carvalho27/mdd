@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assets xmlns="urn:mdd:assets" schemaVersion="1">
+  <asset id="doc_loja" kind="fragment" path="docs/loja/visao-geral.xml" anchor="loja" name="Visão geral"/>
+  <asset id="doc_busca" kind="fragment" path="docs/busca/busca.xml" anchor="busca" name="Busca"/>
+  <asset id="doc_busca_app" kind="fragment" path="docs/busca/busca-app.xml" anchor="busca" name="Busca no app">
+    <condition>busca and mobile</condition>
+  </asset>
+  <asset id="doc_pix" kind="fragment" path="docs/pagamento/pix.xml" anchor="pag_pix" name="Guia do PIX"/>
+  <asset id="img_pix" kind="resource" path="docs/img/pix-fluxo.svg" anchor="pag_pix" name="Fluxo do PIX"/>
+  <asset id="doc_boleto" kind="fragment" path="docs/pagamento/boleto.xml" anchor="pag_boleto" name="Guia do boleto"/>
+</assets>

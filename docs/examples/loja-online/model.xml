@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<featureModel xmlns="urn:mdd:feature-model" schemaVersion="1" name="Loja Online">
+  <feature id="loja" name="Loja Online">
+    <description>Raiz da linha de produtos de lojas virtuais.</description>
+    <attribute id="versao" name="Versão" type="string" default="1.0" configurable="false"/>
+    <feature id="catalogo" name="Catálogo" variability="mandatory"/>
+    <feature id="busca" name="Busca" variability="optional">
+      <attribute id="max_resultados" name="Máx. resultados" type="number" min="10" max="500" default="50"/>
+    </feature>
+    <feature id="mobile" name="App mobile" variability="optional">
+      <attribute id="plataforma" name="Plataforma" type="enum">
+        <option value="android"/>
+        <option value="ios"/>
+        <option value="ambas"/>
+      </attribute>
+    </feature>
+    <feature id="pagamento" name="Pagamento" variability="mandatory">
+      <group min="1" max="*">
+        <feature id="pag_cartao" name="Cartão"/>
+        <feature id="pag_pix" name="PIX"/>
+        <feature id="pag_boleto" name="Boleto"/>
+      </group>
+    </feature>
+  </feature>
+  <constraints>
+    <constraint id="c1" description="PIX exige app mobile">
+      <expression>pag_pix implies mobile</expression>
+    </constraint>
+  </constraints>
+</featureModel>

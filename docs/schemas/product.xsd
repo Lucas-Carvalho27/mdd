@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Schema do product.xml gerado (versão 1).
+  O conteúdo de cada <fragment> é o elemento raiz do arquivo do fragmento, intacto,
+  em qualquer namespace (ADR 0006). Algoritmo de geração: ver docs/SPEC.md §4.4.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:pr="urn:mdd:product"
+           targetNamespace="urn:mdd:product"
+           elementFormDefault="qualified">
+
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+             schemaLocation="xml.xsd"/>
+
+  <xs:simpleType name="Id">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-z][a-z0-9_]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="AttributeValue">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="id" type="pr:Id" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="SelectedFeature">
+    <xs:sequence>
+      <xs:element name="attribute" type="pr:AttributeValue" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="pr:Id" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Features">
+    <xs:sequence>
+      <xs:element name="feature" type="pr:SelectedFeature" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Fragment">
+    <xs:sequence>
+      <xs:any namespace="##any" processContents="skip"/>
+    </xs:sequence>
+    <xs:attribute name="asset" type="pr:Id" use="required"/>
+    <xs:attribute ref="xml:base" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Section">
+    <xs:sequence>
+      <xs:element name="fragment" type="pr:Fragment" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="section" type="pr:Section" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="feature" type="pr:Id" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Content">
+    <xs:sequence>
+      <xs:element name="section" type="pr:Section"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="product">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="features" type="pr:Features"/>
+        <xs:element name="content" type="pr:Content"/>
+      </xs:sequence>
+      <xs:attribute name="schemaVersion" type="xs:positiveInteger" use="required" fixed="1"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="model" type="xs:string" use="required"/>
+      <xs:attribute name="generatedAt" type="xs:dateTime" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

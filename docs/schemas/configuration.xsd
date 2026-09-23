@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Schema de configurations/*.xml (versão 1).
+  Guarda só decisões manuais e valores de atributos (ADR 0005).
+  Regras que o XSD não expressa e que o domínio valida: ver docs/SPEC.md §4.2.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:cf="urn:mdd:configuration"
+           targetNamespace="urn:mdd:configuration"
+           elementFormDefault="qualified">
+
+  <xs:simpleType name="Id">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-z][a-z0-9_]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DecisionState">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="selected"/>
+      <xs:enumeration value="deselected"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="Decision">
+    <xs:attribute name="feature" type="cf:Id" use="required"/>
+    <xs:attribute name="state" type="cf:DecisionState" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Value">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="feature" type="cf:Id" use="required"/>
+        <xs:attribute name="attribute" type="cf:Id" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:element name="configuration">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="decision" type="cf:Decision" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="value" type="cf:Value" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="schemaVersion" type="xs:positiveInteger" use="required" fixed="1"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+    </xs:complexType>
+    <xs:unique name="oneDecisionPerFeature">
+      <xs:selector xpath="cf:decision"/>
+      <xs:field xpath="@feature"/>
+    </xs:unique>
+    <xs:unique name="oneValuePerAttribute">
+      <xs:selector xpath="cf:value"/>
+      <xs:field xpath="@feature"/>
+      <xs:field xpath="@attribute"/>
+    </xs:unique>
+  </xs:element>
+</xs:schema>

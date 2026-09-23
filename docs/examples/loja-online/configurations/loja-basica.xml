@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="urn:mdd:configuration" schemaVersion="1" name="Loja Básica">
+  <decision feature="busca" state="selected"/>
+  <decision feature="pag_cartao" state="selected"/>
+  <decision feature="pag_pix" state="selected"/>
+  <decision feature="pag_boleto" state="deselected"/>
+  <value feature="busca" attribute="max_resultados">100</value>
+  <value feature="mobile" attribute="plataforma">android</value>
+</configuration>

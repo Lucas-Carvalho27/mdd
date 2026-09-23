@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topic xmlns="urn:exemplo:doc">
+  <title>Pagamento com PIX</title>
+  <p>Escaneie o QR Code no app do seu banco. O fluxo completo está abaixo.</p>
+  <img src="../img/pix-fluxo.svg" alt="Fluxo do pagamento com PIX"/>
+</topic>

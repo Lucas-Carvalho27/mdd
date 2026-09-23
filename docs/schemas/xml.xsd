@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cópia mínima do namespace XML (só xml:base), para validar product.xml offline
+  sem baixar http://www.w3.org/2001/xml.xsd.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.w3.org/XML/1998/namespace">
+  <xs:attribute name="base" type="xs:anyURI"/>
+</xs:schema>

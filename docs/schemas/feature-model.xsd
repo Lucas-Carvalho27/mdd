@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Schema do model.xml (versão 1).
+  Regras que o XSD não expressa e que o domínio valida: ver docs/SPEC.md §4.1.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:fm="urn:mdd:feature-model"
+           targetNamespace="urn:mdd:feature-model"
+           elementFormDefault="qualified">
+
+  <xs:simpleType name="Id">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-z][a-z0-9_]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Variability">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="mandatory"/>
+      <xs:enumeration value="optional"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="UnboundedMarker">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GroupMax">
+    <xs:union memberTypes="xs:positiveInteger fm:UnboundedMarker"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="AttributeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="string"/>
+      <xs:enumeration value="number"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="enum"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="Option">
+    <xs:attribute name="value" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Attribute">
+    <xs:sequence>
+      <xs:element name="option" type="fm:Option" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="fm:Id" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="fm:AttributeType" use="required"/>
+    <xs:attribute name="default" type="xs:string"/>
+    <xs:attribute name="min" type="xs:decimal"/>
+    <xs:attribute name="max" type="xs:decimal"/>
+    <xs:attribute name="configurable" type="xs:boolean" default="true"/>
+  </xs:complexType>
+
+  <xs:complexType name="Group">
+    <xs:sequence>
+      <xs:element name="feature" type="fm:Feature" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="min" type="xs:nonNegativeInteger" use="required"/>
+    <xs:attribute name="max" type="fm:GroupMax" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Feature">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="attribute" type="fm:Attribute" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="feature" type="fm:Feature"/>
+        <xs:element name="group" type="fm:Group"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="id" type="fm:Id" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <!-- Obrigatório em features solitárias; proibido na raiz e em membros de grupo. -->
+    <xs:attribute name="variability" type="fm:Variability"/>
+  </xs:complexType>
+
+  <xs:complexType name="Constraint">
+    <xs:sequence>
+      <xs:element name="expression" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="fm:Id" use="required"/>
+    <xs:attribute name="description" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="Constraints">
+    <xs:sequence>
+      <xs:element name="constraint" type="fm:Constraint" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="featureModel">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="feature" type="fm:Feature"/>
+        <xs:element name="constraints" type="fm:Constraints" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="schemaVersion" type="xs:positiveInteger" use="required" fixed="1"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+    </xs:complexType>
+    <xs:key name="featureId">
+      <xs:selector xpath=".//fm:feature"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="constraintId">
+      <xs:selector xpath="fm:constraints/fm:constraint"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+  </xs:element>
+</xs:schema>

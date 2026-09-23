@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Saída esperada ao gerar configurations/loja-basica.xml do projeto docs/examples/loja-online.
+  generatedAt varia a cada geração. Além deste arquivo, a pasta de saída contém
+  docs/img/pix-fluxo.svg (recurso img_pix).
+-->
+<product xmlns="urn:mdd:product" schemaVersion="1" name="Loja Básica" model="Loja Online" generatedAt="2026-09-23T14:00:00Z">
+  <features>
+    <feature id="loja" name="Loja Online">
+      <attribute id="versao">1.0</attribute>
+    </feature>
+    <feature id="catalogo" name="Catálogo"/>
+    <feature id="busca" name="Busca">
+      <attribute id="max_resultados">100</attribute>
+    </feature>
+    <feature id="mobile" name="App mobile">
+      <attribute id="plataforma">android</attribute>
+    </feature>
+    <feature id="pagamento" name="Pagamento"/>
+    <feature id="pag_cartao" name="Cartão"/>
+    <feature id="pag_pix" name="PIX"/>
+  </features>
+  <content>
+    <section feature="loja">
+      <fragment asset="doc_loja" xml:base="docs/loja/">
+        <topic xmlns="urn:exemplo:doc">
+          <title>Visão geral da loja</title>
+          <p>Esta loja virtual permite navegar pelo catálogo e pagar pelos pedidos.</p>
+        </topic>
+      </fragment>
+      <section feature="catalogo"/>
+      <section feature="busca">
+        <fragment asset="doc_busca" xml:base="docs/busca/">
+          <topic xmlns="urn:exemplo:doc">
+            <title>Busca</title>
+            <p>Digite um termo na barra de busca para encontrar produtos do catálogo.</p>
+          </topic>
+        </fragment>
+        <fragment asset="doc_busca_app" xml:base="docs/busca/">
+          <topic xmlns="urn:exemplo:doc">
+            <title>Busca no app</title>
+            <p>No app, toque na lupa no canto superior para abrir a busca por voz.</p>
+          </topic>
+        </fragment>
+      </section>
+      <section feature="mobile"/>
+      <section feature="pagamento">
+        <section feature="pag_cartao"/>
+        <section feature="pag_pix">
+          <fragment asset="doc_pix" xml:base="docs/pagamento/">
+            <topic xmlns="urn:exemplo:doc">
+              <title>Pagamento com PIX</title>
+              <p>Escaneie o QR Code no app do seu banco. O fluxo completo está abaixo.</p>
+              <img src="../img/pix-fluxo.svg" alt="Fluxo do pagamento com PIX"/>
+            </topic>
+          </fragment>
+        </section>
+      </section>
+    </section>
+  </content>
+</product>

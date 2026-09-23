@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Schema do assets.xml (versão 1).
+  Regras que o XSD não expressa e que o domínio valida: ver docs/SPEC.md §4.3.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:as="urn:mdd:assets"
+           targetNamespace="urn:mdd:assets"
+           elementFormDefault="qualified">
+
+  <xs:simpleType name="Id">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-z][a-z0-9_]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="AssetKind">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="fragment"/>
+      <xs:enumeration value="resource"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RelativePath">
+    <!-- Caminho relativo à pasta do projeto, com "/" como separador. -->
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:pattern value="[^/\\:].*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="Asset">
+    <xs:sequence>
+      <xs:element name="condition" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="as:Id" use="required"/>
+    <xs:attribute name="kind" type="as:AssetKind" use="required"/>
+    <xs:attribute name="path" type="as:RelativePath" use="required"/>
+    <xs:attribute name="anchor" type="as:Id" use="required"/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:element name="assets">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="asset" type="as:Asset" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="schemaVersion" type="xs:positiveInteger" use="required" fixed="1"/>
+    </xs:complexType>
+    <xs:key name="assetId">
+      <xs:selector xpath="as:asset"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+  </xs:element>
+</xs:schema>
