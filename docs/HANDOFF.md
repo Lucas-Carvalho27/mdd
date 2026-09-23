@@ -4,19 +4,19 @@ Atualizado em 23/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação                          | Onde está                                                                                                                                                   |
-| ------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída                         | `main` (GitHub)                                                                                                                                             |
-| 1. Domínio e persistência | Concluída                         | `main` (GitHub)                                                                                                                                             |
-| **2A. Edição do modelo**  | **Tarefas 1–7 feitas; falta a 8** | Branch `fase-2a-edicao`. Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md) |
-| 2B. Diagrama visual       | A planejar                        | —                                                                                                                                                           |
-| 3. Configurador           | A planejar                        | —                                                                                                                                                           |
-| 4. Assets                 | A planejar                        | —                                                                                                                                                           |
-| 5. Geração                | A planejar                        | —                                                                                                                                                           |
+| Fase                      | Situação                          | Onde está                                                                                                                                                                     |
+| ------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída                         | `main` (GitHub)                                                                                                                                                               |
+| 1. Domínio e persistência | Concluída                         | `main` (GitHub)                                                                                                                                                               |
+| **2A. Edição do modelo**  | **Tarefas 1–7 feitas; falta a 8** | `main` e branch `fase-2a-edicao` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md) |
+| 2B. Diagrama visual       | A planejar                        | —                                                                                                                                                                             |
+| 3. Configurador           | A planejar                        | —                                                                                                                                                                             |
+| 4. Assets                 | A planejar                        | —                                                                                                                                                                             |
+| 5. Geração                | A planejar                        | —                                                                                                                                                                             |
 
-Na `main`, o app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo numa lista e salva tudo de volta sem mudar um byte.
+O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo numa lista e salva tudo de volta sem mudar um byte.
 
-No branch `fase-2a-edicao` (commit `69033be`), o app também:
+Com a Fase 2A (commit `69033be`, já na `main` a seu pedido, antes da aceitação manual), o app também:
 
 - edita o modelo (features, grupos, atributos e restrições), com desfazer/refazer e diálogo de impacto ao excluir;
 - cria projetos e reabre os recentes;
@@ -47,7 +47,7 @@ Documentos de referência:
 
    > Leia docs/HANDOFF.md e execute a Tarefa 8 do plano docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md. As Tarefas 1 a 7 já estão no branch.
 
-   A Tarefa 8 atualiza a SPEC e os ADRs 0004 e 0008, gera o instalador e tem a **aceitação manual**: recriar o exemplo pela interface, fechar a janela com alterações e reabrir pelos recentes. Depois disso, o branch pode ir para a `main` (merge local, como nas fases anteriores).
+   A Tarefa 8 atualiza a SPEC e os ADRs 0004 e 0008, gera o instalador e tem a **aceitação manual**: recriar o exemplo pela interface, fechar a janela com alterações e reabrir pelos recentes. Faça-a no branch `fase-2a-edicao` (que está igual à `main`) e depois leve o branch para a `main` de novo.
 
 4. Os scripts de verificação estão em `.checks/` só nesta máquina (a pasta é ignorada pelo git de propósito). Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8); os da 2A estão no plano da 2A.
 
