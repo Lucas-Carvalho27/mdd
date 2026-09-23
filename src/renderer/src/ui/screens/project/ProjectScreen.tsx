@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { X } from 'lucide-react'
 import type { ProjectSession } from '@/application/project-session'
 import { Button } from '@/ui/components/ui/button'
 import { ProblemList } from '@/ui/components/ProblemList'
+import type { FeatureActions } from '@/ui/diagram/diagram-context'
+import { FeatureDiagram } from '@/ui/diagram/FeatureDiagram'
 import { hasUnsavedChanges } from '@/ui/stores/project-store'
 import { useProjectStore } from '@/ui/stores/project-store-context'
 import { ConstraintsPanel } from './constraints/ConstraintsPanel'
@@ -13,7 +15,6 @@ import { DeleteFeatureDialog } from './dialogs/DeleteFeatureDialog'
 import { NewFeatureDialog } from './dialogs/NewFeatureDialog'
 import type { EditorDialog } from './editor-dialog'
 import { FeatureToolbar } from './FeatureToolbar'
-import { FeatureTree } from './FeatureTree'
 import { ProjectHeader } from './ProjectHeader'
 import { FeatureProperties } from './properties/FeatureProperties'
 import { useEditorShortcuts } from './use-editor-shortcuts'
@@ -32,6 +33,16 @@ export function ProjectScreen({
   const [dialog, setDialog] = useState<EditorDialog>(null)
   const openDialog = useCallback((next: EditorDialog) => setDialog(next), [])
   useEditorShortcuts(openDialog, dialog === null)
+  const actions = useMemo<FeatureActions>(
+    () => ({
+      addChild: (featureId) => openDialog({ kind: 'new-feature', placement: 'child', featureId }),
+      addSibling: (featureId) =>
+        openDialog({ kind: 'new-feature', placement: 'sibling', featureId }),
+      groupChildren: (parentId) => openDialog({ kind: 'create-group', parentId }),
+      remove: (featureId) => openDialog({ kind: 'delete-feature', featureId })
+    }),
+    [openDialog]
+  )
 
   const { project } = session
   const requestClose = (): void => (unsaved ? setDialog({ kind: 'close-project' }) : close())
@@ -50,12 +61,12 @@ export function ProjectScreen({
       )}
 
       <div className="grid min-h-0 flex-1 grid-cols-[1fr_24rem]">
-        <section className="min-h-0 space-y-4 overflow-auto p-4">
+        <section className="flex min-h-0 flex-col gap-3 p-4">
           <ProblemList title="Não foi possível salvar" tone="error" problems={problems} />
           <ProblemList title="Avisos" tone="warning" problems={warnings} />
-          <div>
-            <FeatureToolbar model={project.model} onOpenDialog={openDialog} />
-            <FeatureTree root={project.model.root} />
+          <FeatureToolbar model={project.model} onOpenDialog={openDialog} />
+          <div className="min-h-0 flex-1 rounded-md border">
+            <FeatureDiagram key={session.folder.rootPath} model={project.model} actions={actions} />
           </div>
         </section>
         <aside className="min-h-0 space-y-8 overflow-auto border-l p-4">
