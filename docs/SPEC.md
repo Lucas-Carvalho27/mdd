@@ -166,9 +166,11 @@ Regras:
 
 **Leitura em três etapas.** Cada etapa para no primeiro tipo de erro e reporta tudo o que encontrou:
 
-1. XML bem-formado (`DOMParser`) → erro com arquivo, linha e coluna.
-2. Conformidade com o XSD (`xmllint-wasm`) → erro com arquivo e linha.
+1. XML bem-formado → erro com arquivo e linha.
+2. Conformidade com o XSD → erro com arquivo e linha.
 3. Invariantes do domínio (§4) → erro com arquivo e ID do elemento.
+
+As etapas 1 e 2 são feitas juntas pelo `xmllint-wasm` no processo main (canal `validateXml`). A etapa 3 roda no renderer, depois que o codec converte o XML com `@xmldom/xmldom`; erros de sintaxe em expressões também informam a linha.
 
 Um arquivo com erro não é aberto, e o app nunca tenta corrigir sozinho.
 
@@ -183,7 +185,7 @@ Um arquivo com erro não é aberto, e o app nunca tenta corrigir sozinho.
 ```
 src/
   shared/ipc.ts            contrato tipado da API exposta pelo preload
-  main/                    processo main do Electron: janela, IPC, disco, shell, diálogos
+  main/                    processo main do Electron: janela, IPC, disco, shell, diálogos, validação XSD
   preload/                 contextBridge → window.mdd
   renderer/src/
     domain/                TypeScript puro. Não importa nada fora de domain/.
@@ -200,7 +202,7 @@ src/
       use-cases/           abrir/salvar projeto, resolver configuração, gerar produto…
     infrastructure/        Implementa os ports. Importa application/ e domain/.
       electron/            adapters sobre window.mdd
-      xml/                 codecs por arquivo, XmlWriter determinístico, validador xmllint-wasm
+      xml/                 codecs por arquivo, escritor determinístico, leitura com @xmldom/xmldom
       solver/              LogicSolverConstraintSolver + logic-solver.d.ts
     ui/                    React. Importa application/ e domain/; infrastructure/ só em ui/app/.
       app/                 composition root: instancia adapters e injeta via Context
@@ -237,15 +239,16 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 
 ### 6.2 Ports (em `application/ports`)
 
-| Port                                                                          | Responsabilidade                                                                                                                                              | Adapter v1                                   |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `ProjectStorage`                                                              | Ler, escrever, listar, copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8). | `ElectronProjectStorage`                     |
-| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                        | `Xml*Repository` (codecs + `ProjectStorage`) |
-| `ConstraintSolver`                                                            | Receber uma `Formula` e responder a satisfatibilidade sob suposições, devolvendo uma solução.                                                                 | `LogicSolverConstraintSolver`                |
-| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                 | `XmlProductDeriver`                          |
-| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                               | `ElectronAssetOpener`                        |
-| `FileDialogs`                                                                 | Escolher a pasta do projeto e escolher um arquivo dentro do projeto.                                                                                          | `ElectronFileDialogs`                        |
-| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                      | `SystemClock`                                |
+| Port                                                                          | Responsabilidade                                                                                                                                              | Adapter v1                                                  |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `ProjectStorage`                                                              | Ler, escrever, listar, copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8). | `ElectronProjectStorage`                                    |
+| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                        | `Xml*Repository` (codecs + `ProjectStorage`)                |
+| `ConstraintSolver`                                                            | Receber uma `Formula` e responder a satisfatibilidade sob suposições, devolvendo uma solução.                                                                 | `LogicSolverConstraintSolver`                               |
+| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                 | `XmlProductDeriver`                                         |
+| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                               | `ElectronAssetOpener`                                       |
+| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto. A escolha de um arquivo dentro do projeto entra na Fase 4, como port próprio.                                                    | `ElectronProjectFolderPicker`                               |
+| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD.                                                                                               | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
+| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                      | `SystemClock`                                               |
 
 ### 6.3 Processo main e IPC
 
@@ -254,6 +257,7 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 - O main mantém a **raiz do projeto aberto** e recusa qualquer operação de arquivo fora dela.
 - Canais:
   - **Arquivos:** `readText`, `writeText` (com hash esperado), `stat`, `list`, `copy`, `rename`, `remove`, `ensureDir`
+  - **XML:** `validateXml` (etapas 1 e 2 da leitura, §5)
   - **Diálogos:** `openProjectFolder`, `pickFileInProject`, `confirm`
   - **Shell:** `shell.openPath`
   - **Projetos recentes:** os 10 últimos, gravados em `userData`
