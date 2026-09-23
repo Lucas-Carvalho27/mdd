@@ -1,22 +1,12 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
+import { IpcChannel, type MddApi } from '../shared/ipc'
 
-// Custom APIs for renderer
-const api = {}
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
+const api: MddApi = {
+  openProjectFolder: () => ipcRenderer.invoke(IpcChannel.openProjectFolder),
+  list: (relativeDir) => ipcRenderer.invoke(IpcChannel.list, relativeDir),
+  readText: (relativePath) => ipcRenderer.invoke(IpcChannel.readText, relativePath),
+  writeText: (relativePath, content, precondition) =>
+    ipcRenderer.invoke(IpcChannel.writeText, relativePath, content, precondition)
 }
+
+contextBridge.exposeInMainWorld('mdd', api)
