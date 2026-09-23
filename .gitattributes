@@ -1,0 +1,7 @@
+# Todos os arquivos de texto com LF no repositório e no checkout, em qualquer máquina.
+# Os XMLs são comparados byte a byte na aceitação (docs/SPEC.md §5).
+* text=auto eol=lf
+
+*.png binary
+*.ico binary
+*.icns binary
