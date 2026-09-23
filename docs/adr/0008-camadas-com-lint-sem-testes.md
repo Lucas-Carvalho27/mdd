@@ -5,4 +5,4 @@ O código do renderer é dividido em `domain` → `application` → `infrastruct
 ## Consequences
 
 - Como o domínio é puro, adicionar testes depois (Vitest) não exige refatoração.
-- Toda edição do modelo é um Command com `execute()` e `undo()`, o que concentra a lógica de edição fora dos componentes e dá desfazer e refazer.
+- Toda edição do modelo é um Command (objeto com `label` e `run()`) executado por um histórico imutável. Os comandos não implementam `undo()`: o histórico guarda o estado anterior de cada comando, e desfazer é voltar a ele. Isso evita escrever a operação inversa de cada edição, que é uma fonte clássica de bugs, e custa pouco porque as versões do estado compartilham tudo o que não mudou. Depois de cada comando, o histórico confere as regras M1–M5 e A1–A3 e recusa o que as quebraria.
