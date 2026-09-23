@@ -1,110 +1,97 @@
+import { useCallback, useState } from 'react'
+import { X } from 'lucide-react'
 import type { ProjectSession } from '@/application/project-session'
-import { printExpression } from '@/domain/expression/printer'
 import { Button } from '@/ui/components/ui/button'
 import { ProblemList } from '@/ui/components/ProblemList'
+import { hasUnsavedChanges } from '@/ui/stores/project-store'
 import { useProjectStore } from '@/ui/stores/project-store-context'
+import { ConstraintsPanel } from './constraints/ConstraintsPanel'
+import { CloseProjectDialog } from './dialogs/CloseProjectDialog'
+import { ConflictDialog } from './dialogs/ConflictDialog'
+import { CreateGroupDialog } from './dialogs/CreateGroupDialog'
+import { DeleteFeatureDialog } from './dialogs/DeleteFeatureDialog'
+import { NewFeatureDialog } from './dialogs/NewFeatureDialog'
+import type { EditorDialog } from './editor-dialog'
+import { FeatureToolbar } from './FeatureToolbar'
 import { FeatureTree } from './FeatureTree'
+import { ProjectHeader } from './ProjectHeader'
+import { FeatureProperties } from './properties/FeatureProperties'
+import { useEditorShortcuts } from './use-editor-shortcuts'
 
 export function ProjectScreen({
   session
 }: {
   readonly session: ProjectSession
 }): React.JSX.Element {
-  const busy = useProjectStore((state) => state.busy)
   const problems = useProjectStore((state) => state.problems)
   const warnings = useProjectStore((state) => state.warnings)
-  const lastSavedAt = useProjectStore((state) => state.lastSavedAt)
-  const save = useProjectStore((state) => state.save)
+  const notice = useProjectStore((state) => state.notice)
+  const dismissNotice = useProjectStore((state) => state.dismissNotice)
+  const unsaved = useProjectStore(hasUnsavedChanges)
   const close = useProjectStore((state) => state.close)
-  const { model, assets, configurations } = session.project
+  const [dialog, setDialog] = useState<EditorDialog>(null)
+  const openDialog = useCallback((next: EditorDialog) => setDialog(next), [])
+  useEditorShortcuts(openDialog, dialog === null)
+
+  const { project } = session
+  const requestClose = (): void => (unsaved ? setDialog({ kind: 'close-project' }) : close())
 
   return (
     <main className="flex h-screen flex-col">
-      <header className="flex items-center gap-3 border-b px-6 py-3">
-        <div className="flex-1">
-          <h1 className="font-semibold">{model.name}</h1>
-          <p className="text-xs text-muted-foreground">{session.folder.rootPath}</p>
+      <ProjectHeader session={session} onClose={requestClose} />
+
+      {notice !== null && (
+        <div className="flex items-center gap-2 border-b bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+          <span className="flex-1">Edição recusada: {notice}</span>
+          <Button size="icon-sm" variant="ghost" title="Dispensar" onClick={dismissNotice}>
+            <X />
+          </Button>
         </div>
-        {lastSavedAt !== null && (
-          <span className="text-xs text-muted-foreground">
-            Salvo às {lastSavedAt.toLocaleTimeString('pt-BR')}
-          </span>
-        )}
-        <Button variant="outline" onClick={close}>
-          Fechar
-        </Button>
-        <Button disabled={busy} onClick={() => void save()}>
-          Salvar
-        </Button>
-      </header>
+      )}
 
-      <div className="flex-1 space-y-8 overflow-auto p-6">
-        <ProblemList title="Não foi possível salvar" tone="error" problems={problems} />
-        <ProblemList title="Avisos" tone="warning" problems={warnings} />
-
-        <Section title="Features">
-          <FeatureTree root={model.root} />
-        </Section>
-
-        <Section title={`Restrições (${model.constraints.length})`}>
-          <ul className="space-y-1 text-sm">
-            {model.constraints.map((constraint) => (
-              <li key={constraint.id}>
-                <code>{printExpression(constraint.expression)}</code>
-                {constraint.description && (
-                  <span className="text-muted-foreground"> — {constraint.description}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        <Section title={`Assets (${assets.assets.length})`}>
-          <ul className="space-y-1 text-sm">
-            {assets.assets.map((asset) => (
-              <li key={asset.id}>
-                <code>{asset.path}</code> → {asset.anchor}
-                {asset.condition && (
-                  <span className="text-muted-foreground">
-                    {' '}
-                    se {printExpression(asset.condition)}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        <Section title={`Configurações (${configurations.length})`}>
-          <ul className="space-y-1 text-sm">
-            {configurations.map(({ key, configuration }) => (
-              <li key={key}>
-                {configuration.name}{' '}
-                <span className="text-muted-foreground">
-                  ({key}.xml, {configuration.decisions.length} decisões)
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Section>
+      <div className="grid min-h-0 flex-1 grid-cols-[1fr_24rem]">
+        <section className="min-h-0 space-y-4 overflow-auto p-4">
+          <ProblemList title="Não foi possível salvar" tone="error" problems={problems} />
+          <ProblemList title="Avisos" tone="warning" problems={warnings} />
+          <div>
+            <FeatureToolbar model={project.model} onOpenDialog={openDialog} />
+            <FeatureTree root={project.model.root} />
+          </div>
+        </section>
+        <aside className="min-h-0 space-y-8 overflow-auto border-l p-4">
+          <FeatureProperties project={project} />
+          <ConstraintsPanel model={project.model} />
+        </aside>
       </div>
-    </main>
-  )
-}
 
-function Section({
-  title,
-  children
-}: {
-  readonly title: string
-  readonly children: React.ReactNode
-}): React.JSX.Element {
-  return (
-    <section>
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h2>
-      {children}
-    </section>
+      <footer className="border-t px-4 py-1 text-xs text-muted-foreground">
+        {project.assets.assets.length} assets · {project.configurations.length} configurações
+      </footer>
+
+      {dialog?.kind === 'new-feature' && (
+        <NewFeatureDialog
+          model={project.model}
+          placement={dialog.placement}
+          featureId={dialog.featureId}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.kind === 'delete-feature' && (
+        <DeleteFeatureDialog
+          project={project}
+          featureId={dialog.featureId}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.kind === 'create-group' && (
+        <CreateGroupDialog
+          model={project.model}
+          parentId={dialog.parentId}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.kind === 'close-project' && <CloseProjectDialog onCancel={() => setDialog(null)} />}
+      <ConflictDialog />
+    </main>
   )
 }

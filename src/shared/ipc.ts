@@ -41,8 +41,19 @@ export interface XmlSchemaIssue {
   message: string
 }
 
+export interface RecentProject {
+  rootPath: string
+  name: string
+}
+
 export interface MddApi {
   openProjectFolder(): Promise<IpcResult<OpenedProject | null>>
+  /** Os últimos projetos abertos, do mais recente para o mais antigo. */
+  listRecentProjects(): Promise<RecentProject[]>
+  /** Reabre uma pasta que está na lista de recentes. */
+  reopenProject(rootPath: string): Promise<IpcResult<OpenedProject>>
+  /** Avisa o main se há alterações não salvas, para confirmar antes de fechar a janela. */
+  setUnsavedChanges(unsaved: boolean): void
   list(relativeDir: string): Promise<IpcResult<DirectoryEntry[]>>
   readText(relativePath: string): Promise<IpcResult<TextFile>>
   writeText(
@@ -60,6 +71,9 @@ export interface MddApi {
 
 export const IpcChannel = {
   openProjectFolder: 'mdd:open-project-folder',
+  listRecentProjects: 'mdd:list-recent-projects',
+  reopenProject: 'mdd:reopen-project',
+  setUnsavedChanges: 'mdd:set-unsaved-changes',
   list: 'mdd:list',
   readText: 'mdd:read-text',
   writeText: 'mdd:write-text',

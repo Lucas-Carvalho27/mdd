@@ -3,7 +3,8 @@ import { validateAssetCatalog } from '@/domain/assets/validation'
 import { validateFeatureModel } from '@/domain/feature-model/validation'
 import type { ConfigurationEntry } from '@/domain/project/project'
 import { fileError, fromValidationIssues, type FileProblem } from '../file-problem'
-import type { ProjectFolderPicker } from '../ports/project-folder-picker'
+import type { PickedFolder, ProjectFolderPicker } from '../ports/project-folder-picker'
+import type { RecentProjects } from '../ports/recent-projects'
 import type {
   AssetCatalogRepository,
   ConfigurationRepository,
@@ -22,6 +23,7 @@ export type OpenProjectResult =
 
 export interface OpenProjectDependencies {
   readonly picker: ProjectFolderPicker
+  readonly recents: RecentProjects
   readonly models: FeatureModelRepository
   readonly assets: AssetCatalogRepository
   readonly configurations: ConfigurationRepository
@@ -38,11 +40,24 @@ export class OpenProject {
     this.deps = deps
   }
 
+  /** Pergunta a pasta ao usuário. */
   async execute(): Promise<OpenProjectResult> {
     const picked = await this.deps.picker.pick()
     if (!picked.ok) return { status: 'failed', problems: [fileError('.', picked.error.message)] }
     if (picked.value === null) return { status: 'cancelled' }
+    return this.load(picked.value)
+  }
 
+  /** Reabre uma pasta conhecida: da lista de recentes, ou para "Recarregar" (SPEC §8). */
+  async reopen(rootPath: string): Promise<OpenProjectResult> {
+    const reopened = await this.deps.recents.reopen(rootPath)
+    if (!reopened.ok) {
+      return { status: 'failed', problems: [fileError('.', reopened.error.message)] }
+    }
+    return this.load(reopened.value)
+  }
+
+  private async load(folder: PickedFolder): Promise<OpenProjectResult> {
     const model = await this.deps.models.load()
     if (!model.ok) return { status: 'failed', problems: model.error }
 
@@ -79,7 +94,7 @@ export class OpenProject {
       status: 'opened',
       warnings: problems,
       session: {
-        folder: picked.value,
+        folder,
         project: { model: model.value.value, assets: catalog, configurations },
         hashes: {
           model: model.value.hash,

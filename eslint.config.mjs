@@ -44,7 +44,9 @@ export default defineConfig(
     },
     rules: {
       ...eslintPluginReactHooks.configs.recommended.rules,
-      ...eslintPluginReactRefresh.configs.vite.rules
+      ...eslintPluginReactRefresh.configs.vite.rules,
+      // Permite `const { campo, ...resto } = objeto` para tirar um campo de um objeto imutável.
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }]
     }
   },
   {
