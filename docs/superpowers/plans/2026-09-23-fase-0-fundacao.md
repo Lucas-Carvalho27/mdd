@@ -1099,13 +1099,36 @@ Execute `dist/win-unpacked/mdd.exe`, clique em **Abrir pasta de projeto** e esco
 
 Esperado: o mesmo resultado do Passo 14 da Tarefa 4. Feche o app.
 
-- [ ] **Passo 3: Confirmar que `dist/` e `out/` não entram no git**
+- [ ] **Passo 3: Corrigir o título da janela**
+
+O `<title>Electron</title>` do `src/renderer/index.html` do template sobrescreve o `title: 'mdd'` do `BrowserWindow`. Troque o início do arquivo por:
+
+```html
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>mdd</title>
+  </head>
+</html>
+```
+
+Rode `npm run build:win` de novo e confira que a barra de título do `dist/win-unpacked/mdd.exe` mostra "mdd".
+
+- [ ] **Passo 4: Confirmar que `dist/` e `out/` não entram no git e commitar**
 
 ```bash
 git status --short
 ```
 
-Esperado: nenhuma linha com `dist/` ou `out/` (já estão no `.gitignore` do template). Se não houver alterações, a fase está concluída sem novo commit.
+Esperado: só `src/renderer/index.html` e este plano aparecem; nenhuma linha com `dist/` ou `out/` (já estão no `.gitignore` do template).
+
+```bash
+git add -A
+git commit -m "fix(ui): título da janela mdd em vez de Electron
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+```
 
 ---
 
