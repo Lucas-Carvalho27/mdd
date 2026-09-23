@@ -35,14 +35,16 @@ Alternativas descartadas:
   - arco **vazio** = alternative `[1..1]`;
   - arco **cheio** = or `[1..*]`;
   - nos demais grupos, arco vazio com o rótulo `[n..m]` ao lado (`*` quando não há máximo).
-- **Botão de recolher:** fica na base do nó que tem filhas. Recolhido, o nó mostra `+N`, com N = quantidade de features escondidas na subárvore.
+- **Botão de recolher:** fica no lado direito do nó que tem filhas, na meia altura. (Na base, como previsto no início, ficaria em cima das linhas que saem do nó.) Recolhido, o nó mostra `+N`, com N = quantidade de features escondidas na subárvore.
 - **Controles:** aproximar, afastar e "ajustar à tela".
 
 ## Comportamento
 
 ### Layout
 
-- É sempre calculado pelo elkjs, de cima para baixo. Nenhuma posição é salva (ADR 0007).
+- É sempre calculado, de cima para baixo. Nenhuma posição é salva (ADR 0007).
+  - O elkjs (algoritmo `mrtree`) põe a posição horizontal.
+  - Os níveis ficam a uma distância fixa um do outro, com espaço para o arco e o círculo. O `mrtree` usa o mesmo espaçamento nas duas direções, e com ele os níveis ficariam colados.
 - A **ordem dos irmãos da esquerda para a direita é a ordem do modelo**. Ela tem significado: é a ordem das seções no produto gerado. Membros de um grupo ficam juntos, na posição do grupo entre os irmãos.
 - O layout é refeito depois de cada edição, desfazer, refazer, recolher e expandir. Isso **não** mexe no zoom nem na posição da tela, com uma exceção: se a feature selecionada ficar fora da área visível (por exemplo, a que acabou de ser criada com Tab), a tela rola até ela, sem mudar o zoom.
 - Se um cálculo de layout antigo terminar depois de um novo, o resultado dele é descartado.
@@ -53,6 +55,7 @@ Alternativas descartadas:
 - Clicar num nó seleciona a feature (a seleção continua na store, como na 2A). O botão direito também seleciona antes de abrir o menu.
 - Clicar no fundo do diagrama não muda a seleção.
 - Arcos de grupo não são selecionáveis. A cardinalidade continua no painel de propriedades de um membro, como na 2A.
+- Recolher uma subárvore que contém a feature selecionada passa a seleção para a feature recolhida.
 - Se a feature selecionada estiver dentro de uma subárvore recolhida (por exemplo, depois de desfazer), os ancestrais dela se expandem.
 
 ### Menu de contexto (botão direito no nó)
@@ -88,22 +91,28 @@ Arrastar um nó **muda o pai** da feature. Não serve para posicionar o nó (ADR
 
 - Os atalhos da 2A (Tab, Enter, F2, Delete, Alt+↑/↓, Ctrl+Z/Y, Ctrl+S) continuam os mesmos e continuam no nível da janela.
 - As teclas próprias do React Flow ficam desligadas: Delete/Backspace para apagar, as setas para mover nós e a seleção múltipla. Assim nada passa por cima do diálogo de impacto nem dos comandos.
+- Um atalho não dispara quando a tecla já foi tratada por outro componente, por exemplo Enter num item do menu de contexto.
 
 ## Arquitetura
 
 Tudo fica em `ui/`: o domínio e a aplicação não mudam. Os arquivos do diagrama ficam em `ui/diagram/` (SPEC §6.1).
 
-| Unidade                                | Faz                                                                                                                                                                                                                                 | Depende de                            |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `ui/diagram/diagram-graph.ts`          | Função pura: modelo + subárvores recolhidas → nós de feature (em pré-ordem, com tipo, `+N` e se pode recolher), grupos (pai, posição, membros, cardinalidade) e linhas (com o marcador de variabilidade). Sem React.                | `domain/`                             |
-| `ui/diagram/diagram-layout.ts`         | Recebe o grafo e o tamanho de cada nó; chama o elkjs e devolve as posições. Calcula a geometria de cada arco (centro, raio, ângulos) a partir das posições do pai e dos membros.                                                    | `elkjs`, `diagram-graph`              |
-| `ui/diagram/FeatureDiagram.tsx`        | Tela do React Flow: monta nós e linhas, refaz o layout, controla zoom e "ajustar à tela", sincroniza a seleção com a store e trata o arrasto.                                                                                       | `@xyflow/react`, store, os dois acima |
-| `ui/diagram/FeatureNode.tsx`           | Caixa da feature com o menu de contexto. O elemento clicável mantém `data-feature-id`, como na lista, para os roteiros de verificação.                                                                                              | componente `context-menu`             |
-| `ui/diagram/GroupArcNode.tsx`          | Desenha o arco (e o rótulo `[n..m]`) em SVG; é alvo de soltar.                                                                                                                                                                      | —                                     |
-| `ui/diagram/VariabilityEdge.tsx`       | Linha reta com o círculo cheio ou vazio na ponta, ou sem círculo.                                                                                                                                                                   | `@xyflow/react`                       |
-| `ui/components/ui/context-menu.tsx`    | Componente shadcn (Radix), com os textos em português.                                                                                                                                                                              | `radix-ui`                            |
-| `ui/stores/project-store.ts`           | Ganha `collapsedFeatureIds` (só enquanto o projeto está aberto: zera ao abrir outro e não vai para o XML), `toggleCollapsed(id)` e `check(command)`, que simula o comando por `executeCommand` e devolve `null` (pode) ou o motivo. | `application/`                        |
-| `ui/screens/project/ProjectScreen.tsx` | A área da esquerda vira coluna: avisos e barra de ações em cima, diagrama ocupando o resto. A `FeatureTree.tsx` é removida.                                                                                                         | —                                     |
+| Unidade                                      | Faz                                                                                                                                                                                                                                 | Depende de                         |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `ui/diagram/diagram-graph.ts`                | Função pura: modelo + subárvores recolhidas → nós de feature (em pré-ordem, com tipo, `+N` e se pode recolher), grupos (pai, posição, membros, cardinalidade) e linhas (com o marcador de variabilidade). Sem React.                | `domain/`                          |
+| `ui/diagram/diagram-layout.ts`               | Recebe o grafo e o tamanho de cada nó e devolve as posições (x do elkjs, y pelo nível). Calcula a geometria de cada arco (centro, ângulos) e acha, por geometria, o alvo sob o cursor durante o arrasto (`dropTargetAt`).           | `elkjs`, `diagram-graph`           |
+| `ui/diagram/measure-feature.ts`              | Largura de cada caixa pelo texto medido num canvas, com as fontes da página.                                                                                                                                                        | —                                  |
+| `ui/diagram/FeatureDiagram.tsx`              | Tela do React Flow: monta nós e linhas, refaz o layout, controla zoom e "ajustar à tela", rola até a selecionada e trata o arrasto.                                                                                                 | `@xyflow/react`, store, os de cima |
+| `ui/diagram/FeatureNode.tsx`                 | Caixa da feature, botão de recolher e menu de contexto. O elemento clicável mantém `data-feature-id`, como na lista, para os roteiros de verificação.                                                                               | componente `context-menu`          |
+| `ui/diagram/FeatureMenu.tsx`                 | Itens do menu de contexto; cada um abre o mesmo diálogo ou roda o mesmo comando que a barra.                                                                                                                                        | store, `diagram-context`           |
+| `ui/diagram/GroupArcNode.tsx`                | Desenha o arco (e o rótulo `[n..m]`) em SVG; fica verde ou vermelho quando é o alvo do arrasto.                                                                                                                                     | —                                  |
+| `ui/diagram/VariabilityEdge.tsx`             | Linha reta com o círculo cheio ou vazio na ponta, ou sem círculo.                                                                                                                                                                   | `@xyflow/react`                    |
+| `ui/diagram/diagram-context.ts`              | Contextos com as ações que abrem diálogos (fornecidas pela tela) e o alvo destacado durante o arrasto.                                                                                                                              | —                                  |
+| `ui/diagram/flow-types.ts`                   | Tipos dos nós e das linhas do React Flow.                                                                                                                                                                                           | `@xyflow/react`                    |
+| `ui/components/ui/context-menu.tsx`          | Componente shadcn (Radix).                                                                                                                                                                                                          | `radix-ui`                         |
+| `ui/stores/project-store.ts`                 | Ganha `collapsedFeatureIds` (só enquanto o projeto está aberto: zera ao abrir outro e não vai para o XML), `toggleCollapsed(id)` e `check(command)`, que simula o comando por `executeCommand` e devolve `null` (pode) ou o motivo. | `application/`                     |
+| `ui/screens/project/use-editor-shortcuts.ts` | Ignora teclas já tratadas por outro componente (`defaultPrevented`).                                                                                                                                                                | —                                  |
+| `ui/screens/project/ProjectScreen.tsx`       | A área da esquerda vira coluna: avisos e barra de ações em cima, diagrama ocupando o resto. A `FeatureTree.tsx` é removida.                                                                                                         | —                                  |
 
 Dependências novas: `@xyflow/react` (12.11) e `elkjs` (0.12). O componente `context-menu` do shadcn usa o `radix-ui`, que já está instalado. Depois de `npx shadcn add`, confira os imports e traduza os textos (armadilha registrada no handoff).
 
@@ -114,7 +123,7 @@ Dependências novas: `@xyflow/react` (12.11) e `elkjs` (0.12). O componente `con
 3. **Tamanho dos nós.** O layout precisa do tamanho de cada caixa, que depende do nome. Escolher entre medir depois de desenhar (duas passadas) ou estimar pelo texto, sem sobrepor nós.
 4. **Arrasto sobre o arco.** Confirmar que dá para achar o nó sob o cursor durante o arrasto (feature ou arco), ignorando o próprio nó arrastado.
 
-O plano da fase só é escrito com essas respostas, e contém o código já verificado.
+O plano da fase só é escrito com essas respostas, e contém o código já verificado. As respostas estão na seção "O que o protótipo respondeu" do [plano](../plans/2026-09-23-fase-2b-diagrama.md).
 
 ## Verificação
 
@@ -132,6 +141,6 @@ Sem testes automatizados (ADR 0008).
   1. Criar o projeto e **recriar o exemplo** usando o diagrama: menu de contexto para criar filhas e irmãs, o grupo pelo menu, e pelo menos um movimento por arrastar e soltar (por exemplo, criar `Boleto` fora de Pagamento e soltá-lo sobre o arco do grupo). Salvar e conferir com `cmp` que o arquivo é idêntico ao exemplo.
   2. **Arrasto inválido:** soltar `pagamento` sobre `pag_pix` (dentro da própria subárvore) mostra a recusa, e nada muda.
   3. **Excluir `pag_pix` pelo menu de contexto** mostra 1 restrição, 2 assets e 1 configuração; Ctrl+Z restaura tudo.
-  4. **Recolher e expandir** `pagamento`: os membros somem e aparece `+3`; ao expandir, eles voltam. Desfazer uma edição dentro da subárvore recolhida expande os ancestrais da feature selecionada.
+  4. **Recolher e expandir** `pagamento`: os membros somem e aparece `+3`; ao expandir, eles voltam. Recolher com a seleção dentro passa a seleção para a feature recolhida, e soltar uma feature sobre um nó recolhido o expande.
   5. O roteiro `ui-check.mjs` da 2A, ajustado à nova aparência. O texto do nó não tem mais o marcador ●/○, que passou para a linha; as ações são as mesmas.
 - **Aceitação da fase (SPEC §9):** a aceitação da 2A, feita pelo diagrama (itens 1 e 3 acima), mais a confirmação ao fechar e os recentes, como na 2A.
