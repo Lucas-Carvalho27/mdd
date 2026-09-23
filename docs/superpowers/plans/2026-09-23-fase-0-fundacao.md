@@ -367,9 +367,12 @@ O `shadcn init` não reconhece a estrutura do electron-vite, então o tema entra
 
 ```bash
 npx shadcn@latest add button -y -o < /dev/null
+npm install class-variance-authority
 ```
 
-Esperado: `Created 1 file: src\renderer\src\ui\components\ui\button.tsx`, e as dependências `cn`, `radix-ui` e `class-variance-authority` aparecem no `package.json`.
+O CLI instala `cn` e `radix-ui`, mas não o `class-variance-authority`, que o `button.tsx` importa. Por isso a instalação explícita.
+
+Esperado: `Created 1 file: src\renderer\src\ui\components\ui\button.tsx`, e `npm ls cn radix-ui class-variance-authority --depth=0` lista os três.
 
 - [ ] **Passo 9: Criar `src/renderer/src/ui/app/App.tsx` (provisório)**
 
