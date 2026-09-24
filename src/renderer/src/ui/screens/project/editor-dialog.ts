@@ -12,4 +12,6 @@ export type EditorDialog =
   | { readonly kind: 'rename-configuration'; readonly key: string }
   | { readonly kind: 'duplicate-configuration'; readonly key: string }
   | { readonly kind: 'delete-configuration'; readonly key: string }
+  /** Depois do diálogo nativo: o arquivo já escolhido, dentro do projeto. */
+  | { readonly kind: 'link-asset'; readonly path: string; readonly anchor: string }
   | null

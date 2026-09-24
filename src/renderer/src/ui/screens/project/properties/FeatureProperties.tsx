@@ -4,12 +4,22 @@ import { findFeature, locateFeature } from '@/domain/feature-model/tree'
 import { CommitField } from '@/ui/components/CommitField'
 import { Button } from '@/ui/components/ui/button'
 import { useProjectStore } from '@/ui/stores/project-store-context'
+import type { EditorDialog } from '../editor-dialog'
+import { AnchoredAssetsSection } from './AnchoredAssetsSection'
 import { AttributesSection } from './AttributesSection'
 import { Field } from './Field'
 import { GroupSection } from './GroupSection'
 
 /** Propriedades da feature selecionada (SPEC §7). Cada alteração vira um comando. */
-export function FeatureProperties({ project }: { readonly project: Project }): React.JSX.Element {
+interface FeaturePropertiesProps {
+  readonly project: Project
+  readonly onOpenDialog: (dialog: EditorDialog) => void
+}
+
+export function FeatureProperties({
+  project,
+  onOpenDialog
+}: FeaturePropertiesProps): React.JSX.Element {
   const selectedId = useProjectStore((state) => state.selectedFeatureId)
   const run = useProjectStore((state) => state.run)
   const { model } = project
@@ -88,6 +98,11 @@ export function FeatureProperties({ project }: { readonly project: Project }): R
       )}
 
       <AttributesSection project={project} feature={feature} />
+      <AnchoredAssetsSection
+        catalog={project.assets}
+        featureId={feature.id}
+        onOpenDialog={onOpenDialog}
+      />
     </section>
   )
 }

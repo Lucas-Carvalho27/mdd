@@ -6,6 +6,8 @@ import { ProblemList } from '@/ui/components/ProblemList'
 import type { FeatureActions } from '@/ui/diagram/diagram-context'
 import { ConfigurationDialogs } from '@/ui/screens/configurator/ConfigurationDialogs'
 import { ConfigurationStatusBar } from '@/ui/screens/configurator/ConfigurationStatusBar'
+import { AssetsWorkspace } from '@/ui/screens/assets/AssetsWorkspace'
+import { LinkAssetDialog } from '@/ui/screens/assets/LinkAssetDialog'
 import { ConfiguratorWorkspace } from '@/ui/screens/configurator/ConfiguratorWorkspace'
 import { hasUnsavedChanges } from '@/ui/stores/project-store'
 import { useProjectStore } from '@/ui/stores/project-store-context'
@@ -18,6 +20,7 @@ import type { EditorDialog } from './editor-dialog'
 import { ModelWorkspace } from './ModelWorkspace'
 import { ProjectHeader } from './ProjectHeader'
 import { useEditorShortcuts } from './use-editor-shortcuts'
+import { useWindowFocus } from './use-window-focus'
 import { ViewRail, type ProjectView } from './ViewRail'
 
 export function ProjectScreen({
@@ -31,10 +34,18 @@ export function ProjectScreen({
   const dismissNotice = useProjectStore((state) => state.dismissNotice)
   const unsaved = useProjectStore(hasUnsavedChanges)
   const close = useProjectStore((state) => state.close)
+  const checkAssetFiles = useProjectStore((state) => state.checkAssetFiles)
   const [view, setView] = useState<ProjectView>('model')
   const [dialog, setDialog] = useState<EditorDialog>(null)
   const openDialog = useCallback((next: EditorDialog) => setDialog(next), [])
-  useEditorShortcuts(openDialog, { enabled: dialog === null, editing: view === 'model' })
+  useEditorShortcuts(openDialog, {
+    enabled: dialog === null,
+    history: view !== 'configurations',
+    editing: view === 'model'
+  })
+  // Um arquivo pode ter sido renomeado fora do app enquanto a janela estava em segundo plano.
+  const onWindowFocus = useCallback(() => void checkAssetFiles(), [checkAssetFiles])
+  useWindowFocus(onWindowFocus)
   const actions = useMemo<FeatureActions>(
     () => ({
       addChild: (featureId) => openDialog({ kind: 'new-feature', placement: 'child', featureId }),
@@ -51,7 +62,11 @@ export function ProjectScreen({
 
   return (
     <main className="flex h-screen flex-col">
-      <ProjectHeader session={session} historyEnabled={view === 'model'} onClose={requestClose} />
+      <ProjectHeader
+        session={session}
+        historyEnabled={view !== 'configurations'}
+        onClose={requestClose}
+      />
 
       {notice !== null && (
         <div className="flex items-center gap-2 border-b bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
@@ -71,18 +86,20 @@ export function ProjectScreen({
 
       <div className="flex min-h-0 flex-1">
         <ViewRail view={view} onChange={setView} />
-        {view === 'model' ? (
+        {view === 'model' && (
           <ModelWorkspace session={session} actions={actions} onOpenDialog={openDialog} />
-        ) : (
+        )}
+        {view === 'configurations' && (
           <ConfiguratorWorkspace project={project} onOpenDialog={openDialog} />
         )}
+        {view === 'assets' && <AssetsWorkspace project={project} onOpenDialog={openDialog} />}
       </div>
 
       <footer className="border-t px-4 py-1 text-xs text-muted-foreground">
-        {view === 'model' ? (
-          `${project.assets.assets.length} assets · ${project.configurations.length} configurações`
-        ) : (
+        {view === 'configurations' ? (
           <ConfigurationStatusBar />
+        ) : (
+          `${project.assets.assets.length} assets · ${project.configurations.length} configurações`
         )}
       </footer>
 
@@ -109,6 +126,15 @@ export function ProjectScreen({
         />
       )}
       {dialog?.kind === 'close-project' && <CloseProjectDialog onCancel={() => setDialog(null)} />}
+      {dialog?.kind === 'link-asset' && (
+        <LinkAssetDialog
+          model={project.model}
+          catalog={project.assets}
+          path={dialog.path}
+          anchor={dialog.anchor}
+          onClose={() => setDialog(null)}
+        />
+      )}
       <ConfigurationDialogs
         dialog={dialog}
         configurations={project.configurations}

@@ -1,12 +1,13 @@
-import { ListChecks, Network } from 'lucide-react'
+import { ListChecks, Network, Paperclip } from 'lucide-react'
 import { cn } from 'cn'
 
-/** As abas da barra lateral (SPEC §7). A de assets chega na Fase 4. */
-export type ProjectView = 'model' | 'configurations'
+/** As abas da barra lateral (SPEC §7). */
+export type ProjectView = 'model' | 'configurations' | 'assets'
 
 const VIEWS = [
   { view: 'model', label: 'Modelo', Icon: Network },
-  { view: 'configurations', label: 'Configurações', Icon: ListChecks }
+  { view: 'configurations', label: 'Configurações', Icon: ListChecks },
+  { view: 'assets', label: 'Assets', Icon: Paperclip }
 ] as const
 
 interface ViewRailProps {
