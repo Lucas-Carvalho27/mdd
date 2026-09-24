@@ -9,14 +9,16 @@ Atualizado em 23/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 | 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                     |
 | 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                     |
 | 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md) |
-| **2B. Diagrama visual**   | **A planejar** | —                                                                                                                                                   |
-| 3. Configurador           | A planejar     | —                                                                                                                                                   |
+| 2B. Diagrama visual       | Concluída      | branch `fase-2b-diagrama`. Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)       |
+| **3. Configurador**       | **A planejar** | —                                                                                                                                                   |
 | 4. Assets                 | A planejar     | —                                                                                                                                                   |
 | 5. Geração                | A planejar     | —                                                                                                                                                   |
 
-O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo numa lista e salva tudo de volta sem mudar um byte. Com a Fase 2A, também:
+O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A e 2B, também:
 
+- mostra o modelo num diagrama na notação clássica, com layout automático, zoom, "ajustar à tela" e subárvores recolhíveis;
 - edita o modelo (features, grupos, atributos e restrições), com desfazer/refazer e diálogo de impacto ao excluir;
+- edita também pelo diagrama: menu de contexto no nó e arrastar e soltar para mudar o pai de uma feature;
 - cria projetos e reabre os recentes;
 - mostra "•" no título com alterações não salvas e salva com Ctrl+S;
 - pergunta o que fazer quando um arquivo foi alterado fora do app, e confirma antes de fechar com alterações.
@@ -43,13 +45,41 @@ Tudo rodou no `dist/win-unpacked/mdd.exe` gerado por `npm run build:win`:
 
 **Como foi feito sem operar a tela:** a janela foi dirigida pelo protocolo de depuração do Chromium, com entrada de verdade (`Input.dispatchMouseEvent`, `Input.insertText` e `Input.dispatchKeyEvent`). Os diálogos nativos foram respondidos pelo inspetor do Node no processo main (veja "Como trabalhamos"): o app pediu cada diálogo com o título, a mensagem e os botões certos, e a resposta foi injetada. **Não foi conferido:** o desenho dos diálogos nativos do Windows na tela, que é responsabilidade do Electron.
 
-## Próximo passo: Fase 2B (diagrama)
+## Aceitação da Fase 2B (feita em 23/09/2026)
 
-A SPEC §9 descreve a entrega: diagrama com React Flow e layout automático no lugar da lista, menu de contexto, arrastar e soltar para mover e subárvores recolhíveis. A aceitação é a mesma da 2A, feita pelo diagrama. O [ADR 0007](adr/0007-diagrama-com-layout-automatico.md) registra a decisão do layout.
+A spec do desenho está em [docs/superpowers/specs/2026-09-23-fase-2b-diagrama-design.md](superpowers/specs/2026-09-23-fase-2b-diagrama-design.md). O plano foi escrito com o código já verificado num protótipo descartável e aplicado com um commit por tarefa.
+
+Tudo rodou no `dist/win-unpacked/mdd.exe` gerado por `npm run build:win`, com as saídas iguais às esperadas no plano:
+
+- **Recriar o exemplo pelo diagrama** (Tarefa 4, Passo 4). O exemplo foi recriado do zero usando menu de contexto, Tab, a barra de ações e um arrasto do Boleto até o arco do grupo. O `cmp` contra `docs/examples/loja-online/model.xml` mostrou arquivo idêntico. O mesmo roteiro confere ainda:
+  - o arrasto de Pagamento para dentro da própria subárvore fica vermelho e é recusado com o motivo;
+  - recolher e expandir funcionam.
+- **Fechar com alteração pendente e recentes** (Passo 5), como na 2A.
+- **Roteiro da 2A pelo diagrama** (Passo 6). O `ui-check.mjs` bateu nas 19 linhas. Só mudaram, como previsto, as duas linhas em que o texto do nó perdeu o ○, que passou para a linha do diagrama.
+- **Roteiro do diagrama** (Tarefa 3, Passo 12, 27 linhas), rodado no app compilado:
+  - as pontas das linhas (●/○), as três notações de grupo e nenhum texto cortado;
+  - o menu de contexto, e Enter num item dele não disparando o atalho;
+  - o arrasto até uma feature, até o arco e até um nó recolhido;
+  - a exclusão pelo menu com o diálogo de impacto;
+  - a rolagem até a feature nova fora da tela.
+
+## Próximo passo: Fase 3 (configurador)
+
+A SPEC §9 descreve a entrega:
+
+- o adapter do solver e a resolução;
+- o modo configuração no diagrama;
+- os valores de atributos;
+- a lista de configurações;
+- a configuração desatualizada.
+
+A aceitação: `loja-basica` abre completa, com `mobile` selecionada por propagação e travada. Remover a decisão de `pag_pix` deixa `mobile` indecisa. Depois de excluir `pag_pix` no modelo e salvar, `loja-basica` abre como desatualizada, com a referência órfã. O [ADR 0002](adr/0002-solver-sat-para-propagacao.md) e o [ADR 0005](adr/0005-configuracao-guarda-so-decisoes-manuais.md) registram as decisões do solver e da configuração.
+
+O diagrama da 2B foi feito para ser reaproveitado: o modo configuração (SPEC §7) desenha os mesmos nós, com os estados de seleção no lugar da edição.
 
 Para começar, peça ao Claude, numa sessão nova:
 
-> Leia docs/HANDOFF.md e escreva o plano da Fase 2B, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
+> Leia docs/HANDOFF.md e escreva o plano da Fase 3, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
@@ -75,7 +105,7 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **Uma fase por vez, com um plano por fase.** Antes de escrever o plano, o código é prototipado e verificado numa cópia descartável do repositório. O plano contém o código já testado.
 - **Sem testes automatizados** (ADR 0008). A verificação usa typecheck, lint e scripts descartáveis em `.checks/`, rodados com `npx tsx` ou `node`. A interface é checada pelo protocolo de depuração do Chromium (`--remote-debugging-port`).
 - **Um branch por fase**, com um commit por tarefa e merge local na `main` ao fim, depois das checagens.
-- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8).
+- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B.
 - **Para dirigir a interface sem o diálogo nativo:** rode o app com `--user-data-dir` apontando para uma pasta própria e com um `recent-projects.json` que já contém o projeto. O projeto abre pela lista de recentes. O roteiro `ui-check.mjs` da 2A faz isso.
 - **Para responder os diálogos nativos sem a tela:** rode o app também com `--inspect=9229` (funciona no `mdd.exe` empacotado) e conecte no inspetor do Node (`http://127.0.0.1:9229/json`). Com `Runtime.evaluate` e `includeCommandLineAPI: true`, o `require('electron')` fica disponível. Aí basta trocar `dialog.showOpenDialog` por uma função que devolve `{ canceled: false, filePaths: [pasta] }`, e `dialog.showMessageBoxSync` por uma que devolve o índice do botão escolhido. O main lê `electron.dialog.*` na hora da chamada, então a troca vale na hora. Para simular o X da janela, chame `BrowserWindow.getAllWindows()[0].close()`, que dispara o mesmo evento `close`.
 
@@ -90,3 +120,7 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **Janela sem o foco do Windows** (por exemplo, quando o usuário está usando outra janela): `focus()` e `blur()` chamados por script não disparam eventos, e os campos que gravam ao sair (`CommitField`) não gravam. Ligue `Emulation.setFocusEmulationEnabled({ enabled: true })` na conexão do protocolo antes do roteiro.
 - **Controle de tela no diálogo de pastas:** não aceita digitar o caminho no campo "Pasta:", só navegar com cliques. Além de lento, isso ocupa a tela do usuário. Prefira o inspetor do main.
 - **Recentes:** o `reopenProject` só aceita pastas que já estão na lista, para que o renderer não possa apontar a raiz do projeto para qualquer lugar.
+- **React Flow e o mouse:** um nó que não é arrastável nem selecionável e não tem handler de clique fica com `pointer-events: none`. A raiz do diagrama é assim, por isso os nós de feature levam `style: { pointerEvents: 'all' }`.
+- **elkjs `mrtree`:** usa o mesmo espaçamento nas duas direções e ignora `nodeNodeBetweenLayers`. O `x` vem do elkjs; o `y` sai do nível (`diagram-layout.ts`).
+- **Menus e atalhos:** Enter num item do menu de contexto também chegaria ao atalho da janela. O atalho ignora teclas com `defaultPrevented`.
+- **Scripts `.mts` com `@/`:** rode com `npx tsx --tsconfig tsconfig.web.json` (o alias está no tsconfig do renderer). Com extensão `.ts`, o `await` no topo falha, porque o projeto é CommonJS.
