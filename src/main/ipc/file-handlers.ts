@@ -1,10 +1,11 @@
 import { createHash } from 'crypto'
-import { ipcMain } from 'electron'
-import { mkdir, readdir, readFile, unlink, writeFile } from 'fs/promises'
+import { ipcMain, shell } from 'electron'
+import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'fs/promises'
 import { dirname } from 'path'
 import {
   IpcChannel,
   type DirectoryEntry,
+  type EntryKind,
   type IpcResult,
   type RemovePrecondition,
   type TextFile,
@@ -104,5 +105,23 @@ export function registerFileHandlers(root: ProjectRoot): void {
         await unlink(path)
         return ok(null)
       })
+  )
+
+  ipcMain.handle(IpcChannel.stat, (_event, relativePath: string) =>
+    withinProject<EntryKind>(root, relativePath, async (path) => {
+      const info = await stat(path)
+      return ok(info.isDirectory() ? 'directory' : 'file')
+    })
+  )
+
+  ipcMain.handle(IpcChannel.openPath, (_event, relativePath: string) =>
+    withinProject<null>(root, relativePath, async (path) => {
+      if ((await stat(path)).isDirectory()) {
+        return fail('io', `"${relativePath}" é uma pasta, não um arquivo.`)
+      }
+      // O Electron devolve texto vazio quando deu certo, ou a mensagem do sistema.
+      const problem = await shell.openPath(path)
+      return problem === '' ? ok(null) : fail('io', problem)
+    })
   )
 }

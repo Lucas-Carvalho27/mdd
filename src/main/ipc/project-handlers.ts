@@ -29,6 +29,31 @@ export function registerProjectHandlers(root: ProjectRoot, recents: RecentProjec
     }
   )
 
+  ipcMain.handle(
+    IpcChannel.pickFileInProject,
+    async (event, title: string): Promise<IpcResult<string | null>> => {
+      if (root.current === null) return fail('no-project', 'Nenhum projeto aberto.')
+      const options: OpenDialogOptions = {
+        title,
+        defaultPath: root.current,
+        properties: ['openFile']
+      }
+      const window = BrowserWindow.fromWebContents(event.sender)
+      const choice = window
+        ? await dialog.showOpenDialog(window, options)
+        : await dialog.showOpenDialog(options)
+      if (choice.canceled || choice.filePaths.length === 0) return ok(null)
+      const relativePath = root.toRelative(choice.filePaths[0])
+      if (relativePath === null) {
+        return fail(
+          'outside-project',
+          'O arquivo precisa estar dentro da pasta do projeto. Copie-o para dentro e vincule de novo.'
+        )
+      }
+      return ok(relativePath)
+    }
+  )
+
   ipcMain.handle(IpcChannel.listRecentProjects, () => recents.list())
 
   ipcMain.handle(

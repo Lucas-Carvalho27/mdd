@@ -14,9 +14,11 @@ export interface StoredText {
   readonly hash: string
 }
 
+export type StorageEntryKind = 'file' | 'directory'
+
 export interface StorageEntry {
   readonly name: string
-  readonly kind: 'file' | 'directory'
+  readonly kind: StorageEntryKind
 }
 
 export type WritePrecondition =
@@ -39,4 +41,6 @@ export interface ProjectStorage {
   list(directory: string): Promise<Result<StorageEntry[], StorageError>>
   /** Exclui o arquivo; um arquivo que já não existe conta como excluído. */
   remove(path: string, precondition: RemovePrecondition): Promise<Result<null, StorageError>>
+  /** Se o caminho é um arquivo ou uma pasta; `not-found` quando não existe. */
+  stat(path: string): Promise<Result<StorageEntryKind, StorageError>>
 }

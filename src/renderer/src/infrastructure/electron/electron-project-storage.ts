@@ -2,6 +2,7 @@ import type {
   ProjectStorage,
   RemovePrecondition,
   StorageEntry,
+  StorageEntryKind,
   StorageError,
   StoredText,
   WritePrecondition
@@ -29,5 +30,9 @@ export class ElectronProjectStorage implements ProjectStorage {
 
   remove(path: string, precondition: RemovePrecondition): Promise<Result<null, StorageError>> {
     return window.mdd.remove(path, precondition)
+  }
+
+  stat(path: string): Promise<Result<StorageEntryKind, StorageError>> {
+    return window.mdd.stat(path)
   }
 }

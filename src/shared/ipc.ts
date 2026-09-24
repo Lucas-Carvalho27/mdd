@@ -19,9 +19,11 @@ export interface OpenedProject {
   name: string
 }
 
+export type EntryKind = 'file' | 'directory'
+
 export interface DirectoryEntry {
   name: string
-  kind: 'file' | 'directory'
+  kind: EntryKind
 }
 
 export interface TextFile {
@@ -66,6 +68,15 @@ export interface MddApi {
   ): Promise<IpcResult<{ hash: string }>>
   /** Exclui o arquivo. Um arquivo que já não existe conta como excluído. */
   remove(relativePath: string, precondition: RemovePrecondition): Promise<IpcResult<null>>
+  /** Se o caminho é um arquivo ou uma pasta; `not-found` quando não existe. */
+  stat(relativePath: string): Promise<IpcResult<EntryKind>>
+  /**
+   * Diálogo nativo para escolher um arquivo, começando na pasta do projeto. Devolve o caminho
+   * relativo, `null` quando cancelado, ou `outside-project` para um arquivo de fora.
+   */
+  pickFileInProject(title: string): Promise<IpcResult<string | null>>
+  /** Abre o arquivo do projeto no programa padrão do sistema. */
+  openPath(relativePath: string): Promise<IpcResult<null>>
   /** Confere se o conteúdo é XML bem-formado e segue o XSD. Lista vazia = válido. */
   validateXml(
     schema: XmlSchemaName,
@@ -83,5 +94,8 @@ export const IpcChannel = {
   readText: 'mdd:read-text',
   writeText: 'mdd:write-text',
   remove: 'mdd:remove',
+  stat: 'mdd:stat',
+  pickFileInProject: 'mdd:pick-file-in-project',
+  openPath: 'mdd:open-path',
   validateXml: 'mdd:validate-xml'
 } as const
