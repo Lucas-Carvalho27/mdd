@@ -1,0 +1,21 @@
+ao abrir                             → aberta null | alterações false
+loja-basica                          → resolved | completa true | indecisas 0 | mobile propagated selected
+mesma resolução enquanto nada muda   → true
+clique em mobile (travada)           → propagated selected | alterações false
+1º clique em pag_pix                 → manual deselected | mobile indecisa
+2º clique em pag_pix                 → indecisa | mobile indecisa | resolved | completa false | indecisas 2
+alterações pendentes                 → true
+mobile manual + pag_pix              → mobile manual selected | pag_pix manual selected
+clique em mobile pula o conflito     → mobile propagated selected | resolved | completa true | indecisas 0
+valor inválido                       → o máximo é 500
+valor válido                         → null
+valor gravado                        → busca=200 mobile=android
+criar sem nome                       → Informe o nome.
+criar                                → loja-basica(Loja Básica) loja-completa(Loja Completa) | aberta loja-completa | resolved | completa false | indecisas 5
+renomear a aberta                    → loja-basica(Loja Básica) loja-premium(Loja Premium) | aberta loja-premium
+duplicar                             → loja-basica(Loja Básica) loja-basica-2(Loja Básica) loja-premium(Loja Premium) | aberta loja-basica-2
+excluir a aberta                     → loja-basica(Loja Básica) loja-premium(Loja Premium) | aberta null
+órfãs depois de excluir pag_pix      → pag_pix
+depois de remover as órfãs           → 0 | resolved | completa false | indecisas 1
+salvo                                → loja-basica loja-premium | alterações false
+recarregar                           → aberta loja-basica

@@ -1,4 +1,12 @@
-import { ArrowDown, ArrowUp, ExternalLink, FileCode2, Paperclip, Unlink } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  ExternalLink,
+  FileCode2,
+  Paperclip,
+  Pencil,
+  Unlink
+} from 'lucide-react'
 import { cn } from 'cn'
 import * as cmd from '@/application/editing/commands'
 import { assetLabel, type Asset } from '@/domain/assets/asset-catalog'
@@ -11,9 +19,11 @@ import { useFileStatus } from './use-file-status'
 
 /** Os assets agrupados por âncora, na ordem do modelo (SPEC §7). */
 export function AssetList({
-  groups
+  groups,
+  onEditFragment
 }: {
   readonly groups: readonly AnchorGroup[]
+  readonly onEditFragment: (path: string) => void
 }): React.JSX.Element {
   return (
     <div className="space-y-4">
@@ -29,6 +39,7 @@ export function AssetList({
                 asset={asset}
                 first={index === 0}
                 last={index === assets.length - 1}
+                onEditFragment={onEditFragment}
               />
             ))}
           </ul>
@@ -43,9 +54,10 @@ interface AssetRowProps {
   /** Primeiro e último da âncora: não sobem nem descem. */
   readonly first: boolean
   readonly last: boolean
+  readonly onEditFragment: (path: string) => void
 }
 
-function AssetRow({ asset, first, last }: AssetRowProps): React.JSX.Element {
+function AssetRow({ asset, first, last, onEditFragment }: AssetRowProps): React.JSX.Element {
   const selected = useProjectStore((state) => state.selectedAssetId === asset.id)
   const selectAsset = useProjectStore((state) => state.selectAsset)
   const run = useProjectStore((state) => state.run)
@@ -80,6 +92,17 @@ function AssetRow({ asset, first, last }: AssetRowProps): React.JSX.Element {
         </span>
         <FileStatusBadge path={asset.path} />
       </button>
+      {asset.kind === 'fragment' && (
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          title="Editar na aba Fragmentos"
+          disabled={status === 'missing'}
+          onClick={() => onEditFragment(asset.path)}
+        >
+          <Pencil />
+        </Button>
+      )}
       <Button
         size="icon-sm"
         variant="ghost"

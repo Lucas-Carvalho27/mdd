@@ -1,0 +1,58 @@
+— listar
+fragmentos                           → docs/loja/visao-geral.xml docs/pagamento/latin1.xml docs/pagamento/pix.xml raiz.xml
+caminho novo Docs/Pagamento/…        → docs/pagamento/cartao.xml
+caminho novo docs/pagamento/PIX…     → "docs/pagamento/PIX.xml" já existe.
+— abrir
+pix.xml                              → "<?xml version=\"1.0\"?>\n<topic>\n  <title>PIX</title>\n</topic>\n" bom=true quebra="\r\n"
+pix.xml só leitura?                  → não
+latin1.xml só leitura?               → Este arquivo não está em UTF-8. Salve-o em UTF-8 em outro editor para poder editar aqui.
+arquivo que não existe               → not-found
+— salvar só os alterados
+resultado                            → gravados [docs/pagamento/pix.xml, docs/pagamento/cartao.xml]
+    conflitos []
+    erros []
+      docs/pagamento/pix.xml: ok
+      docs/pagamento/cartao.xml: ok
+pix.xml no disco                     → "<BOM><?xml version=\"1.0\"?>\r\n<topic>\r\n  <title>Pagamento com PIX</title>\r\n</topic>\r\n"
+cartao.xml no disco                  → "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<topic>\n  <title>Cartão</title>\n</topic>\n"
+latin1.xml no disco                  → "<?xml version=\"1.0\"?>\n<t>Informa��o</t>\n"
+— salvar de novo, sem mudança
+resultado                            → gravados []
+    conflitos []
+    erros []
+— com erro de XML
+resultado                            → gravados [docs/pagamento/pix.xml]
+    conflitos []
+    erros []
+      docs/pagamento/pix.xml: linha 3 Opening and ending tag mismatch: title line 3 and titulo
+— alterado fora do app
+salvar                               → gravados []
+    conflitos [docs/pagamento/pix.xml]
+    erros []
+pix.xml no disco                     → "<BOM><?xml version=\"1.0\"?>\r\n<topic>\r\n  <title>git pull</title>\r\n</topic>\r\n"
+Sobrescrever                         → gravados [docs/pagamento/pix.xml]
+    conflitos []
+    erros []
+      docs/pagamento/pix.xml: ok
+pix.xml no disco                     → "<BOM><?xml version=\"1.0\"?>\r\n<topic>\r\n  <title>Pagamento com PIX</title>\r\n</topic>\r\n"
+— arquivo novo que apareceu por fora
+salvar                               → gravados []
+    conflitos [docs/novo.xml]
+    erros []
+Sobrescrever                         → gravados [docs/novo.xml]
+    conflitos []
+    erros []
+      docs/novo.xml: ok
+no disco                             → DOCS/NOVO.XML
+— apagado por fora, com alteração
+salvar                               → gravados []
+    conflitos [docs/loja/visao-geral.xml]
+    erros []
+Sobrescrever                         → gravados [docs/loja/visao-geral.xml]
+    conflitos []
+    erros []
+      docs/loja/visao-geral.xml: ok
+— erro de disco
+salvar                               → gravados []
+    conflitos []
+    erros [raiz.xml Erro ao acessar "raiz.xml": EPERM]

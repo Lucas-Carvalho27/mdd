@@ -1,0 +1,9 @@
+pix.xml do exemplo         → ok
+tag sem ">"                → docs/x.xml:3 Specification mandates value for attribute Pagamento | docs/x.xml:3 attributes construct error | docs/x.xml:3 Couldn't find end of Start Tag title line 3 | docs/x.xml:3 Opening and ending tag mismatch: topic line 2 and title
+tag sem fechar, CRLF       → docs/x.xml:4 Opening and ending tag mismatch: p line 3 and t
+arquivo novo               → docs/x.xml:2 Start tag expected, '<' not found
+Latin-1 declarado          → docs/x.xml:1 A codificação ISO-8859-1 não é suportada: salve o arquivo em UTF-8.
+bytes que não são UTF-8    → docs/x.xml:3 O arquivo não está em UTF-8: salve-o em UTF-8.
+&nbsp; com DTD externa     → docs/x.xml:4 A entidade &nbsp; não é suportada: use o próprio caractere ou uma referência numérica, como &#160;.
+prefixo sem declaração     → docs/x.xml:3 Há um prefixo de namespace sem declaração (xmlns:…).
+raiz extraída do pix.xml   → <topic xmlns="urn:exemplo:doc">

@@ -23,6 +23,13 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  /* Cores do editor de fragmentos (xml-editor-setup.ts). */
+  --xml-tag: oklch(0.46 0.16 262);
+  --xml-attribute: oklch(0.52 0.13 55);
+  --xml-string: oklch(0.5 0.13 150);
+  --xml-entity: oklch(0.55 0.18 25);
+  --xml-comment: oklch(0.556 0 0);
+  --xml-meta: oklch(0.5 0.14 320);
 }
 
 .dark {
@@ -44,6 +51,12 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --xml-tag: oklch(0.75 0.12 250);
+  --xml-attribute: oklch(0.8 0.11 70);
+  --xml-string: oklch(0.78 0.13 150);
+  --xml-entity: oklch(0.75 0.15 25);
+  --xml-comment: oklch(0.65 0 0);
+  --xml-meta: oklch(0.75 0.12 320);
 }
 
 @theme inline {
