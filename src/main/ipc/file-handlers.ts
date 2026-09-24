@@ -1,9 +1,20 @@
 import { createHash } from 'crypto'
 import { ipcMain, shell } from 'electron'
-import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'fs/promises'
+import {
+  copyFile,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  rm,
+  stat,
+  unlink,
+  writeFile
+} from 'fs/promises'
 import { dirname } from 'path'
 import {
   IpcChannel,
+  OUTPUT_DIRECTORY,
   type DirectoryEntry,
   type EntryKind,
   type IpcResult,
@@ -48,6 +59,25 @@ async function withinProject<T>(
     if (isNotFound(error)) return fail('not-found', `"${relativePath}" não existe.`)
     return fail('io', `Erro ao acessar "${relativePath}": ${(error as Error).message}`)
   }
+}
+
+/**
+ * Como `withinProject`, para as operações que mexem em pastas inteiras: o caminho precisa
+ * ficar dentro de `saida/`.
+ */
+function withinOutput<T>(
+  root: ProjectRoot,
+  relativePath: string,
+  operation: (absolutePath: string) => Promise<IpcResult<T>>
+): Promise<IpcResult<T>> {
+  return withinProject<T>(root, relativePath, async () => {
+    const absolutePath = root.resolveInOutput(relativePath)
+    return absolutePath === null ? outsideOutput(relativePath) : operation(absolutePath)
+  })
+}
+
+function outsideOutput<T>(relativePath: string): IpcResult<T> {
+  return fail('outside-project', `"${relativePath}" fica fora da pasta ${OUTPUT_DIRECTORY}/.`)
 }
 
 function violatesPrecondition(current: string | null, precondition: WritePrecondition): boolean {
@@ -114,9 +144,42 @@ export function registerFileHandlers(root: ProjectRoot): void {
     })
   )
 
+  ipcMain.handle(IpcChannel.copy, (_event, fromPath: string, toPath: string) =>
+    withinProject<null>(root, fromPath, async (source) => {
+      const target = root.resolve(toPath)
+      if (target === null) {
+        return fail('outside-project', `O caminho "${toPath}" fica fora do projeto.`)
+      }
+      if ((await stat(source)).isDirectory()) {
+        return fail('io', `"${fromPath}" é uma pasta, não um arquivo.`)
+      }
+      await mkdir(dirname(target), { recursive: true })
+      await copyFile(source, target)
+      return ok(null)
+    })
+  )
+
+  ipcMain.handle(IpcChannel.rename, (_event, fromPath: string, toPath: string) =>
+    withinOutput<null>(root, fromPath, async (source) => {
+      const target = root.resolveInOutput(toPath)
+      if (target === null) return outsideOutput(toPath)
+      await rename(source, target)
+      return ok(null)
+    })
+  )
+
+  ipcMain.handle(IpcChannel.removeDirectory, (_event, relativePath: string) =>
+    withinOutput<null>(root, relativePath, async (path) => {
+      await rm(path, { recursive: true, force: true })
+      return ok(null)
+    })
+  )
+
   ipcMain.handle(IpcChannel.openPath, (_event, relativePath: string) =>
     withinProject<null>(root, relativePath, async (path) => {
-      if ((await stat(path)).isDirectory()) {
+      // Pastas, só as geradas: o "Abrir pasta" da faixa de sucesso da geração.
+      const isFolder = (await stat(path)).isDirectory()
+      if (isFolder && root.resolveInOutput(relativePath) === null) {
         return fail('io', `"${relativePath}" é uma pasta, não um arquivo.`)
       }
       // O Electron devolve texto vazio quando deu certo, ou a mensagem do sistema.

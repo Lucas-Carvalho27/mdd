@@ -13,6 +13,9 @@ const api: MddApi = {
   remove: (relativePath, precondition) =>
     ipcRenderer.invoke(IpcChannel.remove, relativePath, precondition),
   stat: (relativePath) => ipcRenderer.invoke(IpcChannel.stat, relativePath),
+  copy: (fromPath, toPath) => ipcRenderer.invoke(IpcChannel.copy, fromPath, toPath),
+  rename: (fromPath, toPath) => ipcRenderer.invoke(IpcChannel.rename, fromPath, toPath),
+  removeDirectory: (relativePath) => ipcRenderer.invoke(IpcChannel.removeDirectory, relativePath),
   pickFileInProject: (title) => ipcRenderer.invoke(IpcChannel.pickFileInProject, title),
   openPath: (relativePath) => ipcRenderer.invoke(IpcChannel.openPath, relativePath),
   validateXml: (schema, fileName, content) =>

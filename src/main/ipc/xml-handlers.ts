@@ -13,7 +13,7 @@ export function registerXmlHandlers(): void {
     IpcChannel.validateXml,
     async (
       _event,
-      schema: XmlSchemaName,
+      schema: XmlSchemaName | null,
       fileName: string,
       content: string
     ): Promise<IpcResult<XmlSchemaIssue[]>> => {

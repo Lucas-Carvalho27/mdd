@@ -35,4 +35,16 @@ export class ElectronProjectStorage implements ProjectStorage {
   stat(path: string): Promise<Result<StorageEntryKind, StorageError>> {
     return window.mdd.stat(path)
   }
+
+  copy(from: string, to: string): Promise<Result<null, StorageError>> {
+    return window.mdd.copy(from, to)
+  }
+
+  rename(from: string, to: string): Promise<Result<null, StorageError>> {
+    return window.mdd.rename(from, to)
+  }
+
+  removeDirectory(path: string): Promise<Result<null, StorageError>> {
+    return window.mdd.removeDirectory(path)
+  }
 }

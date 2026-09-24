@@ -43,4 +43,13 @@ export interface ProjectStorage {
   remove(path: string, precondition: RemovePrecondition): Promise<Result<null, StorageError>>
   /** Se o caminho é um arquivo ou uma pasta; `not-found` quando não existe. */
   stat(path: string): Promise<Result<StorageEntryKind, StorageError>>
+  /** Copia um arquivo byte a byte, criando as pastas do destino e substituindo o que houver lá. */
+  copy(from: string, to: string): Promise<Result<null, StorageError>>
+  /**
+   * Renomeia um arquivo ou uma pasta. Como apagar pastas, só vale dentro da pasta de saída
+   * da geração (SPEC §3); fora dela, `outside-project`.
+   */
+  rename(from: string, to: string): Promise<Result<null, StorageError>>
+  /** Apaga a pasta com tudo o que tem dentro, só dentro da pasta de saída; se não existe, conta como apagada. */
+  removeDirectory(path: string): Promise<Result<null, StorageError>>
 }
