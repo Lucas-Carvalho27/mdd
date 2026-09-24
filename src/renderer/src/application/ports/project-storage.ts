@@ -24,6 +24,9 @@ export type WritePrecondition =
   | { readonly kind: 'must-not-exist' }
   | { readonly kind: 'overwrite' }
 
+export type RemovePrecondition =
+  { readonly kind: 'hash'; readonly expectedHash: string } | { readonly kind: 'overwrite' }
+
 /** Arquivos da pasta do projeto aberto. Caminhos relativos, com "/" como separador. */
 export interface ProjectStorage {
   readText(path: string): Promise<Result<StoredText, StorageError>>
@@ -34,4 +37,6 @@ export interface ProjectStorage {
     precondition: WritePrecondition
   ): Promise<Result<string, StorageError>>
   list(directory: string): Promise<Result<StorageEntry[], StorageError>>
+  /** Exclui o arquivo; um arquivo que já não existe conta como excluído. */
+  remove(path: string, precondition: RemovePrecondition): Promise<Result<null, StorageError>>
 }

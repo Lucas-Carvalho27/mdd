@@ -6,6 +6,7 @@ import type {
   ExpectedHash,
   FeatureModelRepository,
   LoadedFile,
+  RemoveResult,
   SaveResult
 } from '@/application/ports/repositories'
 import type { XmlSchemaValidator } from '@/application/ports/xml-schema-validator'
@@ -109,6 +110,10 @@ export class XmlConfigurationRepository implements ConfigurationRepository {
 
   save(key: string, configuration: Configuration, expectedHash: ExpectedHash): Promise<SaveResult> {
     return this.fileFor(key).save(configuration, expectedHash)
+  }
+
+  remove(key: string, expectedHash: string | 'any'): Promise<RemoveResult> {
+    return this.fileFor(key).remove(expectedHash)
   }
 
   private fileFor(key: string): XmlDocumentFile<Configuration> {

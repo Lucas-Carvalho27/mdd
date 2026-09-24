@@ -10,6 +10,8 @@ const api: MddApi = {
   readText: (relativePath) => ipcRenderer.invoke(IpcChannel.readText, relativePath),
   writeText: (relativePath, content, precondition) =>
     ipcRenderer.invoke(IpcChannel.writeText, relativePath, content, precondition),
+  remove: (relativePath, precondition) =>
+    ipcRenderer.invoke(IpcChannel.remove, relativePath, precondition),
   validateXml: (schema, fileName, content) =>
     ipcRenderer.invoke(IpcChannel.validateXml, schema, fileName, content)
 }

@@ -1,27 +1,28 @@
 # Handoff — onde paramos e como continuar
 
-Atualizado em 23/09/2026. Leia este arquivo primeiro ao retomar o projeto.
+Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação       | Onde está                                                                                                                                                       |
-| ------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                                 |
-| 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                                 |
-| 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)             |
-| 2B. Diagrama visual       | Concluída      | `main` (local; ainda não enviada ao GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md) |
-| **3. Configurador**       | **A planejar** | —                                                                                                                                                               |
-| 4. Assets                 | A planejar     | —                                                                                                                                                               |
-| 5. Geração                | A planejar     | —                                                                                                                                                               |
+| Fase                      | Situação                                          | Onde está                                                                                                                                                             |
+| ------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída                                         | `main` (GitHub)                                                                                                                                                       |
+| 1. Domínio e persistência | Concluída                                         | `main` (GitHub)                                                                                                                                                       |
+| 2A. Edição do modelo      | Concluída                                         | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                   |
+| 2B. Diagrama visual       | Concluída                                         | `main` (local; ainda não enviada ao GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)       |
+| 3. Configurador           | Código concluído; aceitação no `mdd.exe` pendente | `main` (local; ainda não enviada ao GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md) |
+| **4. Assets**             | **A planejar**                                    | —                                                                                                                                                                     |
+| 5. Geração                | A planejar                                        | —                                                                                                                                                                     |
 
-O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A e 2B, também:
+O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B e 3, também:
 
 - mostra o modelo num diagrama na notação clássica, com layout automático, zoom, "ajustar à tela" e subárvores recolhíveis;
 - edita o modelo (features, grupos, atributos e restrições), com desfazer/refazer e diálogo de impacto ao excluir;
 - edita também pelo diagrama: menu de contexto no nó e arrastar e soltar para mudar o pai de uma feature;
 - cria projetos e reabre os recentes;
 - mostra "•" no título com alterações não salvas e salva com Ctrl+S;
-- pergunta o que fazer quando um arquivo foi alterado fora do app, e confirma antes de fechar com alterações.
+- pergunta o que fazer quando um arquivo foi alterado fora do app, e confirma antes de fechar com alterações;
+- resolve cada configuração com o solver SAT e a mostra no diagrama em modo configuração, com decisões por clique, valores de atributos, lista de configurações e faixas para configurações desatualizadas ou em conflito.
 
 Documentos de referência:
 
@@ -63,23 +64,47 @@ Tudo rodou no `dist/win-unpacked/mdd.exe` gerado por `npm run build:win`, com as
   - a exclusão pelo menu com o diálogo de impacto;
   - a rolagem até a feature nova fora da tela.
 
-## Próximo passo: Fase 3 (configurador)
+## Aceitação da Fase 3 (parcial, 24/09/2026)
 
-A SPEC §9 descreve a entrega:
+O plano está em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md), escrito com o código já verificado num protótipo descartável. No protótipo, a aceitação inteira passou no `mdd.exe` empacotado.
 
-- o adapter do solver e a resolução;
-- o modo configuração no diagrama;
-- os valores de atributos;
-- a lista de configurações;
-- a configuração desatualizada.
+**Feito no branch `fase-3-configurador`, mesclado na `main` em 24/09/2026 a pedido do usuário, com a aceitação no `mdd.exe` ainda pendente.** Houve um commit por tarefa. As Tarefas 1 a 4 passaram por revisão de código, todas aprovadas; a Tarefa 5 (correção do empacotamento e documentação) e a revisão final do branch inteiro não foram feitas.
 
-A aceitação: `loja-basica` abre completa, com `mobile` selecionada por propagação e travada. Remover a decisão de `pag_pix` deixa `mobile` indecisa. Depois de excluir `pag_pix` no modelo e salvar, `loja-basica` abre como desatualizada, com a referência órfã. O [ADR 0002](adr/0002-solver-sat-para-propagacao.md) e o [ADR 0005](adr/0005-configuracao-guarda-so-decisoes-manuais.md) registram as decisões do solver e da configuração.
+- os roteiros `resolution-check.mts`, `configurations-check.mts` e `configurator-store-check.mts` deram as saídas esperadas no plano. Os três primeiros casos do `resolution-check` são a aceitação da SPEC §9 no domínio:
+  - `loja-basica` completa, com `mobile` propagada;
+  - sem a decisão de `pag_pix`, `mobile` indecisa;
+  - com `pag_pix` excluída do modelo, a referência órfã;
+- o roteiro completo do configurador (`configurador-ui.mjs`) deu a saída esperada no app compilado em modo de desenvolvimento (`electron.exe .`, sobre o `out/`);
+- a regressão da 2A (`ui-check.mjs`, 19 linhas) e da 2B (`diagrama-ui.mjs`, 27 linhas) bateu com o esperado (Tarefa 4, Passo 16).
 
-O diagrama da 2B foi feito para ser reaproveitado: o modo configuração (SPEC §7) desenha os mesmos nós, com os estados de seleção no lugar da edição.
+**Defeito de empacotamento encontrado e corrigido.** O `electron-builder.yml` não excluía `.checks/` nem `.superpowers/`, e o `app.asar` levava os projetos de teste, os perfis do Chromium dos roteiros e os pacotes de revisão. Nesta pasta, o `mdd.exe` gerado não abria: o `package.json` dentro do `app.asar` saía com o tamanho certo, mas com bytes de outro arquivo. A causa exata não foi provada, mas o sintoma sumiu com as duas exclusões. No build novo, o `app.asar` não tem mais essas pastas, e o `package.json` interno é JSON válido (`mdd 0.1.0`).
+
+**Pendente: a aceitação no `mdd.exe` empacotado** (plano da Fase 3, Tarefa 5, Passos 2 a 4). Ficou para depois a pedido do usuário, porque os roteiros abrem e fecham janelas na tela dele:
+
+- `configurador-ui.mjs` no `mdd.exe`;
+- as duas partes do `aceitacao-3.mjs`;
+- fechar com uma decisão pendente, com `main-dialogs.mjs`.
+
+Antes da interrupção, uma primeira execução do `configurador-ui.mjs` no `mdd.exe` novo bateu com o esperado nas 35 primeiras linhas: abas, `loja-basica` completa com `mobile` travada, os cliques em `pag_pix`, os valores, a lista e o salvar. Então o app empacotado abre e o solver roda dentro do `app.asar`. A execução parou no passo seguinte, excluir `pag_pix` pela tecla Delete na aba Modelo: o diálogo de impacto não abriu. A causa não foi apurada. O mesmo passo passou no protótipo empacotado e no modo de desenvolvimento, e a falha aconteceu enquanto as janelas mexiam na tela do usuário. As tentativas seguintes esbarraram em restos das anteriores (uma configuração a mais na cópia do projeto), porque a cópia não foi preparada de novo. Ao retomar, prepare a cópia do zero, como no plano, e confira esse passo.
+
+Os roteiros já estão em `.checks/`. Antes de rodar, combine com o usuário um momento em que as janelas não atrapalhem. Se a aceitação achar um defeito, corrija num branch novo a partir da `main`.
+
+## Próximo passo: Fase 4 (assets)
+
+Antes, feche a Fase 3: rode a aceitação pendente no `mdd.exe` (seção acima). A revisão final do branch da Fase 3 também ficou por fazer (`git diff ca5ddc9..<merge>`).
+
+A SPEC §9 descreve a entrega da Fase 4:
+
+- a aba de assets;
+- o vínculo com âncora e condição;
+- o estado do arquivo;
+- abrir no programa padrão.
+
+A aceitação: a aba mostra os 6 assets do exemplo. Renomear `boleto.xml` fora do app faz o asset aparecer como ausente.
 
 Para começar, peça ao Claude, numa sessão nova:
 
-> Leia docs/HANDOFF.md e escreva o plano da Fase 3, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
+> Leia docs/HANDOFF.md e escreva o plano da Fase 4, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
@@ -105,7 +130,7 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **Uma fase por vez, com um plano por fase.** Antes de escrever o plano, o código é prototipado e verificado numa cópia descartável do repositório. O plano contém o código já testado.
 - **Sem testes automatizados** (ADR 0008). A verificação usa typecheck, lint e scripts descartáveis em `.checks/`, rodados com `npx tsx` ou `node`. A interface é checada pelo protocolo de depuração do Chromium (`--remote-debugging-port`).
 - **Um branch por fase**, com um commit por tarefa e merge local na `main` ao fim, depois das checagens.
-- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B.
+- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B. Os da Fase 3 (`resolution-check.mts`, `configurations-check.mts`, `configurator-store-check.mts`, `quit.mjs`, `configurador-ui.mjs` e `aceitacao-3.mjs`) estão no plano da Fase 3.
 - **Para dirigir a interface sem o diálogo nativo:** rode o app com `--user-data-dir` apontando para uma pasta própria e com um `recent-projects.json` que já contém o projeto. O projeto abre pela lista de recentes. O roteiro `ui-check.mjs` da 2A faz isso.
 - **Para responder os diálogos nativos sem a tela:** rode o app também com `--inspect=9229` (funciona no `mdd.exe` empacotado) e conecte no inspetor do Node (`http://127.0.0.1:9229/json`). Com `Runtime.evaluate` e `includeCommandLineAPI: true`, o `require('electron')` fica disponível. Aí basta trocar `dialog.showOpenDialog` por uma função que devolve `{ canceled: false, filePaths: [pasta] }`, e `dialog.showMessageBoxSync` por uma que devolve o índice do botão escolhido. O main lê `electron.dialog.*` na hora da chamada, então a troca vale na hora. Para simular o X da janela, chame `BrowserWindow.getAllWindows()[0].close()`, que dispara o mesmo evento `close`.
 
@@ -124,3 +149,10 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **elkjs `mrtree`:** usa o mesmo espaçamento nas duas direções e ignora `nodeNodeBetweenLayers`. O `x` vem do elkjs; o `y` sai do nível (`diagram-layout.ts`).
 - **Menus e atalhos:** Enter num item do menu de contexto também chegaria ao atalho da janela. O atalho ignora teclas com `defaultPrevented`.
 - **Scripts `.mts` com `@/`:** rode com `npx tsx --tsconfig tsconfig.web.json` (o alias está no tsconfig do renderer). Com extensão `.ts`, o `await` no topo falha, porque o projeto é CommonJS.
+- **`logic-solver` e a CSP:** o `minisat.js` tem `eval`, e a página o bloqueia. Os caminhos usados não chamam `eval`, então o solver funciona; o `npm run build` avisa três vezes "Use of eval … is strongly discouraged", e é esperado.
+- **`logic-solver` reaproveitado:** cada `solveAssuming` deixa as perguntas seguintes mais lentas. Use um solver novo por resolução (`LogicSolverConstraintSolver.load`).
+- **Seletores do Zustand:** um seletor que calcula algo (como a resolução) precisa devolver o mesmo objeto enquanto nada muda, senão o React entra em laço. O `ResolveConfiguration` guarda o resultado num `WeakMap` indexado pela configuração.
+- **Fechar o app num roteiro:** com alteração pendente, fechar pelo protocolo faz o main abrir o diálogo nativo e esperar. Use `.checks/quit.mjs`, que avisa `setUnsavedChanges(false)` antes, e nunca `taskkill /IM electron.exe`.
+- **Captura de tela pelo protocolo:** `Page.captureScreenshot` trava com a janela em segundo plano; chame `Page.bringToFront` antes.
+- **O que vai para o instalador:** a lista `files` do `electron-builder.yml` precisa excluir as pastas de rascunho (`.checks/` e `.superpowers/`). Sem isso, elas entram no `app.asar`, e nesta pasta o `package.json` interno saiu corrompido e o `mdd.exe` não abria.
+- **Roteiros de interface abrem janelas na tela do usuário:** os cliques vão direto para a janela do app, sem tomar o mouse, mas as janelas abrindo e fechando incomodam. Combine com o usuário antes de rodar, e não abra o `mdd.exe` na mão enquanto eles rodam.

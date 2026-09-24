@@ -104,9 +104,9 @@ Uma configuração guarda só as **decisões manuais** (`selected` ou `deselecte
 | Completa      | Válida, sem features indecisas e com todo atributo configurável de feature selecionada tendo valor (o da configuração ou o `default`). |
 | Desatualizada | Tem referências órfãs, está em conflito, ou tem valor de atributo inválido para o tipo.                                                |
 
-**Valores de atributos.** `number` deve ser decimal dentro de `min..max`; `boolean` deve ser `true` ou `false`; `enum` deve ser uma das `option`; `string` aceita qualquer texto. Valores de features não selecionadas continuam no arquivo, mas são ignorados.
+**Valores de atributos.** `number` deve ser decimal dentro de `min..max`; `boolean` deve ser `true` ou `false`; `enum` deve ser uma das `option`; `string` aceita qualquer texto. Valores de features não selecionadas continuam no arquivo, mas são ignorados. Um valor para um atributo que ficou fixo no modelo conta como referência órfã. Um valor inválido de uma feature selecionada conta como atributo sem valor.
 
-**Regras de interação:** uma feature com decisão propagada não aceita decisão manual contrária (fica travada na interface). Configurações incompletas podem ser salvas. A geração só é liberada para configurações completas.
+**Regras de interação:** uma feature com decisão propagada não aceita decisão manual contrária (fica travada na interface). Um clique nunca deixa a configuração em conflito: se o próximo estado do ciclo contradisser as outras decisões, a decisão sobre a feature é removida, e ela passa a mostrar o valor que o modelo impõe. Decisões e valores novos entram na ordem do modelo (pré-ordem), para o arquivo não depender da ordem dos cliques. Configurações incompletas podem ser salvas. A geração só é liberada para configurações completas.
 
 ### 4.3 Assets
 
@@ -240,16 +240,16 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 
 ### 6.2 Ports (em `application/ports`)
 
-| Port                                                                          | Responsabilidade                                                                                                                                              | Adapter v1                                                  |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `ProjectStorage`                                                              | Ler, escrever, listar, copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8). | `ElectronProjectStorage`                                    |
-| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                        | `Xml*Repository` (codecs + `ProjectStorage`)                |
-| `ConstraintSolver`                                                            | Receber uma `Formula` e responder a satisfatibilidade sob suposições, devolvendo uma solução.                                                                 | `LogicSolverConstraintSolver`                               |
-| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                 | `XmlProductDeriver`                                         |
-| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                               | `ElectronAssetOpener`                                       |
-| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto. A escolha de um arquivo dentro do projeto entra na Fase 4, como port próprio.                                                    | `ElectronProjectFolderPicker`                               |
-| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD.                                                                                               | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
-| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                      | `SystemClock`                                               |
+| Port                                                                          | Responsabilidade                                                                                                                                                            | Adapter v1                                                  |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `ProjectStorage`                                                              | Ler, escrever, listar, copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8).               | `ElectronProjectStorage`                                    |
+| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                                      | `Xml*Repository` (codecs + `ProjectStorage`)                |
+| `ConstraintSolver`                                                            | Carregar uma `Formula` e responder a satisfatibilidade sob uma suposição (um literal), devolvendo uma solução. Cada resolução carrega a fórmula num solver novo (ADR 0002). | `LogicSolverConstraintSolver`                               |
+| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                               | `XmlProductDeriver`                                         |
+| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                                             | `ElectronAssetOpener`                                       |
+| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto. A escolha de um arquivo dentro do projeto entra na Fase 4, como port próprio.                                                                  | `ElectronProjectFolderPicker`                               |
+| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD.                                                                                                             | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
+| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                                    | `SystemClock`                                               |
 
 ### 6.3 Processo main e IPC
 
@@ -257,7 +257,7 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 - O preload expõe só `window.mdd`, tipado por `src/shared/ipc.ts`.
 - O main mantém a **raiz do projeto aberto** e recusa qualquer operação de arquivo fora dela.
 - Canais:
-  - **Arquivos:** `readText`, `writeText` (com hash esperado), `stat`, `list`, `copy`, `rename`, `remove`, `ensureDir`
+  - **Arquivos:** `readText`, `writeText` (com hash esperado), `stat`, `list`, `copy`, `rename`, `remove` (com hash esperado), `ensureDir`
   - **XML:** `validateXml` (etapas 1 e 2 da leitura, §5)
   - **Diálogos:** `openProjectFolder`, `pickFileInProject`, `confirm`
   - **Shell:** `shell.openPath`
@@ -311,19 +311,22 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 **Configurações:**
 
-- Lista com criar, renomear, duplicar e excluir (com confirmação).
+- A barra lateral é uma faixa estreita com as abas. Na aba Configurações, a lista fica à esquerda, o diagrama no centro e os valores dos atributos à direita.
+- Lista com criar, renomear, duplicar e excluir (com confirmação); o nome do arquivo aparece enquanto se digita o nome. Como o resto do projeto, essas operações só chegam ao disco ao salvar: excluir apaga o arquivo, e renomear grava o arquivo novo e apaga o antigo.
 - Abrir uma configuração mostra **o mesmo diagrama em modo configuração**, com a estrutura só para leitura. Estados dos nós:
-  - selecionada manual;
-  - desselecionada manual;
+  - selecionada manual (✓);
+  - desselecionada manual (✕);
   - selecionada ou desselecionada **propagada** (com cadeado e dica "decidido pelo modelo");
   - indecisa.
-- Um clique alterna entre indecisa → selecionada → desselecionada → indecisa. Nós propagados não respondem ao clique.
-- Painel direito: valores dos atributos das features selecionadas, com validação por tipo.
-- Barra de status: válida / completa / incompleta (N indecisas, M atributos sem valor) / em conflito.
-- Uma configuração desatualizada exibe uma faixa com:
+- Um clique alterna entre indecisa → selecionada → desselecionada → indecisa. Nós propagados não respondem ao clique. Em conflito, ou com o modelo vazio, nada é propagado: os nós mostram só as decisões manuais e não respondem.
+- Painel direito: valores dos atributos das features selecionadas, com validação por tipo. Campo vazio = sem valor (vale o `default`, se houver); um valor que não serve para o tipo é recusado com o motivo.
+- Barra de status: válida / completa / incompleta (N indecisas, M atributos sem valor) / em conflito / modelo vazio, com "desatualizada" quando for o caso.
+- Uma configuração desatualizada exibe faixas com:
   - as referências órfãs, com a ação "remover referências órfãs";
-  - no caso de conflito, a lista de decisões manuais com a ação de remover cada uma.
-- Botão **Gerar produto**, habilitado só quando a configuração está completa.
+  - no caso de conflito, a lista de decisões manuais com a ação de remover cada uma;
+  - os valores inválidos, com a ação de remover cada um.
+- Desfazer, refazer e os atalhos de edição valem só na aba Modelo; no configurador, só Ctrl+S.
+- Botão **Gerar produto** (Fase 5), habilitado só quando a configuração está completa.
 
 **Assets:**
 
@@ -334,7 +337,7 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 ## 8. Comportamentos transversais
 
-- **Salvar é manual** (Ctrl+S) e grava tudo o que tiver alteração (modelo, assets e a configuração aberta). O título da janela mostra `•` quando há algo não salvo. Fechar a janela ou o projeto com alterações pendentes pede confirmação.
+- **Salvar é manual** (Ctrl+S) e grava tudo o que tiver alteração (modelo, assets e configurações, inclusive apagando os arquivos das configurações excluídas ou renomeadas). O título da janela mostra `•` quando há algo não salvo. Fechar a janela ou o projeto com alterações pendentes pede confirmação.
 - **Alteração externa:** o app guarda o hash de cada arquivo ao ler. Ao salvar, se o arquivo no disco mudou (por exemplo, depois de um `git pull`), ele pergunta se deve **sobrescrever**, **recarregar** (descartando as alterações locais daquele arquivo) ou **cancelar**. Nunca sobrescreve em silêncio.
 - **Erros** de leitura seguem §5. Erros de disco e de geração aparecem em diálogo com todos os itens.
 - **Interface em português. Empacotamento para Windows** (electron-builder, instalador NSIS).

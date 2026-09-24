@@ -5,7 +5,12 @@ import type {
   StorageError,
   WritePrecondition
 } from '@/application/ports/project-storage'
-import type { ExpectedHash, LoadedFile, SaveResult } from '@/application/ports/repositories'
+import type {
+  ExpectedHash,
+  LoadedFile,
+  RemoveResult,
+  SaveResult
+} from '@/application/ports/repositories'
 import type { XmlSchema, XmlSchemaValidator } from '@/application/ports/xml-schema-validator'
 import { err, ok, type Result } from '@/domain/shared/result'
 import { parseXmlRoot, type DecodeProblem } from './xml-reader'
@@ -75,6 +80,18 @@ export class XmlDocumentFile<T> {
       return err({ kind: 'conflict', file: this.path })
     }
     return err({ kind: 'error', problem: this.storageProblem(written.error) })
+  }
+
+  async remove(expectedHash: string | 'any'): Promise<RemoveResult> {
+    const removed = await this.storage.remove(
+      this.path,
+      expectedHash === 'any' ? { kind: 'overwrite' } : { kind: 'hash', expectedHash }
+    )
+    if (removed.ok) return removed
+    if (removed.error.code === 'changed-externally') {
+      return err({ kind: 'conflict', file: this.path })
+    }
+    return err({ kind: 'error', problem: this.storageProblem(removed.error) })
   }
 
   private storageProblem(error: StorageError): FileProblem {

@@ -1,6 +1,6 @@
 /*
  * Uma configuração guarda só decisões manuais e valores de atributos (ADR 0005).
- * A resolução (propagação, validade, completude) chega na Fase 3.
+ * O resto (propagação, validade, completude) é calculado: veja resolution.ts.
  */
 
 export type DecisionState = 'selected' | 'deselected'

@@ -23,6 +23,8 @@ export type SaveFailure =
 /** Gravação bem-sucedida devolve o novo hash do arquivo. */
 export type SaveResult = Result<string, SaveFailure>
 
+export type RemoveResult = Result<null, SaveFailure>
+
 export interface FeatureModelRepository {
   load(): Promise<Result<LoadedFile<FeatureModel>, FileProblem[]>>
   save(model: FeatureModel, expectedHash: ExpectedHash): Promise<SaveResult>
@@ -39,4 +41,6 @@ export interface ConfigurationRepository {
   listKeys(): Promise<Result<string[], FileProblem[]>>
   load(key: string): Promise<Result<LoadedFile<Configuration>, FileProblem[]>>
   save(key: string, configuration: Configuration, expectedHash: ExpectedHash): Promise<SaveResult>
+  /** Exclui o arquivo se ele ainda estiver com o hash (ou sempre, com `'any'`). */
+  remove(key: string, expectedHash: string | 'any'): Promise<RemoveResult>
 }

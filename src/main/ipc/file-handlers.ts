@@ -1,11 +1,12 @@
 import { createHash } from 'crypto'
 import { ipcMain } from 'electron'
-import { mkdir, readdir, readFile, writeFile } from 'fs/promises'
+import { mkdir, readdir, readFile, unlink, writeFile } from 'fs/promises'
 import { dirname } from 'path'
 import {
   IpcChannel,
   type DirectoryEntry,
   type IpcResult,
+  type RemovePrecondition,
   type TextFile,
   type WritePrecondition
 } from '../../shared/ipc'
@@ -88,6 +89,20 @@ export function registerFileHandlers(root: ProjectRoot): void {
         await mkdir(dirname(path), { recursive: true })
         await writeFile(path, content, 'utf8')
         return ok({ hash: sha256(content) })
+      })
+  )
+
+  ipcMain.handle(
+    IpcChannel.remove,
+    (_event, relativePath: string, precondition: RemovePrecondition) =>
+      withinProject<null>(root, relativePath, async (path) => {
+        const current = await readIfExists(path)
+        if (current === null) return ok(null)
+        if (precondition.kind === 'hash' && sha256(current) !== precondition.expectedHash) {
+          return fail('changed-externally', `"${relativePath}" foi alterado fora do app.`)
+        }
+        await unlink(path)
+        return ok(null)
       })
   )
 }

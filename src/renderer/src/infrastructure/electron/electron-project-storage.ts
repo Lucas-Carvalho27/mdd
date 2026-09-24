@@ -1,5 +1,6 @@
 import type {
   ProjectStorage,
+  RemovePrecondition,
   StorageEntry,
   StorageError,
   StoredText,
@@ -24,5 +25,9 @@ export class ElectronProjectStorage implements ProjectStorage {
 
   list(directory: string): Promise<Result<StorageEntry[], StorageError>> {
     return window.mdd.list(directory)
+  }
+
+  remove(path: string, precondition: RemovePrecondition): Promise<Result<null, StorageError>> {
+    return window.mdd.remove(path, precondition)
   }
 }

@@ -1,17 +1,18 @@
+import type { Result } from '@/domain/shared/result'
 import type { FileProblem } from '../file-problem'
 import type {
   AssetCatalogRepository,
   ConfigurationRepository,
   ExpectedHash,
   FeatureModelRepository,
-  SaveResult
+  SaveFailure
 } from '../ports/repositories'
 import type { ProjectSession } from '../project-session'
 
 export interface SaveProjectResult {
   /** Sessão com os hashes atualizados dos arquivos que foram gravados. */
   readonly session: ProjectSession
-  /** Arquivos alterados fora do app, que não foram gravados (SPEC §8). */
+  /** Arquivos alterados fora do app, que não foram gravados nem excluídos (SPEC §8). */
   readonly conflicts: string[]
   /** Outros erros de gravação. */
   readonly problems: FileProblem[]
@@ -29,8 +30,9 @@ export interface SaveOptions {
 }
 
 /**
- * Grava todos os arquivos do projeto. Cada arquivo só é gravado se ainda estiver como na
- * última leitura, a não ser com `overwrite`; os demais seguem sendo gravados.
+ * Grava todos os arquivos do projeto e exclui os das configurações que saíram da lista
+ * (excluídas ou renomeadas). Cada arquivo só é gravado ou excluído se ainda estiver como
+ * na última leitura, a não ser com `overwrite`; os demais seguem normalmente.
  */
 export class SaveProject {
   private readonly deps: SaveProjectDependencies
@@ -47,7 +49,7 @@ export class SaveProject {
     const conflicts: string[] = []
     const problems: FileProblem[] = []
     const expect = (hash: ExpectedHash): ExpectedHash => (options.overwrite ? 'any' : hash)
-    const collect = (result: SaveResult): string | undefined => {
+    const collect = <T>(result: Result<T, SaveFailure>): T | undefined => {
       if (result.ok) return result.value
       if (result.error.kind === 'conflict') conflicts.push(result.error.file)
       else problems.push(result.error.problem)
@@ -71,6 +73,14 @@ export class SaveProject {
       )
       const hash = collect(saved)
       if (hash !== undefined) configurationHashes[key] = hash
+    }
+
+    // Só depois de gravar as novas: um arquivo renomeado nunca some antes de o novo existir.
+    const kept = new Set(project.configurations.map((entry) => entry.key))
+    for (const [key, hash] of Object.entries(hashes.configurations)) {
+      if (kept.has(key)) continue
+      const removed = await this.deps.configurations.remove(key, options.overwrite ? 'any' : hash)
+      if (collect(removed) !== undefined) delete configurationHashes[key]
     }
 
     return {
