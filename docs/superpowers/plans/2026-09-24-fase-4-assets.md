@@ -59,7 +59,8 @@ O código deste plano foi prototipado e verificado numa cópia descartável do r
 10. **O aviso da faixa amarela** passa a guardar o texto inteiro: "Edição recusada: …", "Arquivo recusado: …", "Não foi possível abrir …". A faixa só exibe o texto, então os roteiros antigos, que procuram "Edição recusada", continuam iguais.
 11. **Funções de edição separadas.** No lugar de um `updateAsset` com campos opcionais, o domínio tem `renameAsset`, `setAssetKind`, `setAssetAnchor` e `setAssetCondition`, cada um com o seu comando e rótulo de desfazer.
 12. **`configurator-store-check.mts`** (Fase 3) monta a store sem os serviços novos, e a store agora confere os arquivos ao abrir o projeto. Ele ganha os três serviços, com a mesma saída (Tarefa 3).
-13. **Regressão:** o `ui-check.mjs` (2A) e o `configurador-ui.mjs` (Fase 3) saíram iguais; neste, só muda a linha da dica do desfazer ("Desfazer vale só nas abas Modelo e Assets"). No `diagrama-ui.mjs` (2B), o arrasto até o arco do grupo falhou uma vez em três rodadas, sem relação com esta fase: se falhar, rode de novo.
+13. **Regressão:** o `ui-check.mjs` (2A) e o `configurador-ui.mjs` (Fase 3) saíram iguais; neste, só muda a linha da dica do desfazer ("Desfazer vale só nas abas Modelo e Assets"). O `diagrama-ui.mjs` (2B) é instável nos arrastos e no clique logo depois de "Ajustar à tela": falhou uma vez em três rodadas no protótipo, duas em três na execução deste plano e uma em três no `mdd.exe` de antes da Fase 4, cada vez num ponto diferente. Não tem relação com esta fase: se falhar, rode de novo.
+14. **Na execução**, logo depois de um build, a tela inicial demorou mais que uma espera fixa de 2 segundos, e o roteiro clicou antes de a lista de recentes aparecer. O `run-ui.sh` espera a lista aparecer (até 30 segundos).
 
 ## Mapa de arquivos
 
@@ -2066,7 +2067,7 @@ export async function connectMain(port) {
 
 - [ ] **Passo 2: Escrever `.checks/run-ui.sh`**
 
-Prepara uma cópia limpa do exemplo, abre o app (`dev` = `electron.exe .` sobre o `out/`), roda um roteiro e fecha. Para o `configurador-ui.mjs`, acrescenta o `conflito.xml` da Fase 3.
+Prepara uma cópia limpa do exemplo, abre o app (`dev` = `electron.exe .` sobre o `out/`), espera a lista de recentes aparecer, roda um roteiro e fecha. Para o `configurador-ui.mjs`, acrescenta o `conflito.xml` da Fase 3.
 
 ```bash
 #!/usr/bin/env bash
@@ -2090,7 +2091,8 @@ node -e "require('fs').writeFileSync('.checks/ui-data/recent-projects.json', JSO
 if [ "$app" = "dev" ]; then exe=./node_modules/electron/dist/electron.exe; first=.; else exe="$app"; first=; fi
 "$exe" $first --inspect=9229 --remote-debugging-port=9333 --disable-features=CalculateNativeWinOcclusion --user-data-dir="$(cygpath -w "$PWD/.checks/ui-data")" > /dev/null 2>&1 &
 for i in $(seq 1 30); do curl -s http://127.0.0.1:9333/json > /dev/null 2>&1 && break; sleep 1; done
-sleep 2
+# Logo depois de um build, a tela inicial demora mais: espera a lista de recentes aparecer.
+node -e "import('./.checks/cdp.mjs').then(async ({ connect }) => { const ui = await connect(9333); await ui.waitFor(\"document.querySelector('main section ul button') !== null\", 30000); ui.close() })"
 node "$script" 9333 "$@" "$dir"
 node .checks/quit.mjs 9333
 sleep 2
@@ -3858,7 +3860,7 @@ bash .checks/run-ui.sh dev .checks/configurador-ui.mjs
 Esperado:
 
 - `ui-check.mjs`: exatamente a saída do plano da 2B (Tarefa 4, Passo 6), 19 linhas, mais `app fechado`;
-- `diagrama-ui.mjs`: exatamente a saída do plano da 2B (Tarefa 3, Passo 12), 27 linhas, mais `app fechado`. O arrasto até o arco é instável (falhou uma vez em três rodadas no protótipo); se as linhas "soltar sobre o arco", "recolher" e "soltar sobre o recolhido" saírem diferentes, rode de novo;
+- `diagrama-ui.mjs`: exatamente a saída do plano da 2B (Tarefa 3, Passo 12), 27 linhas, mais `app fechado`. Os arrastos e o clique logo depois de "Ajustar à tela" são instáveis, também na versão de antes da Fase 4 (veja o item 13 de "O que o protótipo respondeu"): se a saída divergir a partir de um arrasto ou parar em `não achei`, rode de novo até sair igual;
 - `configurador-ui.mjs`: exatamente a saída do plano da Fase 3 (Tarefa 4, Passo 15), 49 linhas, mais `app fechado`, com uma diferença prevista:
 
 ```

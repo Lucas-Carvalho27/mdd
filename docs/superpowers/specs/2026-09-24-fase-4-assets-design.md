@@ -2,6 +2,8 @@
 
 Aprovado em 24/09/2026. Detalha a linha da Fase 4 da [SPEC](../../SPEC.md) §9, os assets da §4.3 e da §7 e os comandos de asset da §4.5.
 
+> O protótipo refinou alguns pontos deste desenho: a ordem no `assets.xml`, a conferência depois de qualquer mudança nos assets, Ctrl+Z com o foco numa lista de opções e as funções de edição separadas. Veja "O que o protótipo respondeu" no [plano](../plans/2026-09-24-fase-4-assets.md); a SPEC já reflete esses pontos.
+
 ## Objetivo
 
 Vincular arquivos do projeto às features. A janela ganha a aba **Assets**, com a lista dos assets agrupados por âncora, o estado de cada arquivo (ok ou ausente) e as ações abrir, editar, trocar arquivo, reordenar e desvincular. O painel da feature, na aba Modelo, passa a mostrar os assets ancorados nela.
