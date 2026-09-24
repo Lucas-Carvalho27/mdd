@@ -4,15 +4,15 @@ Atualizado em 23/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação       | Onde está                                                                                                                                           |
-| ------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                     |
-| 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                     |
-| 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md) |
-| 2B. Diagrama visual       | Concluída      | branch `fase-2b-diagrama`. Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)       |
-| **3. Configurador**       | **A planejar** | —                                                                                                                                                   |
-| 4. Assets                 | A planejar     | —                                                                                                                                                   |
-| 5. Geração                | A planejar     | —                                                                                                                                                   |
+| Fase                      | Situação       | Onde está                                                                                                                                                       |
+| ------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                                 |
+| 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                                 |
+| 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)             |
+| 2B. Diagrama visual       | Concluída      | `main` (local; ainda não enviada ao GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md) |
+| **3. Configurador**       | **A planejar** | —                                                                                                                                                               |
+| 4. Assets                 | A planejar     | —                                                                                                                                                               |
+| 5. Geração                | A planejar     | —                                                                                                                                                               |
 
 O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A e 2B, também:
 
