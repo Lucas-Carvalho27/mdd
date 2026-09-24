@@ -2,6 +2,8 @@
 
 Aprovado em 24/09/2026. Detalha a linha da Fase 5 da [SPEC](../../SPEC.md) §9, a geração da §4.4, as portas da §6.2, os canais da §6.3 e o botão "Gerar produto" da §7.
 
+> O protótipo refinou alguns pontos deste desenho: a ordem das conferências dos fragmentos (`xmllint` e depois `@xmldom/xmldom`), os recursos do plano como assets, o `GenerateProduct` sem o `ProjectStorage` direto e os diálogos num componente próprio. Veja "O que o protótipo respondeu" no [plano](../plans/2026-09-24-fase-5-geracao.md); a SPEC já reflete esses pontos.
+
 ## Objetivo
 
 Gerar o produto de uma configuração completa: a pasta `saida/<chave>/`, com o `product.xml` (os fragmentos embutidos) e os recursos copiados. `<chave>` é o nome do arquivo da configuração, sem `.xml`. O configurador ganha o botão **Gerar produto**.
