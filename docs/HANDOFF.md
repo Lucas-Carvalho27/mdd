@@ -4,15 +4,15 @@ Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação                                          | Onde está                                                                                                                                                                             |
-| ------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída                                         | `main` (GitHub)                                                                                                                                                                       |
-| 1. Domínio e persistência | Concluída                                         | `main` (GitHub)                                                                                                                                                                       |
-| 2A. Edição do modelo      | Concluída                                         | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                   |
-| 2B. Diagrama visual       | Concluída                                         | `main` (local; ainda não enviada ao GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                       |
-| 3. Configurador           | Código concluído; aceitação no `mdd.exe` pendente | Branch `fase-3-configurador` (ainda não mesclado na `main`). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md) |
-| **4. Assets**             | **A planejar**                                    | —                                                                                                                                                                                     |
-| 5. Geração                | A planejar                                        | —                                                                                                                                                                                     |
+| Fase                      | Situação                                          | Onde está                                                                                                                                                             |
+| ------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída                                         | `main` (GitHub)                                                                                                                                                       |
+| 1. Domínio e persistência | Concluída                                         | `main` (GitHub)                                                                                                                                                       |
+| 2A. Edição do modelo      | Concluída                                         | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                   |
+| 2B. Diagrama visual       | Concluída                                         | `main` (local; ainda não enviada ao GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)       |
+| 3. Configurador           | Código concluído; aceitação no `mdd.exe` pendente | `main` (local; ainda não enviada ao GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md) |
+| **4. Assets**             | **A planejar**                                    | —                                                                                                                                                                     |
+| 5. Geração                | A planejar                                        | —                                                                                                                                                                     |
 
 O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B e 3, também:
 
@@ -68,7 +68,7 @@ Tudo rodou no `dist/win-unpacked/mdd.exe` gerado por `npm run build:win`, com as
 
 O plano está em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md), escrito com o código já verificado num protótipo descartável. No protótipo, a aceitação inteira passou no `mdd.exe` empacotado.
 
-**Feito no branch `fase-3-configurador`,** com um commit por tarefa e uma revisão de código por tarefa, todas aprovadas:
+**Feito no branch `fase-3-configurador`, mesclado na `main` em 24/09/2026 a pedido do usuário, com a aceitação no `mdd.exe` ainda pendente.** Houve um commit por tarefa. As Tarefas 1 a 4 passaram por revisão de código, todas aprovadas; a Tarefa 5 (correção do empacotamento e documentação) e a revisão final do branch inteiro não foram feitas.
 
 - os roteiros `resolution-check.mts`, `configurations-check.mts` e `configurator-store-check.mts` deram as saídas esperadas no plano. Os três primeiros casos do `resolution-check` são a aceitação da SPEC §9 no domínio:
   - `loja-basica` completa, com `mobile` propagada;
@@ -87,11 +87,11 @@ O plano está em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](supe
 
 Antes da interrupção, uma primeira execução do `configurador-ui.mjs` no `mdd.exe` novo bateu com o esperado nas 35 primeiras linhas: abas, `loja-basica` completa com `mobile` travada, os cliques em `pag_pix`, os valores, a lista e o salvar. Então o app empacotado abre e o solver roda dentro do `app.asar`. A execução parou no passo seguinte, excluir `pag_pix` pela tecla Delete na aba Modelo: o diálogo de impacto não abriu. A causa não foi apurada. O mesmo passo passou no protótipo empacotado e no modo de desenvolvimento, e a falha aconteceu enquanto as janelas mexiam na tela do usuário. As tentativas seguintes esbarraram em restos das anteriores (uma configuração a mais na cópia do projeto), porque a cópia não foi preparada de novo. Ao retomar, prepare a cópia do zero, como no plano, e confira esse passo.
 
-Os roteiros já estão em `.checks/`. Antes de rodar, combine com o usuário um momento em que as janelas não atrapalhem. Depois da aceitação, o branch volta para a `main` com merge local.
+Os roteiros já estão em `.checks/`. Antes de rodar, combine com o usuário um momento em que as janelas não atrapalhem. Se a aceitação achar um defeito, corrija num branch novo a partir da `main`.
 
 ## Próximo passo: Fase 4 (assets)
 
-Antes, feche a Fase 3: rode a aceitação pendente no `mdd.exe` (seção acima) e mescle o branch `fase-3-configurador` na `main`.
+Antes, feche a Fase 3: rode a aceitação pendente no `mdd.exe` (seção acima). A revisão final do branch da Fase 3 também ficou por fazer (`git diff ca5ddc9..<merge>`).
 
 A SPEC §9 descreve a entrega da Fase 4:
 
