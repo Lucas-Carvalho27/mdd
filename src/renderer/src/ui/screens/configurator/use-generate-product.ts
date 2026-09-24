@@ -4,19 +4,20 @@ import type { EditorDialog } from '@/ui/screens/project/editor-dialog'
 import { useProjectStore } from '@/ui/stores/project-store-context'
 
 /**
- * Gera o produto da configuração aberta e abre o diálogo que o resultado pede: substituir a
+ * Gera o produto da configuração `key` e abre o diálogo que o resultado pede: substituir a
  * pasta que já existe, ou os problemas. O sucesso aparece na faixa verde, sem diálogo.
  */
 export function useGenerateProduct(
   onOpenDialog: (dialog: EditorDialog) => void
-): (options?: GenerateOptions) => Promise<void> {
+): (key: string, options?: GenerateOptions) => Promise<void> {
   const generate = useProjectStore((state) => state.generateProduct)
   return useCallback(
-    async (options) => {
-      const result = await generate(options)
+    async (key, options) => {
+      const result = await generate(key, options)
       switch (result?.kind) {
         case 'needs-confirmation':
-          onOpenDialog({ kind: 'replace-output', folder: result.folder })
+          // O diálogo guarda a chave: "Substituir" gera esta, mesmo que outra seja aberta.
+          onOpenDialog({ kind: 'replace-output', key, folder: result.folder })
           break
         case 'problems':
           onOpenDialog({

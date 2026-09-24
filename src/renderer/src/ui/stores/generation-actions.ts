@@ -38,11 +38,13 @@ export interface GenerationState {
   readonly lastGeneration: LastGeneration | null
 
   /**
-   * Gera o produto da configuração aberta, do projeto como está na tela. Devolve o resultado
-   * para a tela decidir o que mostrar, ou `null` quando não há o que mostrar (nenhuma
-   * configuração aberta, outra geração em andamento, ou o projeto foi fechado no meio).
+   * Gera o produto da configuração `key`, do projeto como está na tela. A chave vem de quem
+   * chama (o botão, ou o diálogo de substituir), e não da configuração aberta, que pode ter
+   * mudado com o diálogo aberto. Devolve o resultado para a tela decidir o que mostrar, ou
+   * `null` quando não há o que mostrar (nenhum projeto aberto, outra geração em andamento, ou
+   * o projeto foi fechado no meio).
    */
-  generateProduct(options?: GenerateOptions): Promise<GenerateProductResult | null>
+  generateProduct(key: string, options?: GenerateOptions): Promise<GenerateProductResult | null>
   openGeneratedFolder(): Promise<void>
   dismissLastGeneration(): void
 }
@@ -52,6 +54,17 @@ export const GENERATION_CLOSED = {
   lastGeneration: null
 } satisfies Partial<GenerationState>
 
+/**
+ * A última geração, sem ela se for da chave `key`. Renomear ou excluir a configuração apaga a
+ * faixa: senão ela voltaria quando outra configuração ganhasse a mesma chave.
+ */
+export function withoutGenerationOf(
+  last: LastGeneration | null,
+  key: string
+): LastGeneration | null {
+  return last?.key === key ? null : last
+}
+
 type SetState = StoreApi<ProjectState>['setState']
 
 export function createGenerationActions(
@@ -60,20 +73,21 @@ export function createGenerationActions(
   services: GenerationServices
 ): Omit<GenerationState, keyof typeof GENERATION_CLOSED> {
   return {
-    async generateProduct(options) {
-      const { session, openConfigurationKey: key, generating } = get()
-      if (session === null || key === null || generating) return null
+    async generateProduct(key, options) {
+      const { session, generating } = get()
+      if (session === null || generating) return null
       set({ generating: true })
-      const result = await services.generateProduct.execute(session.project, key, options)
       // Fechar ou reabrir o projeto já zerou o estado da geração.
-      if (get().session?.folder !== session.folder) return null
-      set({
-        generating: false,
-        ...(result.kind === 'generated'
-          ? { lastGeneration: { key, folder: result.folder, generatedAt: result.generatedAt } }
-          : {})
-      })
-      return result
+      const sameProject = (): boolean => get().session?.folder === session.folder
+      try {
+        const result = await services.generateProduct.execute(session.project, key, options)
+        if (!sameProject()) return null
+        set({ lastGeneration: lastGenerationAfter(get().lastGeneration, key, result) })
+        return result
+      } finally {
+        // Também quando o caso de uso lança: o botão não fica preso em "Gerando…".
+        if (sameProject()) set({ generating: false })
+      }
     },
 
     async openGeneratedFolder() {
@@ -89,4 +103,19 @@ export function createGenerationActions(
       set({ lastGeneration: null })
     }
   }
+}
+
+/**
+ * A faixa depois de uma geração: o sucesso a troca pela chave gerada; uma falha na escrita da
+ * mesma chave a apaga, porque a pasta pode não existir mais.
+ */
+function lastGenerationAfter(
+  last: LastGeneration | null,
+  key: string,
+  result: GenerateProductResult
+): LastGeneration | null {
+  if (result.kind === 'generated') {
+    return { key, folder: result.folder, generatedAt: result.generatedAt }
+  }
+  return result.kind === 'write-failed' ? withoutGenerationOf(last, key) : last
 }

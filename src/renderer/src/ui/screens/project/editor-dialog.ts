@@ -16,8 +16,8 @@ export type EditorDialog =
   | { readonly kind: 'delete-configuration'; readonly key: string }
   /** Depois do diálogo nativo: o arquivo já escolhido, dentro do projeto. */
   | { readonly kind: 'link-asset'; readonly path: string; readonly anchor: string }
-  /** A pasta do produto já existe: substituir? */
-  | { readonly kind: 'replace-output'; readonly folder: string }
+  /** A pasta do produto da configuração `key` já existe: substituir? */
+  | { readonly kind: 'replace-output'; readonly key: string; readonly folder: string }
   /** A geração falhou; `note` diz o que aconteceu com o disco. */
   | {
       readonly kind: 'generation-problems'

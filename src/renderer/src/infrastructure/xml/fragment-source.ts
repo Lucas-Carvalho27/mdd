@@ -11,6 +11,7 @@ import type { DecodeProblem } from './xml-reader'
  */
 
 const BOM = '\u{FEFF}'
+const REPLACEMENT_CHARACTER = '\u{FFFD}'
 const DECLARED_ENCODING = /^<\?xml\s[^?]*?\bencoding\s*=\s*(["'])(.*?)\1/
 const ENTITY_NOT_FOUND = /^entity not found:(&[^;\s]+;)/
 /** As quebras de linha que o @xmldom/xmldom conta: "\r\n", "\r" sozinho e "\n". */
@@ -19,6 +20,16 @@ const LINE_BREAK = /\r\n?|\n/g
 /** A codificação da declaração XML, se houver. O app só lê fragmentos em UTF-8. */
 export function declaredEncoding(content: string): string | undefined {
   return DECLARED_ENCODING.exec(withoutBom(content))?.[2]
+}
+
+/**
+ * A linha do primeiro U+FFFD, se houver: a leitura como UTF-8 põe esse caractere no lugar dos
+ * bytes inválidos, como os acentos de um arquivo salvo em Latin-1.
+ */
+export function firstUndecodedLine(content: string): number | undefined {
+  const found = content.indexOf(REPLACEMENT_CHARACTER)
+  if (found < 0) return undefined
+  return (content.slice(0, found).match(LINE_BREAK)?.length ?? 0) + 1
 }
 
 /** O texto do elemento raiz, pronto para entrar num `<fragment>`, ou os problemas encontrados. */

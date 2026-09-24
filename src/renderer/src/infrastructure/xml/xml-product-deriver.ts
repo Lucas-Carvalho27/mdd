@@ -5,11 +5,13 @@ import type { XmlSchemaValidator } from '@/application/ports/xml-schema-validato
 import { firstPerPath, type Asset } from '@/domain/assets/asset-catalog'
 import type { GenerationPlan, PlannedSection } from '@/domain/generation/generation-plan'
 import { err, ok, type Result } from '@/domain/shared/result'
-import { declaredEncoding, extractFragmentRoot } from './fragment-source'
+import { declaredEncoding, extractFragmentRoot, firstUndecodedLine } from './fragment-source'
 import type { DecodeProblem } from './xml-reader'
 import { element, rawXml, textElement, writeXmlDocument, type XmlElement } from './xml-writer'
 
 const NAMESPACE = 'urn:mdd:product'
+/** Fragmentos conferidos ao mesmo tempo: cada xmllint abre um worker com 16 MB de memória. */
+const FRAGMENTS_AT_ONCE = 4
 
 /**
  * O produto em XML (SPEC §4.4, ADR 0006): o product.xml com cada fragmento embutido e os
@@ -29,9 +31,9 @@ export class XmlProductDeriver implements ProductDeriver {
     generatedAt: Date
   ): Promise<Result<readonly ProductFile[], FileProblem[]>> {
     // Um caminho usado por dois assets é conferido uma vez só. As conferências de cada tipo
-    // rodam juntas, e os problemas saem na ordem do plano.
+    // rodam juntas (as dos fragmentos, poucas por vez), e os problemas saem na ordem do plano.
     const fragments = firstPerPath(fragmentsOf(plan.root))
-    const roots = await Promise.all(fragments.map((asset) => this.loadFragment(asset)))
+    const roots = await mapAtMost(FRAGMENTS_AT_ONCE, fragments, (asset) => this.loadFragment(asset))
     const resources = await Promise.all(plan.resources.map((asset) => this.checkResource(asset)))
     const problems = [...roots, ...resources].flatMap((result) => (result.ok ? [] : result.error))
     if (problems.length > 0) return err(problems)
@@ -65,6 +67,16 @@ export class XmlProductDeriver implements ProductDeriver {
         })
       ])
     }
+    // Sem declaração, a outra codificação aparece nos bytes que não são UTF-8.
+    const undecoded = firstUndecodedLine(content)
+    if (undecoded !== undefined) {
+      return err([
+        problem(asset, {
+          line: undecoded,
+          message: 'O arquivo não está em UTF-8: salve-o em UTF-8.'
+        })
+      ])
+    }
     const issues = await this.validator.validate(null, asset.path, content)
     if (issues.length > 0) return err(issues.map((issue) => problem(asset, issue)))
     const root = extractFragmentRoot(content)
@@ -90,6 +102,25 @@ function problem(asset: Asset, issue: DecodeProblem): FileProblem {
 
 function fragmentsOf(section: PlannedSection): Asset[] {
   return [...section.fragments, ...section.children.flatMap(fragmentsOf)]
+}
+
+/** Como `Promise.all` sobre `items.map(run)`, com no máximo `limit` chamadas ao mesmo tempo. */
+async function mapAtMost<T, R>(
+  limit: number,
+  items: readonly T[],
+  run: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = []
+  let next = 0
+  // Cada fila pega o próximo item livre; o resultado fica no índice do item.
+  const queue = async (): Promise<void> => {
+    while (next < items.length) {
+      const index = next++
+      results[index] = await run(items[index])
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, queue))
+  return results
 }
 
 function writeProduct(

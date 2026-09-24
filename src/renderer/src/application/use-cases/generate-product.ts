@@ -37,9 +37,9 @@ export interface GenerateProductDependencies {
 
 /**
  * Gera o produto de uma configuração (SPEC §4.4) a partir do projeto como está na tela, com
- * as alterações não salvas: planeja, deriva (conferindo as fontes), pergunta antes de
- * substituir e grava com a troca. A derivação vem antes da pergunta, para o usuário nunca
- * confirmar uma substituição que depois falharia.
+ * as alterações não salvas: planeja, deriva (conferindo as fontes), recupera a versão anterior
+ * que ficou fora do lugar, pergunta antes de substituir e grava com a troca. A derivação vem
+ * antes da pergunta, para o usuário nunca confirmar uma substituição que depois falharia.
  */
 export class GenerateProduct {
   private readonly deps: GenerateProductDependencies
@@ -67,6 +67,13 @@ export class GenerateProduct {
     const derived = await this.deps.deriver.derive(plan.value, generatedAt)
     if (!derived.ok) return { kind: 'problems', problems: derived.error }
 
+    // Uma versão anterior que ficou na `.old` volta antes da pergunta: senão a escrita a
+    // apagaria como sobra. Se não voltar, a geração para sem apagar nada.
+    const recovered = await this.deps.writer.recover(key)
+    if (!recovered.ok) {
+      const { problems, previousAt } = recovered.error
+      return { kind: 'write-failed', problems, previousAt }
+    }
     const folder = this.deps.writer.folderOf(key)
     if (!options.replace && (await this.deps.writer.exists(key))) {
       return { kind: 'needs-confirmation', folder }

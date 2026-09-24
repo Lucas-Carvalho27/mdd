@@ -97,7 +97,7 @@ function ConfigurationToolbar({
         >
           <Trash2 /> Excluir…
         </Button>
-        <GenerateButton onOpenDialog={onOpenDialog} />
+        <GenerateButton configurationKey={key} onOpenDialog={onOpenDialog} />
       </div>
       <p className="text-xs text-muted-foreground">
         Clique numa feature para alternar entre indecisa, selecionada e desselecionada. O cadeado
@@ -109,8 +109,10 @@ function ConfigurationToolbar({
 
 /** "Gerar produto" (SPEC §7): só com a configuração completa; a dica diz o que falta. */
 function GenerateButton({
+  configurationKey,
   onOpenDialog
 }: {
+  readonly configurationKey: string
   readonly onOpenDialog: (dialog: EditorDialog) => void
 }): React.JSX.Element {
   const resolution = useProjectStore((state) => state.openResolution())
@@ -124,7 +126,7 @@ function GenerateButton({
       <Button
         size="sm"
         disabled={resolution === null || blocked !== null || generating}
-        onClick={() => void generate()}
+        onClick={() => void generate(configurationKey)}
       >
         <FileOutput /> {generating ? 'Gerando…' : 'Gerar produto'}
       </Button>

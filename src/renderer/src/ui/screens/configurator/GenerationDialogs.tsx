@@ -45,7 +45,7 @@ export function GenerationDialogs({
                 variant="destructive"
                 onClick={() => {
                   onClose()
-                  void generate({ replace: true })
+                  void generate(dialog.key, { replace: true })
                 }}
               >
                 Substituir

@@ -38,6 +38,7 @@ import {
 import {
   createGenerationActions,
   GENERATION_CLOSED,
+  withoutGenerationOf,
   type GenerationServices,
   type GenerationState
 } from './generation-actions'
@@ -378,6 +379,10 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
         // Renomear troca a chave; a configuração aberta continua aberta.
         const openKey = openConfigurationKey === key ? change.value.key : openConfigurationKey
         setConfigurations(change.value.entries, openKey)
+        // A faixa da última geração é da chave antiga.
+        if (change.value.key !== key) {
+          set({ lastGeneration: withoutGenerationOf(get().lastGeneration, key) })
+        }
         return null
       },
 
@@ -394,6 +399,7 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
           entries.removeConfiguration(session.project.configurations, key),
           openConfigurationKey === key ? null : openConfigurationKey
         )
+        set({ lastGeneration: withoutGenerationOf(get().lastGeneration, key) })
       },
 
       toggleDecision(featureId) {
