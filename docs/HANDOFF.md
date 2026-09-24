@@ -151,10 +151,7 @@ O branch `fase-5-geracao` foi mesclado na `main` em 24/09/2026.
 
 ## Próximo passo
 
-Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas. O que resta, para o usuário escolher:
-
-- as checagens manuais ainda não confirmadas das Fases 0 e 1 (veja "Checagens manuais ainda não confirmadas" abaixo);
-- os itens da fase "Depois" da SPEC §9.
+Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo). O usuário pediu, em seguida, um editor de XML integrado ao app: um editor de texto simples, com realce de sintaxe, para criar e editar os fragmentos dentro da aplicação. Virou a **Fase 6 (editor de fragmentos)**, no branch `fase-6-editor-fragmentos`. O desenho foi aprovado e está em [docs/superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md](superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md): editor com CodeMirror 6 numa aba nova, só para os fragmentos, salvando junto com o projeto no Ctrl+S. O próximo passo é o usuário revisar a spec; depois vêm o protótipo descartável e o plano. Os itens da fase "Depois" da SPEC §9 continuam em aberto.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
@@ -164,16 +161,16 @@ A Fase 2A **mudou a regra de IDs** (ADR 0004):
 - **Agora:** ao criar uma feature (Tab, Enter ou botões) ou um projeto, abre um diálogo com **Nome** e **ID**. O ID é sugerido a partir do nome e pode ser ajustado **só naquele momento**. Depois fica imutável, como antes.
 - **Motivo:** sem isso, toda feature criada pela interface nasceria com ID `nova_feature`, e seria impossível recriar o exemplo `loja-online` (o critério de aceitação da Fase 2).
 
-## Checagens manuais ainda não confirmadas
+## Checagens manuais das Fases 0 e 1 (feitas)
 
-Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agora dá para fazê-las com a técnica do inspetor do main (veja abaixo):
+Estas tinham ficado de lado porque dependiam do diálogo nativo de pastas. Em 24/09/2026, o usuário informou que já as fez, e elas não precisam mais ser feitas:
 
 - **Fase 0:** em `dist/win-unpacked/mdd.exe`, "Abrir pasta de projeto" em `docs/examples/loja-online` lista os arquivos sem mensagem vermelha.
 - **Fase 1** (plano da Fase 1, Tarefa 7 Passo 9 e Tarefa 8 Passo 7):
   - abrir o exemplo e ver as 8 features, a restrição, os 6 assets e a configuração;
   - Salvar sem mudar o `git status`;
   - editar o `model.xml` por fora e ver o erro ao salvar;
-  - abrir as cópias quebradas (`loja-duplicado`, `loja-hifen`, `loja-max0`) e ver o erro com arquivo e linha. O plano da Fase 1 tem os comandos para recriá-las.
+  - abrir as cópias quebradas (`loja-duplicado`, `loja-hifen`, `loja-max0`) e ver o erro com arquivo e linha.
 
 ## Como trabalhamos (e vale manter)
 
