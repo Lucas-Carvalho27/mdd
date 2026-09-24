@@ -33,6 +33,9 @@ export interface TextFile {
 export type WritePrecondition =
   { kind: 'hash'; expectedHash: string } | { kind: 'must-not-exist' } | { kind: 'overwrite' }
 
+/** Excluir só se o arquivo ainda estiver com este hash, ou excluir de qualquer jeito. */
+export type RemovePrecondition = { kind: 'hash'; expectedHash: string } | { kind: 'overwrite' }
+
 /** Schemas de docs/schemas/ usados na leitura dos arquivos do projeto. */
 export type XmlSchemaName = 'feature-model' | 'assets' | 'configuration'
 
@@ -61,6 +64,8 @@ export interface MddApi {
     content: string,
     precondition: WritePrecondition
   ): Promise<IpcResult<{ hash: string }>>
+  /** Exclui o arquivo. Um arquivo que já não existe conta como excluído. */
+  remove(relativePath: string, precondition: RemovePrecondition): Promise<IpcResult<null>>
   /** Confere se o conteúdo é XML bem-formado e segue o XSD. Lista vazia = válido. */
   validateXml(
     schema: XmlSchemaName,
@@ -77,5 +82,6 @@ export const IpcChannel = {
   list: 'mdd:list',
   readText: 'mdd:read-text',
   writeText: 'mdd:write-text',
+  remove: 'mdd:remove',
   validateXml: 'mdd:validate-xml'
 } as const
