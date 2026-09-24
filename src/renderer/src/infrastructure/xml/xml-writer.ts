@@ -9,17 +9,31 @@ export type XmlAttributes = ReadonlyArray<readonly [name: string, value: string 
 export interface XmlElement {
   readonly name: string
   readonly attributes: XmlAttributes
-  readonly children: readonly XmlElement[]
+  readonly children: readonly XmlNode[]
   /** Quando definido, o elemento tem só este texto e nenhum filho. */
   readonly text?: string
 }
 
+/**
+ * Um trecho de XML já pronto, escrito exatamente como está: só a primeira linha recebe o
+ * recuo. É como um fragmento entra no product.xml sem mudar os espaços de dentro (SPEC §4.4).
+ */
+export interface XmlRaw {
+  readonly raw: string
+}
+
+export type XmlNode = XmlElement | XmlRaw
+
 export function element(
   name: string,
   attributes: XmlAttributes = [],
-  children: readonly XmlElement[] = []
+  children: readonly XmlNode[] = []
 ): XmlElement {
   return { name, attributes, children }
+}
+
+export function rawXml(raw: string): XmlRaw {
+  return { raw }
 }
 
 export function textElement(
@@ -34,6 +48,11 @@ export function writeXmlDocument(root: XmlElement): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n${writeElement(root, 0)}\n`
 }
 
+function writeNode(node: XmlNode, depth: number): string {
+  if ('raw' in node) return `${'  '.repeat(depth)}${node.raw}`
+  return writeElement(node, depth)
+}
+
 function writeElement(node: XmlElement, depth: number): string {
   const indent = '  '.repeat(depth)
   const attributes = node.attributes
@@ -46,7 +65,7 @@ function writeElement(node: XmlElement, depth: number): string {
   if (node.children.length === 0) return `${opening}/>`
   return [
     `${opening}>`,
-    ...node.children.map((child) => writeElement(child, depth + 1)),
+    ...node.children.map((child) => writeNode(child, depth + 1)),
     `${indent}</${node.name}>`
   ].join('\n')
 }
