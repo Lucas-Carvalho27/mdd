@@ -1,3 +1,4 @@
+import { sameKey } from '@/domain/project/configuration-entries'
 import type { Result } from '@/domain/shared/result'
 import type { FileProblem } from '../file-problem'
 import type {
@@ -65,6 +66,7 @@ export class SaveProject {
     }
 
     const configurationHashes: Record<string, string> = { ...hashes.configurations }
+    let allConfigurationsWritten = true
     for (const { key, configuration } of project.configurations) {
       const saved = await this.deps.configurations.save(
         key,
@@ -73,14 +75,24 @@ export class SaveProject {
       )
       const hash = collect(saved)
       if (hash !== undefined) configurationHashes[key] = hash
+      else allConfigurationsWritten = false
     }
 
-    // Só depois de gravar as novas: um arquivo renomeado nunca some antes de o novo existir.
-    const kept = new Set(project.configurations.map((entry) => entry.key))
-    for (const [key, hash] of Object.entries(hashes.configurations)) {
-      if (kept.has(key)) continue
-      const removed = await this.deps.configurations.remove(key, options.overwrite ? 'any' : hash)
-      if (collect(removed) !== undefined) delete configurationHashes[key]
+    // Só depois de gravar todas as configurações: um arquivo renomeado nunca some antes de
+    // o novo existir. Se alguma gravação falhou, as exclusões ficam para o próximo salvar,
+    // e "Recarregar" ainda encontra no disco tudo o que estava lá.
+    if (allConfigurationsWritten) {
+      for (const [key, hash] of Object.entries(hashes.configurations)) {
+        const kept = project.configurations.find((entry) => sameKey(entry.key, key))
+        // Uma chave que só difere na caixa é o arquivo que acabou de ser gravado.
+        if (kept !== undefined) {
+          if (kept.key !== key) delete configurationHashes[key]
+          continue
+        }
+        const removed = await this.deps.configurations.remove(key, options.overwrite ? 'any' : hash)
+        collect(removed)
+        if (removed.ok) delete configurationHashes[key]
+      }
     }
 
     return {

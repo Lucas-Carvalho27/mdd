@@ -337,7 +337,7 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 ## 8. Comportamentos transversais
 
-- **Salvar é manual** (Ctrl+S) e grava tudo o que tiver alteração (modelo, assets e configurações, inclusive apagando os arquivos das configurações excluídas ou renomeadas). O título da janela mostra `•` quando há algo não salvo. Fechar a janela ou o projeto com alterações pendentes pede confirmação.
+- **Salvar é manual** (Ctrl+S) e grava tudo o que tiver alteração (modelo, assets e configurações, inclusive apagando os arquivos das configurações excluídas ou renomeadas). Os arquivos só são apagados depois que todas as configurações foram gravadas; se alguma gravação falhar, a exclusão fica para o próximo salvar. Como no Windows `Loja.xml` e `loja.xml` são o mesmo arquivo, duas chaves de configuração que só diferem na caixa contam como a mesma. O título da janela mostra `•` quando há algo não salvo. Fechar a janela ou o projeto com alterações pendentes pede confirmação.
 - **Alteração externa:** o app guarda o hash de cada arquivo ao ler. Ao salvar, se o arquivo no disco mudou (por exemplo, depois de um `git pull`), ele pergunta se deve **sobrescrever**, **recarregar** (descartando as alterações locais daquele arquivo) ou **cancelar**. Nunca sobrescreve em silêncio.
 - **Erros** de leitura seguem §5. Erros de disco e de geração aparecem em diálogo com todos os itens.
 - **Interface em português. Empacotamento para Windows** (electron-builder, instalador NSIS).
