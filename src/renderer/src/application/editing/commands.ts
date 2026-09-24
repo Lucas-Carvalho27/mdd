@@ -1,3 +1,5 @@
+import { fileNameOf, type AssetCatalog, type AssetKind } from '@/domain/assets/asset-catalog'
+import * as assets from '@/domain/assets/asset-edits'
 import * as attributes from '@/domain/feature-model/attribute-edits'
 import * as constraints from '@/domain/feature-model/constraint-edits'
 import * as features from '@/domain/feature-model/feature-edits'
@@ -174,6 +176,54 @@ export function deleteFeature(featureId: string, featureName: string): EditorCom
   }
 }
 
+export function linkAsset(draft: assets.AssetDraft): EditorCommand {
+  return assetCommand(`Vincular "${fileNameOf(draft.path)}"`, (catalog, model) =>
+    assets.linkAsset(model, catalog, draft)
+  )
+}
+
+export function renameAsset(assetId: string, name: string): EditorCommand {
+  return assetCommand('Renomear asset', (catalog) => assets.renameAsset(catalog, assetId, name))
+}
+
+export function setAssetKind(assetId: string, kind: AssetKind): EditorCommand {
+  return assetCommand(kind === 'fragment' ? 'Tornar fragmento' : 'Tornar recurso', (catalog) =>
+    assets.setAssetKind(catalog, assetId, kind)
+  )
+}
+
+export function setAssetAnchor(assetId: string, anchor: string): EditorCommand {
+  return assetCommand('Mudar âncora', (catalog, model) =>
+    assets.setAssetAnchor(model, catalog, assetId, anchor)
+  )
+}
+
+export function setAssetCondition(
+  assetId: string,
+  condition: Expression | undefined
+): EditorCommand {
+  return assetCommand(condition ? 'Editar condição' : 'Remover condição', (catalog) =>
+    assets.setAssetCondition(catalog, assetId, condition)
+  )
+}
+
+export function relinkAsset(assetId: string, path: string): EditorCommand {
+  return assetCommand(`Trocar arquivo por "${fileNameOf(path)}"`, (catalog) =>
+    assets.relinkAsset(catalog, assetId, path)
+  )
+}
+
+export function reorderAsset(assetId: string, offset: -1 | 1): EditorCommand {
+  return assetCommand(offset < 0 ? 'Mover asset para cima' : 'Mover asset para baixo', (catalog) =>
+    assets.reorderAsset(catalog, assetId, offset)
+  )
+}
+
+/** `label` é como o asset aparece na lista, para o "Desfazer: Desvincular …". */
+export function unlinkAsset(assetId: string, label: string): EditorCommand {
+  return assetCommand(`Desvincular "${label}"`, (catalog) => assets.unlinkAsset(catalog, assetId))
+}
+
 function modelCommand(
   label: string,
   edit: (model: FeatureModel) => Result<FeatureModel, string>,
@@ -185,6 +235,20 @@ function modelCommand(
       const edited = edit(state.model)
       if (!edited.ok) return edited
       return ok({ state: { ...state, model: edited.value }, focusFeatureId })
+    }
+  }
+}
+
+function assetCommand(
+  label: string,
+  edit: (catalog: AssetCatalog, model: FeatureModel) => Result<AssetCatalog, string>
+): EditorCommand {
+  return {
+    label,
+    run: (state) => {
+      const edited = edit(state.assets, state.model)
+      if (!edited.ok) return edited
+      return ok({ state: { ...state, assets: edited.value } })
     }
   }
 }
