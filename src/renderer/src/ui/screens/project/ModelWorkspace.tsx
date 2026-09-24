@@ -32,7 +32,7 @@ export function ModelWorkspace({
         </div>
       </section>
       <aside className="min-h-0 space-y-8 overflow-auto border-l p-4">
-        <FeatureProperties project={project} />
+        <FeatureProperties project={project} onOpenDialog={onOpenDialog} />
         <ConstraintsPanel model={project.model} />
       </aside>
     </div>

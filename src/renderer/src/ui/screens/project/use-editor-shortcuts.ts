@@ -18,7 +18,9 @@ type Shortcut =
 export interface ShortcutScope {
   /** Com um diálogo aberto, nenhum atalho vale: as teclas são do diálogo. */
   readonly enabled: boolean
-  /** Fora da aba Modelo, só Ctrl+S vale: a estrutura não se edita no configurador. */
+  /** Desfazer e refazer: nas abas Modelo e Assets, que editam pelo histórico (SPEC §4.5). */
+  readonly history: boolean
+  /** Tab, Enter, F2, Delete e Alt+↑/↓ editam a estrutura: só na aba Modelo. */
   readonly editing: boolean
 }
 
@@ -28,7 +30,7 @@ export interface ShortcutScope {
  */
 export function useEditorShortcuts(
   openDialog: (dialog: EditorDialog) => void,
-  { enabled, editing }: ShortcutScope
+  { enabled, history, editing }: ShortcutScope
 ): void {
   const store = useProjectStoreApi()
 
@@ -40,9 +42,11 @@ export function useEditorShortcuts(
       const state = store.getState()
       const shortcut = shortcutFor(event)
       if (shortcut === undefined || state.session === null || state.conflicts.length > 0) return
-      if (shortcut !== 'save' && (!editing || isTyping(event.target))) return
+      if (shortcut !== 'save' && isTyping(event.target, shortcut)) return
+      const isHistory = shortcut === 'undo' || shortcut === 'redo'
+      if (isHistory ? !history : shortcut !== 'save' && !editing) return
 
-      if (shortcut === 'save' || shortcut === 'undo' || shortcut === 'redo') {
+      if (shortcut === 'save' || isHistory) {
         event.preventDefault()
         if (shortcut === 'save') void state.save()
         else if (shortcut === 'undo') state.undo()
@@ -81,7 +85,7 @@ export function useEditorShortcuts(
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [store, openDialog, enabled, editing])
+  }, [store, openDialog, enabled, history, editing])
 }
 
 function shortcutFor(event: KeyboardEvent): Shortcut | undefined {
@@ -100,7 +104,12 @@ function shortcutFor(event: KeyboardEvent): Shortcut | undefined {
   return undefined
 }
 
-function isTyping(target: EventTarget | null): boolean {
+/**
+ * Num campo de texto, as teclas são do campo (inclusive o Ctrl+Z dele). Numa lista de opções
+ * não há o que desfazer ali: Ctrl+Z e Ctrl+Y vão para o histórico, e as demais teclas ficam nela.
+ */
+function isTyping(target: EventTarget | null, shortcut: Shortcut): boolean {
   if (!(target instanceof HTMLElement)) return false
-  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+  if (target.isContentEditable || ['INPUT', 'TEXTAREA'].includes(target.tagName)) return true
+  return target.tagName === 'SELECT' && shortcut !== 'undo' && shortcut !== 'redo'
 }

@@ -1,7 +1,10 @@
+import { CheckAssetFiles } from '@/application/use-cases/check-asset-files'
 import { CreateProject } from '@/application/use-cases/create-project'
 import { OpenProject } from '@/application/use-cases/open-project'
 import { ResolveConfiguration } from '@/application/use-cases/resolve-configuration'
 import { SaveProject } from '@/application/use-cases/save-project'
+import { ElectronAssetOpener } from '@/infrastructure/electron/electron-asset-opener'
+import { ElectronProjectFilePicker } from '@/infrastructure/electron/electron-project-file-picker'
 import { ElectronProjectFolderPicker } from '@/infrastructure/electron/electron-project-folder-picker'
 import { ElectronProjectStorage } from '@/infrastructure/electron/electron-project-storage'
 import { ElectronRecentProjects } from '@/infrastructure/electron/electron-recent-projects'
@@ -36,6 +39,9 @@ export function createAppStore(): ProjectStore {
     saveProject: new SaveProject(repositories),
     resolveConfiguration: new ResolveConfiguration(new LogicSolverConstraintSolver()),
     recentProjects: recents,
-    unsavedChanges: new ElectronUnsavedChangesIndicator()
+    unsavedChanges: new ElectronUnsavedChangesIndicator(),
+    checkAssetFiles: new CheckAssetFiles(storage),
+    filePicker: new ElectronProjectFilePicker(),
+    assetOpener: new ElectronAssetOpener()
   })
 }

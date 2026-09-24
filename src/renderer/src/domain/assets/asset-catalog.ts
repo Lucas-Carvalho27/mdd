@@ -20,3 +20,13 @@ export interface AssetCatalog {
 }
 
 export const EMPTY_ASSET_CATALOG: AssetCatalog = { assets: [] }
+
+/** O último trecho do caminho: "docs/img/pix-fluxo.svg" → "pix-fluxo.svg". */
+export function fileNameOf(path: string): string {
+  return path.slice(path.lastIndexOf('/') + 1)
+}
+
+/** Como o asset aparece na interface: o nome, ou o nome do arquivo quando não tem nome. */
+export function assetLabel(asset: Asset): string {
+  return asset.name ?? fileNameOf(asset.path)
+}

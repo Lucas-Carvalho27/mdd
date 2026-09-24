@@ -4,17 +4,17 @@ Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação       | Onde está                                                                                                                                                                                                                                                                 |
-| ------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                           |
-| 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                           |
-| 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                       |
-| 2B. Diagrama visual       | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                       |
-| 3. Configurador           | Concluída      | `main`. Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
-| **4. Assets**             | **A planejar** | —                                                                                                                                                                                                                                                                         |
-| 5. Geração                | A planejar     | —                                                                                                                                                                                                                                                                         |
+| Fase                      | Situação       | Onde está                                                                                                                                                                                                                                                                          |
+| ------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
+| 2B. Diagrama visual       | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
+| 3. Configurador           | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
+| 4. Assets                 | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
+| **5. Geração**            | **A planejar** | —                                                                                                                                                                                                                                                                                  |
 
-O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B e 3, também:
+O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B, 3 e 4, também:
 
 - mostra o modelo num diagrama na notação clássica, com layout automático, zoom, "ajustar à tela" e subárvores recolhíveis;
 - edita o modelo (features, grupos, atributos e restrições), com desfazer/refazer e diálogo de impacto ao excluir;
@@ -23,6 +23,7 @@ O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado
 - mostra "•" no título com alterações não salvas e salva com Ctrl+S;
 - pergunta o que fazer quando um arquivo foi alterado fora do app, e confirma antes de fechar com alterações;
 - resolve cada configuração com o solver SAT e a mostra no diagrama em modo configuração, com decisões por clique, valores de atributos, lista de configurações e faixas para configurações desatualizadas ou em conflito.
+- vincula arquivos do projeto às features na aba Assets, com o estado de cada arquivo (ok ou ausente), trocar arquivo, reordenar, desvincular e abrir no programa padrão, e mostra os assets ancorados no painel da feature.
 
 Documentos de referência:
 
@@ -96,20 +97,46 @@ A correção veio no branch `fase-3-correcoes`, mesclado na `main`. O registro, 
 
 **Não foi refeito no `mdd.exe`:** a regressão da 2A e da 2B (Tarefa 4, Passo 16), que passou no modo de desenvolvimento. A correção só mexe no salvar e na lista de configurações.
 
-## Próximo passo: Fase 4 (assets)
+## Aceitação da Fase 4 (feita em 24/09/2026)
 
-A SPEC §9 descreve a entrega da Fase 4:
+O desenho está em [docs/superpowers/specs/2026-09-24-fase-4-assets-design.md](superpowers/specs/2026-09-24-fase-4-assets-design.md), e o plano, em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md). O plano foi escrito com o código já verificado num protótipo descartável (inclusive no `mdd.exe`) e conferido com ele por script: os trechos "Troque / por", aplicados em ordem, reproduzem os arquivos do protótipo. A execução foi feita no branch `fase-4-assets`, com um commit por tarefa, e o `src` terminou idêntico ao do protótipo.
 
-- a aba de assets;
-- o vínculo com âncora e condição;
-- o estado do arquivo;
-- abrir no programa padrão.
+**Roteiros, todos com a saída esperada no plano:**
 
-A aceitação: a aba mostra os 6 assets do exemplo. Renomear `boleto.xml` fora do app faz o asset aparecer como ausente.
+- `asset-edits-check.mts` (31 linhas): os 6 assets do exemplo recriados por comandos, passando por todas as operações, dão um `assets.xml` idêntico ao exemplo;
+- `asset-files-check.mts`, `project-root-check.mts` e `assets-store-check.mts`;
+- `configurator-store-check.mts` (Fase 3), com os serviços novos: igual ao plano da Fase 3;
+- `assets-ui.mjs` (50 linhas), no modo de desenvolvimento e no `mdd.exe`;
+- `aceitacao-4.mjs` no `mdd.exe`: parte 1, os 6 assets e `boleto.xml` renomeado fora do app aparecendo como ausente; parte 2, os 6 assets vinculados pela interface, fora de ordem, e o `assets.xml` salvo idêntico ao do exemplo.
+
+**Regressão (Tarefa 4, Passo 23):** o `ui-check.mjs` (2A) saiu igual; o `configurador-ui.mjs` (Fase 3) também, com a diferença prevista na dica do desfazer ("Desfazer vale só nas abas Modelo e Assets"). O `diagrama-ui.mjs` (2B) saiu igual numa de três rodadas; nas outras, parou num arrasto ou num clique logo depois de "Ajustar à tela". Para separar isso da Fase 4, o mesmo roteiro rodou três vezes no `mdd.exe` de antes da fase (gerado de manhã, com as correções da Fase 3): falhou uma vez, também num arrasto. A instabilidade é do roteiro, e não desta fase (veja "Armadilhas").
+
+**Achado na execução:** logo depois de um build, a tela inicial demorou mais que os 2 segundos fixos do `run-ui.sh`, e o roteiro clicou antes de a lista de recentes aparecer. O `run-ui.sh` passou a esperar a lista (o plano já traz essa versão).
+
+**Checagem à mão** (Tarefa 5, Passo 4), feita pelo usuário no `mdd.exe`, sobre uma cópia do exemplo em `.checks/aceitacao-manual/`. Ele confirmou os três resultados esperados:
+
+- a aba Assets mostrou os 6 assets, todos ok;
+- renomear `boleto.xml` no Explorer e voltar ao app com um clique deixou "Guia do boleto" ausente, com o resumo "6 assets · 1 ausente";
+- Abrir em "Fluxo do PIX" abriu o `.svg` no programa padrão.
+
+Isso cobre o que os roteiros só simulam: a volta real do foco pelo Windows e o `shell.openPath` de verdade.
+
+O branch `fase-4-assets` foi mesclado na `main` em 24/09/2026 e enviado ao GitHub.
+
+## Próximo passo: Fase 5 (geração)
+
+A SPEC §9 descreve a entrega da Fase 5:
+
+- o plano de geração (domínio, SPEC §4.4 passo 1);
+- a verificação dos arquivos antes de gravar;
+- o `XmlProductDeriver`;
+- a pasta temporária e a troca.
+
+A aceitação: gerar `loja-basica` produz o equivalente a `docs/examples/produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.
 
 Para começar, peça ao Claude, numa sessão nova:
 
-> Leia docs/HANDOFF.md e escreva o plano da Fase 4, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
+> Leia docs/HANDOFF.md e escreva o plano da Fase 5, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
@@ -135,7 +162,7 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **Uma fase por vez, com um plano por fase.** Antes de escrever o plano, o código é prototipado e verificado numa cópia descartável do repositório. O plano contém o código já testado.
 - **Sem testes automatizados** (ADR 0008). A verificação usa typecheck, lint e scripts descartáveis em `.checks/`, rodados com `npx tsx` ou `node`. A interface é checada pelo protocolo de depuração do Chromium (`--remote-debugging-port`).
 - **Um branch por fase**, com um commit por tarefa e merge local na `main` ao fim, depois das checagens.
-- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B. Os da Fase 3 (`resolution-check.mts`, `configurations-check.mts`, `configurator-store-check.mts`, `quit.mjs`, `configurador-ui.mjs` e `aceitacao-3.mjs`) estão no plano da Fase 3. O `save-safety-check.mts` está nas correções da Fase 3 ([docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md)). Num plano, cada roteiro vem depois de uma linha "Crie `.checks/<nome>`:", e dá para extraí-los com um script pequeno em vez de copiar à mão.
+- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B. Os da Fase 3 (`resolution-check.mts`, `configurations-check.mts`, `configurator-store-check.mts`, `quit.mjs`, `configurador-ui.mjs` e `aceitacao-3.mjs`) estão no plano da Fase 3. O `save-safety-check.mts` está nas correções da Fase 3 ([docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md)). Os da Fase 4 (`asset-edits-check.mts`, `asset-files-check.mts`, `project-root-check.mts`, `assets-store-check.mts`, `main-process.mjs`, `run-ui.sh`, `assets-ui.mjs` e `aceitacao-4.mjs`) estão no plano da Fase 4, cada um num passo "Escrever `.checks/<nome>`"; o `ui-check.mjs` precisa das duas mudanças da 2B (plano da 2B, Tarefa 4, Passo 6). O `run-ui.sh` prepara a cópia do exemplo, abre o app, espera a tela inicial, roda um roteiro e fecha: prefira-o a montar os comandos à mão. Num plano, cada roteiro vem depois de uma linha "Crie `.checks/<nome>`:", e dá para extraí-los com um script pequeno em vez de copiar à mão.
 - **Para dirigir a interface sem o diálogo nativo:** rode o app com `--user-data-dir` apontando para uma pasta própria e com um `recent-projects.json` que já contém o projeto. O projeto abre pela lista de recentes. O roteiro `ui-check.mjs` da 2A faz isso.
 - **Para responder os diálogos nativos sem a tela:** rode o app também com `--inspect=9229` (funciona no `mdd.exe` empacotado) e conecte no inspetor do Node (`http://127.0.0.1:9229/json`). Com `Runtime.evaluate` e `includeCommandLineAPI: true`, o `require('electron')` fica disponível. Aí basta trocar `dialog.showOpenDialog` por uma função que devolve `{ canceled: false, filePaths: [pasta] }`, e `dialog.showMessageBoxSync` por uma que devolve o índice do botão escolhido. O main lê `electron.dialog.*` na hora da chamada, então a troca vale na hora. Para simular o X da janela, chame `BrowserWindow.getAllWindows()[0].close()`, que dispara o mesmo evento `close`.
 
@@ -161,4 +188,11 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **Captura de tela pelo protocolo:** `Page.captureScreenshot` trava com a janela em segundo plano; chame `Page.bringToFront` antes.
 - **Nomes de arquivo no Windows não diferenciam caixa:** `Loja.xml` e `loja.xml` são o mesmo arquivo. Qualquer lista de arquivos com chave tirada do nome (como as configurações) precisa comparar as chaves sem caixa (`sameKey` em `configuration-entries.ts`). O `save-safety-check.mts` tem um armazenamento em memória que imita isso.
 - **O que vai para o instalador:** a lista `files` do `electron-builder.yml` precisa excluir as pastas de rascunho (`.checks/` e `.superpowers/`). Sem isso, elas entram no `app.asar`, e nesta pasta o `package.json` interno saiu corrompido e o `mdd.exe` não abria.
+- **Foco da janela nos roteiros:** o Windows não deixa um app em segundo plano tomar o foco de outra janela, então `BrowserWindow.focus()` pelo inspetor não é confiável quando o usuário está usando outra janela (e `blur()` não tira o foco). Para exercitar o que acontece "quando a janela volta ao foco", dispare `window.dispatchEvent(new Event('focus'))` na página. Com uma troca de foco de verdade, o renderer recebe `blur` e `focus`, cada um duas vezes.
+- **`shell.openPath` num roteiro:** troque-o por um registrador pelo inspetor do main (`.checks/main-process.mjs`). Um arquivo de extensão sem programa associado não serve de teste "sem janela": o Windows pode abrir o diálogo "Como você deseja abrir este arquivo?".
+- **Atalhos e `<select>`:** um `<select>` com foco não tem desfazer próprio. Ctrl+Z e Ctrl+Y vão para o histórico; as demais teclas ficam com a lista.
+- **Campo que grava ao sair e Esc:** `blur()` dispara o `onBlur` na hora, com o texto antigo na closure. Marque o cancelamento num `ref` antes do `blur()` (veja o `ConditionField`).
+- **Arquivo `.tsx` só exporta componentes** (`react-refresh/only-export-components`): funções e hooks compartilhados vão para um `.ts` ao lado (`expression-check.ts`, `use-file-status.ts`).
+- **`diagrama-ui.mjs` instável:** os arrastos e o clique logo depois de "Ajustar à tela" falham às vezes, cada vez num ponto diferente, também na versão de antes da Fase 4 (uma em três rodadas). Se a saída divergir a partir de um arrasto ou parar em `não achei`, rode de novo.
+- **Tela inicial logo depois de um build:** demora mais que alguns segundos para mostrar os recentes. Espere a lista aparecer antes de clicar (o `run-ui.sh` faz isso).
 - **Roteiros de interface abrem janelas na tela do usuário:** os cliques vão direto para a janela do app, sem tomar o mouse, mas as janelas abrindo e fechando incomodam. Combine com o usuário antes de rodar, e não abra o `mdd.exe` na mão enquanto eles rodam.

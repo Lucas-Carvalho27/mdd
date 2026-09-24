@@ -6,7 +6,7 @@ import { useProjectStore } from '@/ui/stores/project-store-context'
 
 interface ProjectHeaderProps {
   readonly session: ProjectSession
-  /** Desfazer e refazer valem só para o modelo; o configurador não tem histórico (SPEC §2). */
+  /** Desfazer e refazer valem para o modelo e os assets; o configurador não tem histórico (SPEC §2). */
   readonly historyEnabled: boolean
   readonly onClose: () => void
 }
@@ -73,7 +73,7 @@ function historyTitle(
   label: string | undefined,
   shortcut: string
 ): string {
-  if (!enabled) return `${action} vale só na aba Modelo`
+  if (!enabled) return `${action} vale só nas abas Modelo e Assets`
   if (label === undefined) return `Nada para ${action.toLowerCase()}`
   return `${action}: ${label} (${shortcut})`
 }

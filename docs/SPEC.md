@@ -110,13 +110,15 @@ Uma configuração guarda só as **decisões manuais** (`selected` ou `deselecte
 
 ### 4.3 Assets
 
-Um asset tem `id` único (gerado do nome do arquivo, no mesmo formato de ID de feature), `kind` (`fragment` ou `resource`), `path`, `anchor` (ID de feature) e, opcionalmente, `name` e `condition`.
+Um asset tem `id` único (no mesmo formato de ID de feature), `kind` (`fragment` ou `resource`), `path`, `anchor` (ID de feature) e, opcionalmente, `name` e `condition`. O `id` é sugerido pelo nome do arquivo ao vincular (`pix-fluxo.svg` → `pix_fluxo`) e pode ser ajustado só nesse momento; depois não muda, nem ao trocar o arquivo (ADR 0004).
 
 **Invariantes:** A1 — `path` é relativo e fica dentro do projeto. A2 — `anchor` existe no modelo. A3 — `condition`, se existir, é uma expressão válida que só referencia features existentes.
 
 **Inclusão.** Um asset entra no produto quando a âncora está selecionada **e** a condição (se existir) é verdadeira para a configuração. A ordem dos assets de uma mesma âncora é a ordem no `assets.xml`.
 
-**Estado do arquivo** (calculado, não salvo): _ok_, _ausente_ (o arquivo não existe) ou, só para fragmentos e verificado na geração, _XML malformado_.
+**Ordem no arquivo.** Um asset novo, ou que troca de âncora, entra como o último da âncora, na posição que mantém o `assets.xml` agrupado na ordem das âncoras no modelo (pré-ordem). Assim o arquivo não depende da ordem em que os vínculos foram feitos. Reordenar troca o asset de lugar com o vizinho da mesma âncora.
+
+**Estado do arquivo** (calculado, não salvo): _ok_ (o caminho é um arquivo que existe), _ausente_ (não existe, é uma pasta ou não pode ser conferido) ou, só para fragmentos e verificado na geração, _XML malformado_.
 
 ### 4.4 Geração
 
@@ -240,16 +242,17 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 
 ### 6.2 Ports (em `application/ports`)
 
-| Port                                                                          | Responsabilidade                                                                                                                                                            | Adapter v1                                                  |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `ProjectStorage`                                                              | Ler, escrever, listar, copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8).               | `ElectronProjectStorage`                                    |
-| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                                      | `Xml*Repository` (codecs + `ProjectStorage`)                |
-| `ConstraintSolver`                                                            | Carregar uma `Formula` e responder a satisfatibilidade sob uma suposição (um literal), devolvendo uma solução. Cada resolução carrega a fórmula num solver novo (ADR 0002). | `LogicSolverConstraintSolver`                               |
-| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                               | `XmlProductDeriver`                                         |
-| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                                             | `ElectronAssetOpener`                                       |
-| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto. A escolha de um arquivo dentro do projeto entra na Fase 4, como port próprio.                                                                  | `ElectronProjectFolderPicker`                               |
-| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD.                                                                                                             | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
-| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                                    | `SystemClock`                                               |
+| Port                                                                          | Responsabilidade                                                                                                                                                                 | Adapter v1                                                  |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `ProjectStorage`                                                              | Ler, escrever, listar, conferir (`stat`), copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8). | `ElectronProjectStorage`                                    |
+| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                                           | `Xml*Repository` (codecs + `ProjectStorage`)                |
+| `ConstraintSolver`                                                            | Carregar uma `Formula` e responder a satisfatibilidade sob uma suposição (um literal), devolvendo uma solução. Cada resolução carrega a fórmula num solver novo (ADR 0002).      | `LogicSolverConstraintSolver`                               |
+| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                                    | `XmlProductDeriver`                                         |
+| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                                                  | `ElectronAssetOpener`                                       |
+| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto.                                                                                                                                                     | `ElectronProjectFolderPicker`                               |
+| `ProjectFilePicker`                                                           | Escolher um arquivo dentro do projeto, num diálogo que começa na raiz. Devolve o caminho relativo e recusa um arquivo de fora.                                                   | `ElectronProjectFilePicker`                                 |
+| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD.                                                                                                                  | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
+| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                                         | `SystemClock`                                               |
 
 ### 6.3 Processo main e IPC
 
@@ -260,7 +263,7 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
   - **Arquivos:** `readText`, `writeText` (com hash esperado), `stat`, `list`, `copy`, `rename`, `remove` (com hash esperado), `ensureDir`
   - **XML:** `validateXml` (etapas 1 e 2 da leitura, §5)
   - **Diálogos:** `openProjectFolder`, `pickFileInProject`, `confirm`
-  - **Shell:** `shell.openPath`
+  - **Shell:** `openPath` (`shell.openPath`, só para arquivos do projeto)
   - **Projetos recentes:** `listRecentProjects` e `reopenProject` (os 10 últimos, gravados em `userData`; só pastas da lista podem ser reabertas sem o diálogo)
   - **Janela:** `setUnsavedChanges` (o main pergunta antes de fechar a janela com alterações não salvas)
 
@@ -330,10 +333,14 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 **Assets:**
 
-- Lista agrupada por âncora, com o estado de cada arquivo (ok / ausente) e ações para abrir, editar, reordenar e desvincular.
-- Para vincular, o arquivo é escolhido em um diálogo que começa na pasta do projeto. Um arquivo fora do projeto é recusado com a orientação de copiá-lo para dentro.
-- O tipo é sugerido pela extensão (`.xml` → fragmento, demais → recurso).
-- A condição usa o mesmo editor das restrições.
+- Na aba Assets, a lista fica no centro, agrupada por âncora na ordem do modelo, e as propriedades do asset selecionado ficam à direita.
+- Cada linha mostra o tipo, o nome (ou o nome do arquivo), o caminho, a condição e o estado do arquivo (ok / ausente), com as ações abrir (desligada quando ausente), mover para cima ou para baixo dentro da âncora e desvincular (sem confirmação: tem desfazer, e o arquivo fica no disco).
+- O painel edita nome, tipo, âncora e condição, e tem "Trocar arquivo…", que muda só o caminho. Trocar a âncora leva o asset para o fim da nova âncora.
+- Para vincular, o arquivo é escolhido em um diálogo que começa na pasta do projeto. Um arquivo fora do projeto é recusado com a orientação de copiá-lo para dentro. Depois vem o diálogo com o tipo (sugerido pela extensão: `.xml` → fragmento, demais → recurso), o nome (opcional), o ID (sugerido pelo nome do arquivo e ajustável só ali) e a âncora.
+- A condição usa o mesmo editor das restrições; vazio = sem condição. Uma expressão inválida não é gravada.
+- O estado dos arquivos é conferido ao abrir o projeto, ao entrar na aba, quando a janela volta ao foco, depois de qualquer mudança nos assets (inclusive desfazer) e no botão "Atualizar".
+- Todas as edições de assets são comandos do histórico: desfazer e refazer valem nas abas Modelo e Assets (também com o foco numa lista de opções). Tab, Enter, F2, Delete e Alt+↑/↓ valem só na aba Modelo.
+- O painel da feature, na aba Modelo, lista os assets ancorados nela, com o estado de cada arquivo e o botão "Vincular arquivo…".
 
 ## 8. Comportamentos transversais
 

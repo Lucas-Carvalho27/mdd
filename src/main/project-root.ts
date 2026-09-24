@@ -17,11 +17,29 @@ export class ProjectRoot {
 
   /** Devolve o caminho absoluto, ou `null` se o caminho sair do projeto. */
   resolve(relativePath: string): string | null {
-    if (this.rootPath === null) throw new Error('Nenhum projeto aberto.')
+    const root = this.requireRoot()
     if (isAbsolute(relativePath)) return null
-    const absolute = resolve(join(this.rootPath, relativePath))
-    const fromRoot = relative(this.rootPath, absolute)
-    const escapes = fromRoot === '..' || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot)
-    return escapes ? null : absolute
+    const absolute = resolve(join(root, relativePath))
+    return escapesRoot(relative(root, absolute)) ? null : absolute
   }
+
+  /**
+   * O caminho relativo à raiz, com "/" como separador, de um arquivo escolhido no diálogo.
+   * `null` para o que fica fora do projeto (outro disco, pasta vizinha) ou para a própria raiz.
+   */
+  toRelative(absolutePath: string): string | null {
+    const fromRoot = relative(this.requireRoot(), resolve(absolutePath))
+    if (fromRoot === '' || escapesRoot(fromRoot)) return null
+    return fromRoot.split(sep).join('/')
+  }
+
+  private requireRoot(): string {
+    if (this.rootPath === null) throw new Error('Nenhum projeto aberto.')
+    return this.rootPath
+  }
+}
+
+/** O caminho, relativo à raiz, sai dela? No Windows, outro disco volta como caminho absoluto. */
+function escapesRoot(fromRoot: string): boolean {
+  return fromRoot === '..' || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot)
 }

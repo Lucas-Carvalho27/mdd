@@ -29,9 +29,15 @@ import { findFeature, locateFeature } from '@/domain/feature-model/tree'
 import * as entries from '@/domain/project/configuration-entries'
 import type { ConfigurationEntry, Project } from '@/domain/project/project'
 import type { Result } from '@/domain/shared/result'
+import {
+  ASSETS_CLOSED,
+  createAssetsActions,
+  type AssetsServices,
+  type AssetsState
+} from './assets-actions'
 
 /** Casos de uso e serviços de que a store precisa; a composition root entrega as implementações. */
-export interface ProjectStoreServices {
+export interface ProjectStoreServices extends AssetsServices {
   readonly openProject: {
     execute(): Promise<OpenProjectResult>
     reopen(rootPath: string): Promise<OpenProjectResult>
@@ -49,7 +55,7 @@ export interface ProjectStoreServices {
   readonly unsavedChanges: UnsavedChangesIndicator
 }
 
-export interface ProjectState {
+export interface ProjectState extends AssetsState {
   readonly session: ProjectSession | null
   /** O projeto como está no disco; comparar com a sessão diz se há alterações. */
   readonly saved: Project | null
@@ -66,7 +72,7 @@ export interface ProjectState {
   readonly warnings: readonly FileProblem[]
   /** Arquivos alterados fora do app na última gravação: a interface pergunta o que fazer. */
   readonly conflicts: readonly string[]
-  /** Por que a última edição foi recusada. */
+  /** O aviso da faixa amarela, como "Edição recusada: …" ou "Arquivo recusado: …". */
   readonly notice: string | null
   readonly recents: readonly RecentProject[]
   readonly lastSavedAt: Date | null
@@ -146,7 +152,8 @@ const CLOSED = {
   warnings: [],
   conflicts: [],
   notice: null,
-  lastSavedAt: null
+  lastSavedAt: null,
+  ...ASSETS_CLOSED
 } satisfies Partial<ProjectState>
 
 /** Estado de tela do editor. As regras ficam no domínio e nos casos de uso, não aqui. */
@@ -162,6 +169,7 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
         selectedFeatureId: session.project.model.root.id
       })
       void get().loadRecents()
+      void get().checkAssetFiles()
     }
 
     const handleOpen = (result: OpenProjectResult): void => {
@@ -181,6 +189,8 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
         selectedFeatureId: selected,
         collapsedFeatureIds: revealed(collapsedFeatureIds, project.model, selected)
       })
+      // Vincular, trocar arquivo, desfazer…: o estado dos arquivos acompanha os assets.
+      if (project.assets !== session.project.assets) void get().checkAssetFiles()
     }
 
     const setConfigurations = (
@@ -225,6 +235,7 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
       ...CLOSED,
       busy: false,
       recents: [],
+      ...createAssetsActions(set, get, services),
 
       async loadRecents() {
         set({ recents: await services.recentProjects.list() })
@@ -290,7 +301,7 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
         if (session === null) return false
         const step = executeCommand(history, editorStateOf(session), command)
         if (!step.ok) {
-          set({ notice: step.error })
+          set({ notice: `Edição recusada: ${step.error}` })
           return false
         }
         applyStep(step.value)
