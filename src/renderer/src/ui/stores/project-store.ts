@@ -36,6 +36,13 @@ import {
   type AssetsState
 } from './assets-actions'
 import {
+  createFragmentsActions,
+  FRAGMENTS_CLOSED,
+  hasModifiedFragments,
+  type FragmentsServices,
+  type FragmentsState
+} from './fragments-actions'
+import {
   createGenerationActions,
   GENERATION_CLOSED,
   withoutGenerationOf,
@@ -44,7 +51,8 @@ import {
 } from './generation-actions'
 
 /** Casos de uso e serviços de que a store precisa; a composition root entrega as implementações. */
-export interface ProjectStoreServices extends AssetsServices, GenerationServices {
+export interface ProjectStoreServices
+  extends AssetsServices, GenerationServices, FragmentsServices {
   readonly openProject: {
     execute(): Promise<OpenProjectResult>
     reopen(rootPath: string): Promise<OpenProjectResult>
@@ -62,7 +70,7 @@ export interface ProjectStoreServices extends AssetsServices, GenerationServices
   readonly unsavedChanges: UnsavedChangesIndicator
 }
 
-export interface ProjectState extends AssetsState, GenerationState {
+export interface ProjectState extends AssetsState, GenerationState, FragmentsState {
   readonly session: ProjectSession | null
   /** O projeto como está no disco; comparar com a sessão diz se há alterações. */
   readonly saved: Project | null
@@ -135,7 +143,8 @@ export function hasUnsavedChanges(state: ProjectState): boolean {
   return (
     model !== state.saved.model ||
     assets !== state.saved.assets ||
-    configurations !== state.saved.configurations
+    configurations !== state.saved.configurations ||
+    hasModifiedFragments(state)
   )
 }
 
@@ -161,7 +170,8 @@ const CLOSED = {
   notice: null,
   lastSavedAt: null,
   ...ASSETS_CLOSED,
-  ...GENERATION_CLOSED
+  ...GENERATION_CLOSED,
+  ...FRAGMENTS_CLOSED
 } satisfies Partial<ProjectState>
 
 /** Estado de tela do editor. As regras ficam no domínio e nos casos de uso, não aqui. */
@@ -245,6 +255,7 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
       recents: [],
       ...createAssetsActions(set, get, services),
       ...createGenerationActions(set, get, services),
+      ...createFragmentsActions(set, get, services),
 
       async loadRecents() {
         set({ recents: await services.recentProjects.list() })
@@ -273,19 +284,29 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
         if (session === null) return
         set({ busy: true, problems: [], conflicts: [] })
         const result = await services.saveProject.execute(session, options)
-        const complete = result.conflicts.length === 0 && result.problems.length === 0
+        // Os fragmentos vão depois dos arquivos do projeto, no mesmo Ctrl+S.
+        const fragments = await get().saveFragments(options)
+        // O projeto foi fechado ou trocado durante a gravação.
+        if (get().session?.folder !== session.folder) {
+          set({ busy: false })
+          return
+        }
+        const projectSaved = result.conflicts.length === 0 && result.problems.length === 0
+        const complete =
+          projectSaved && fragments.conflicts.length === 0 && fragments.problems.length === 0
         set({
           busy: false,
           // Da sessão, só os hashes mudam: uma edição feita durante a gravação é mantida.
           session: { ...get().session!, hashes: result.session.hashes },
-          conflicts: result.conflicts,
-          problems: result.problems,
-          ...(complete ? { saved: session.project, lastSavedAt: new Date() } : {})
+          conflicts: [...result.conflicts, ...fragments.conflicts],
+          problems: [...result.problems, ...fragments.problems],
+          ...(projectSaved ? { saved: session.project } : {}),
+          ...(complete ? { lastSavedAt: new Date() } : {})
         })
       },
 
       async reload() {
-        const { session, openConfigurationKey } = get()
+        const { session, openConfigurationKey, fragmentFiles, shownFragmentPath } = get()
         if (session === null) return
         set({ busy: true, problems: [], conflicts: [] })
         handleOpen(await services.openProject.reopen(session.folder.rootPath))
@@ -293,6 +314,12 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
         const reopened = get().session?.project.configurations
         if (reopened?.some((entry) => entry.key === openConfigurationKey)) {
           set({ openConfigurationKey })
+        }
+        // A aba Fragmentos relê as pastas, e o fragmento exibido volta, relido do disco.
+        if (fragmentFiles === null || get().session === null) return
+        await get().loadFragmentFiles()
+        if (shownFragmentPath !== null && get().fragmentFiles?.includes(shownFragmentPath)) {
+          await get().showFragment(shownFragmentPath)
         }
       },
 

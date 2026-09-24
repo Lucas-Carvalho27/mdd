@@ -1,8 +1,11 @@
 import { CheckAssetFiles } from '@/application/use-cases/check-asset-files'
 import { CreateProject } from '@/application/use-cases/create-project'
+import { FragmentFiles } from '@/application/use-cases/fragment-files'
 import { GenerateProduct } from '@/application/use-cases/generate-product'
+import { OpenFragment } from '@/application/use-cases/open-fragment'
 import { OpenProject } from '@/application/use-cases/open-project'
 import { ResolveConfiguration } from '@/application/use-cases/resolve-configuration'
+import { SaveFragments } from '@/application/use-cases/save-fragments'
 import { SaveProject } from '@/application/use-cases/save-project'
 import { WriteProductFolder } from '@/application/use-cases/write-product-folder'
 import { ElectronAssetOpener } from '@/infrastructure/electron/electron-asset-opener'
@@ -20,6 +23,7 @@ import {
   XmlConfigurationRepository,
   XmlFeatureModelRepository
 } from '@/infrastructure/xml/xml-repositories'
+import { XmlFragmentChecker } from '@/infrastructure/xml/xml-fragment-checker'
 import { XmlProductDeriver } from '@/infrastructure/xml/xml-product-deriver'
 import { createProjectStore, type ProjectStore } from '@/ui/stores/project-store'
 import { OUTPUT_DIRECTORY } from '../../../../shared/ipc'
@@ -41,6 +45,8 @@ export function createAppStore(): ProjectStore {
   }
   // Uma só resolução para a tela e a geração: o resultado guardado serve às duas.
   const resolveConfiguration = new ResolveConfiguration(new LogicSolverConstraintSolver())
+  // O editor de fragmentos confere como a geração confere.
+  const fragmentChecker = new XmlFragmentChecker(validator)
   return createProjectStore({
     openProject: new OpenProject({ picker, recents, ...repositories }),
     createProject: new CreateProject({ picker, models }),
@@ -57,6 +63,10 @@ export function createAppStore(): ProjectStore {
       writer: new WriteProductFolder(storage, OUTPUT_DIRECTORY),
       clock: new SystemClock()
     }),
-    outputFolderOpener: new ElectronOutputFolderOpener()
+    outputFolderOpener: new ElectronOutputFolderOpener(),
+    fragmentFiles: new FragmentFiles(storage, OUTPUT_DIRECTORY),
+    openFragment: new OpenFragment(storage),
+    saveFragments: new SaveFragments({ storage, checker: fragmentChecker }),
+    fragmentChecker
   })
 }
