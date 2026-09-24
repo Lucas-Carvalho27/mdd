@@ -15,8 +15,8 @@ import type { ProjectSession } from '@/application/project-session'
 import type { CreateProjectResult } from '@/application/use-cases/create-project'
 import type { OpenProjectResult } from '@/application/use-cases/open-project'
 import type { SaveOptions, SaveProjectResult } from '@/application/use-cases/save-project'
-import type { FeatureModel } from '@/domain/feature-model/feature-model'
-import { findFeature } from '@/domain/feature-model/tree'
+import type { Feature, FeatureModel } from '@/domain/feature-model/feature-model'
+import { findFeature, locateFeature } from '@/domain/feature-model/tree'
 
 /** Casos de uso e serviços de que a store precisa; a composition root entrega as implementações. */
 export interface ProjectStoreServices {
@@ -40,6 +40,8 @@ export interface ProjectState {
   readonly saved: EditorState | null
   readonly history: EditHistory
   readonly selectedFeatureId: string | null
+  /** Subárvores recolhidas no diagrama; valem só enquanto o projeto está aberto (ADR 0007). */
+  readonly collapsedFeatureIds: ReadonlySet<string>
   readonly busy: boolean
   /** Erros da última abertura ou gravação. */
   readonly problems: readonly FileProblem[]
@@ -63,9 +65,13 @@ export interface ProjectState {
   close(): void
   /** Executa uma edição; devolve `false` se ela foi recusada (o motivo fica em `notice`). */
   run(command: EditorCommand): boolean
+  /** Simula a edição sem registrar nada: `null` se ela seria aceita, senão o motivo da recusa. */
+  check(command: EditorCommand): string | null
   undo(): void
   redo(): void
   selectFeature(featureId: string): void
+  /** Recolhe ou expande a subárvore da feature no diagrama. */
+  toggleCollapsed(featureId: string): void
   dismissNotice(): void
 }
 
@@ -81,11 +87,14 @@ export function hasUnsavedChanges(state: ProjectState): boolean {
   return model !== state.saved.model || assets !== state.saved.assets
 }
 
+const NO_FEATURES: ReadonlySet<string> = new Set()
+
 const CLOSED = {
   session: null,
   saved: null,
   history: EMPTY_HISTORY,
   selectedFeatureId: null,
+  collapsedFeatureIds: NO_FEATURES,
   problems: [],
   warnings: [],
   conflicts: [],
@@ -114,14 +123,16 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
     }
 
     const applyStep = (step: HistoryStep): void => {
-      const { session, selectedFeatureId } = get()
+      const { session, selectedFeatureId, collapsedFeatureIds } = get()
       if (session === null) return
       const project = { ...session.project, ...step.state }
+      const selected = nextSelection(selectedFeatureId, project.model, step.focusFeatureId)
       set({
         session: { ...session, project },
         history: step.history,
         notice: null,
-        selectedFeatureId: nextSelection(selectedFeatureId, project.model, step.focusFeatureId)
+        selectedFeatureId: selected,
+        collapsedFeatureIds: revealed(collapsedFeatureIds, project.model, selected)
       })
     }
 
@@ -196,6 +207,13 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
         return true
       },
 
+      check(command) {
+        const { session, history } = get()
+        if (session === null) return 'Nenhum projeto aberto.'
+        const step = executeCommand(history, editorStateOf(session), command)
+        return step.ok ? null : step.error
+      },
+
       undo() {
         const step = undo(get().history)
         if (step !== undefined) applyStep(step)
@@ -208,6 +226,25 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
 
       selectFeature(featureId) {
         set({ selectedFeatureId: featureId })
+      },
+
+      toggleCollapsed(featureId) {
+        const { session, selectedFeatureId, collapsedFeatureIds } = get()
+        if (session === null) return
+        const collapsed = new Set(collapsedFeatureIds)
+        if (collapsed.delete(featureId)) {
+          set({ collapsedFeatureIds: collapsed })
+          return
+        }
+        collapsed.add(featureId)
+        // A seleção não pode sumir dentro da subárvore recolhida: passa para a feature recolhida.
+        const root = session.project.model.root
+        const hidden =
+          selectedFeatureId !== null && ancestorIds(root, selectedFeatureId).includes(featureId)
+        set({
+          collapsedFeatureIds: collapsed,
+          ...(hidden ? { selectedFeatureId: featureId } : {})
+        })
       },
 
       dismissNotice() {
@@ -232,4 +269,26 @@ function nextSelection(
   if (focusFeatureId !== undefined) return focusFeatureId
   if (current !== null && findFeature(model.root, current) !== undefined) return current
   return model.root.id
+}
+
+/** Expande os ancestrais da feature, para ela não ficar escondida numa subárvore recolhida. */
+function revealed(
+  collapsed: ReadonlySet<string>,
+  model: FeatureModel,
+  featureId: string
+): ReadonlySet<string> {
+  const ancestors = ancestorIds(model.root, featureId)
+  if (!ancestors.some((id) => collapsed.has(id))) return collapsed
+  return new Set([...collapsed].filter((id) => !ancestors.includes(id)))
+}
+
+/** IDs do pai, do avô… até a raiz. */
+function ancestorIds(root: Feature, featureId: string): string[] {
+  const ids: string[] = []
+  let location = locateFeature(root, featureId)
+  while (location !== undefined && location.kind !== 'root') {
+    ids.push(location.parent.id)
+    location = locateFeature(root, location.parent.id)
+  }
+  return ids
 }
