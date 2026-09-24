@@ -1,0 +1,48 @@
+— abrir o projeto e a aba
+antes da aba, Atualizar              → não lê as pastas
+árvore                               → docs/antigo.xml docs/loja/visao-geral.xml docs/pagamento/boleto.xml docs/pagamento/pix.xml
+exibido                              → docs/pagamento/pix.xml
+problemas                            → ok
+título                               → salvo
+— editar e salvar
+depois de digitar                    → •
+voltando ao texto do disco           → salvo
+depois do Ctrl+S                     → salvo · conflitos 0 · avisos 0
+no disco                             → título novo
+— com erro de XML
+problemas                            → linha 3 Opening and ending tag mismatch: title line 3 and titulo
+depois do Ctrl+S                     → salvo · avisos: docs/pagamento/pix.xml:3 Salvo com erro de XML: Opening and ending tag mismatch: title line 3 and titulo
+corrigido e salvo                    → salvo · avisos 0 · problemas ok
+— só para leitura
+antigo.xml                           → Este arquivo não está em UTF-8. Salve-o em UTF-8 em outro editor para poder editar aqui.
+digitar nele                         → "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<t>Informa��o</t>\n" · salvo
+problemas                            → linha 1 A codificação ISO-8859-1 não é suportada: salve o arquivo em UTF-8.
+— fragmento novo
+caminho docs/pagamento/PIX.xml       → "docs/pagamento/PIX.xml" já existe.
+criar configurations/x.xml           → A pasta configurations/ é das configurações.
+criar Docs/Pagamento/cartao.xml      → criado
+exibido                              → docs/pagamento/cartao.xml · "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+problemas                            → linha 2 Start tag expected, '<' not found
+árvore                               → docs/antigo.xml docs/loja/visao-geral.xml docs/pagamento/boleto.xml docs/pagamento/cartao.xml docs/pagamento/pix.xml
+título                               → •
+criar o mesmo de novo                → "docs/pagamento/cartao.xml" já existe.
+descartado                           → exibido (nenhum) · salvo · árvore docs/antigo.xml docs/loja/visao-geral.xml docs/pagamento/boleto.xml docs/pagamento/pix.xml
+salvo                                → salvo · no disco o texto digitado
+— descartar alterações
+alterado                             → •
+descartado                           → salvo · texto do disco
+— mudanças fora do app, e a janela volta ao foco
+árvore                               → docs/antigo.xml docs/busca/busca.xml docs/loja/visao-geral.xml docs/pagamento/cartao.xml docs/pagamento/pix.xml
+visao-geral.xml (sem alteração)      → "<topic>\n  <title>Mudou por fora</title>\n</topic>\n"
+pix.xml (com alteração)              → mantido
+problemas do exibido                 → ok
+Ctrl+S                               → conflitos [docs/pagamento/pix.xml] · •
+Sobrescrever                         → conflitos [] · salvo
+pix.xml no disco                     → o meu
+— apagado por fora: exibido sem alteração, e com alteração
+busca.xml                            → exibido (nenhum) · árvore docs/antigo.xml docs/loja/visao-geral.xml docs/pagamento/cartao.xml docs/pagamento/pix.xml
+visao-geral.xml                      → novo? true · árvore docs/antigo.xml docs/loja/visao-geral.xml docs/pagamento/cartao.xml docs/pagamento/pix.xml
+Ctrl+S                               → conflitos [] · salvo · no disco "<topic/>\n"
+— recarregar e fechar
+Recarregar                           → exibido docs/loja/visao-geral.xml · "<topic/>\n" · salvo
+Fechar                               → 0 abertos · aba zerada

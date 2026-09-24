@@ -1,0 +1,10 @@
+LF                                   → "<a>\n  <b/>\n</a>\n" bom=false quebra="\n" volta idêntico
+CRLF                                 → "<a>\n  <b/>\n</a>\n" bom=false quebra="\r\n" volta idêntico
+BOM e CRLF                           → "<a>\n</a>\n" bom=true quebra="\r\n" volta idêntico
+BOM e LF, sem quebra no fim          → "<a>\n</a>" bom=true quebra="\n" volta idêntico
+uma linha só                         → "<a/>" bom=false quebra="\n" volta idêntico
+vazio                                → "" bom=false quebra="\n" volta idêntico
+misturado                            → "<a>\n  <b/>\n</a>\n" bom=false quebra="\r\n" volta como "<a>\r\n  <b/>\r\n</a>\r\n"
+CR sozinho                           → "<a>\n</a>\n" bom=false quebra="\n" volta como "<a>\n</a>\n"
+linha nova num arquivo CRLF          → "<BOM><a>\r\n  <novo/>\r\n</a>\r\n"
+arquivo novo                         → "<?xml version=\"1.0\"?>\n<a/>\n"
