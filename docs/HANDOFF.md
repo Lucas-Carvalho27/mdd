@@ -13,7 +13,7 @@ Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 | 3. Configurador           | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
 | 4. Assets                 | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
 | 5. Geração                | Concluída    | `main`. Plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)                    |
-| 6. Editor de fragmentos   | Em andamento | Desenho aprovado no branch `fase-6-editor-fragmentos`; protótipo no branch local `prototipo-fase-6`. Veja "Fase 6 em andamento"                                                                                                                                                    |
+| 6. Editor de fragmentos   | Em andamento | Desenho aprovado no branch `fase-6-editor-fragmentos`; protótipo no branch `prototipo-fase-6`. Veja "Fase 6 em andamento"                                                                                                                                                          |
 
 O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B, 3 e 4, também:
 
@@ -168,7 +168,7 @@ Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checag
 **Branches:**
 
 - `fase-6-editor-fragmentos` (GitHub): só a spec e este handoff. O código ainda não entrou.
-- `prototipo-fase-6` (**só local, não enviado ao GitHub**): o protótipo descartável, um commit por tarefa sobre o commit da spec (`e70285f`). Ele foi feito num clone no scratchpad da sessão, que pode sumir; o branch local é a cópia que vale. Os refinamentos da store feitos durante a Tarefa 5 (não conferir de novo o mesmo texto, não repetir na árvore um arquivo novo que apareceu no disco) ficaram no commit da T5, mas o arquivo `fragments-actions.ts` é da Tarefa 4.
+- `prototipo-fase-6` (GitHub): o protótipo descartável, um commit por tarefa sobre o commit da spec (`e70285f`). O último commit (`459ebc3`) traz a pasta `.checks/`, que fica fora do git na `main`: os roteiros novos da Fase 6, os das fases anteriores, os modelos e scripts de plano e as saídas conferidas, em `.checks/out/`. **Nunca mescle este branch:** ele é só a fonte do plano. Como ele tem arquivos em `.checks/` que o git conhece, trabalhe nele num clone separado (ou num `git worktree`), e não no clone do branch da fase. Os refinamentos da store feitos durante a Tarefa 5 (não conferir de novo o mesmo texto, não repetir na árvore um arquivo novo que apareceu no disco) ficaram no commit da T5, mas o arquivo `fragments-actions.ts` é da Tarefa 4.
 
 **Tarefas do protótipo** (cada arquivo pertence a uma tarefa só):
 
@@ -182,7 +182,7 @@ Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checag
    - a pasta `ui/screens/fragments/`;
    - `ViewRail`, `editor-dialog.ts`, `ProjectScreen`, `AssetsWorkspace` e `AssetList`.
 
-**O que já foi verificado no protótipo** (as saídas estão em `.checks/out-fase-6-proto/`):
+**O que já foi verificado no protótipo** (as saídas estão em `.checks/out/`, no branch do protótipo):
 
 - Tarefas 1 a 4: typecheck e lint limpos, e cada roteiro com a saída esperada.
   - Roteiros novos: `fragment-path-check.mts`, `text-format-check.mts`, `fragment-checker-check.mts`, `save-fragments-check.mts` e `fragments-store-check.mts`, os dois últimos sobre a pasta em memória `memory-folder.mts`.
@@ -195,7 +195,7 @@ Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checag
 **O que o protótipo respondeu** (a levar para a spec do desenho e para a SPEC na tarefa de documentos):
 
 - `ListFragmentFiles` virou `FragmentFiles`, com `list()` e `checkNewPath()`: as duas coisas dependem das mesmas regras e do nome da pasta de saída.
-- A detecção de codificação (`declaredEncoding`, `firstUndecodedLine` e `encodingProblem`) foi para `domain/fragments/encoding.ts`, porque o `OpenFragment` também precisa dela. O `.checks/fragment-source-check.mts` passa a importar `declaredEncoding` do domínio. A versão ajustada está em `.checks/fragment-source-check-fase6.mts`; o original ficou como está, porque confere o código atual da `main`.
+- A detecção de codificação (`declaredEncoding`, `firstUndecodedLine` e `encodingProblem`) foi para `domain/fragments/encoding.ts`, porque o `OpenFragment` também precisa dela. O `.checks/fragment-source-check.mts` passa a importar `declaredEncoding` do domínio; no branch do protótipo, ele já está ajustado.
 - O `XmlProductDeriver` mantém o construtor `(storage, validator)` e cria o `XmlFragmentChecker` por dentro. Assim o `generate-product-check.mts` não muda.
 - Um caminho novo adota a grafia das pastas que já existem: `Docs/Pagamento/cartao.xml` vira `docs/pagamento/cartao.xml`.
 - O aviso "Salvo com erro de XML" some quando o arquivo é salvo sem problema e ao fechar o projeto. **Não some ao descartar**, porque o disco continua com o erro. A spec diz que some ao descartar: corrigir.
@@ -206,10 +206,7 @@ Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checag
 
 **Próximos passos:**
 
-1. **Recriar o clone do protótipo** num lugar descartável:
-   - `git clone <este repositório> <pasta>`, `git switch prototipo-fase-6` e `npm ci`;
-   - copiar os roteiros de `.checks/` para o clone;
-   - no clone, trocar o `fragment-source-check.mts` pelo `fragment-source-check-fase6.mts`.
+1. **Clonar o protótipo** num lugar descartável: `git clone -b prototipo-fase-6 https://github.com/Lucas-Carvalho27/mdd.git <pasta>` e `npm ci`. Os roteiros já vêm em `.checks/`.
 2. **Combinar com o usuário e rodar** `bash .checks/run-ui.sh dev .checks/fragmentos-ui.mjs 9229` no clone. Os roteiros abrem janelas: pergunte antes. Corrigir o que falhar e guardar a saída.
 3. Regressão de interface: `ui-check.mjs`, `configurador-ui.mjs`, `assets-ui.mjs` e `geracao-ui.mjs`.
 4. **Tarefa 6, documentos:**
