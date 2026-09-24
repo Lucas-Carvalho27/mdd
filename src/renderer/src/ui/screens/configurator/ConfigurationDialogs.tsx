@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { configurationKey } from '@/domain/project/configuration-entries'
+import { configurationKey, keyAfterRename } from '@/domain/project/configuration-entries'
 import type { ConfigurationEntry } from '@/domain/project/project'
 import { Button } from '@/ui/components/ui/button'
 import {
@@ -33,6 +33,7 @@ export function ConfigurationDialogs({
   const keys = new Set(configurations.map((entry) => entry.key))
   const entryOf = (key: string): ConfigurationEntry | undefined =>
     configurations.find((entry) => entry.key === key)
+  const others = (key: string): Set<string> => new Set([...keys].filter((other) => other !== key))
 
   switch (dialog?.kind) {
     case 'new-configuration':
@@ -41,7 +42,7 @@ export function ConfigurationDialogs({
           title="Nova configuração"
           submitLabel="Criar"
           initialName=""
-          takenKeys={keys}
+          fileKeyFor={(name) => configurationKey(name, keys)}
           onSubmit={create}
           onClose={onClose}
         />
@@ -54,7 +55,7 @@ export function ConfigurationDialogs({
           title={`Renomear “${entry.configuration.name}”`}
           submitLabel="Renomear"
           initialName={entry.configuration.name}
-          takenKeys={new Set([...keys].filter((key) => key !== entry.key))}
+          fileKeyFor={(name) => keyAfterRename(entry.key, name, others(entry.key))}
           onSubmit={(name) => rename(entry.key, name)}
           onClose={onClose}
         />
@@ -68,7 +69,7 @@ export function ConfigurationDialogs({
           title={`Duplicar “${entry.configuration.name}”`}
           submitLabel="Duplicar"
           initialName={`${entry.configuration.name} (cópia)`}
-          takenKeys={keys}
+          fileKeyFor={(name) => configurationKey(name, keys)}
           onSubmit={(name) => duplicate(entry.key, name)}
           onClose={onClose}
         />
@@ -88,8 +89,8 @@ interface NameDialogProps {
   readonly title: string
   readonly submitLabel: string
   readonly initialName: string
-  /** Chaves já usadas, para mostrar o nome do arquivo que a configuração vai ter. */
-  readonly takenKeys: ReadonlySet<string>
+  /** A chave que a configuração vai ter com o nome, para mostrar o nome do arquivo. */
+  readonly fileKeyFor: (name: string) => string
   /** Devolve o motivo quando o nome não serve. */
   readonly onSubmit: (name: string) => string | null
   readonly onClose: () => void
@@ -100,7 +101,7 @@ function NameDialog({
   title,
   submitLabel,
   initialName,
-  takenKeys,
+  fileKeyFor,
   onSubmit,
   onClose
 }: NameDialogProps): React.JSX.Element {
@@ -130,7 +131,7 @@ function NameDialog({
               onChange={(event) => setName(event.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Arquivo: <code>configurations/{configurationKey(name, takenKeys)}.xml</code>
+              Arquivo: <code>configurations/{fileKeyFor(name)}.xml</code>
             </p>
             {problem !== null && <p className="text-xs text-destructive">{problem}</p>}
           </div>

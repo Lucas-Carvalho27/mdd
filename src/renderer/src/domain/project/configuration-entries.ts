@@ -6,6 +6,10 @@ import type { ConfigurationEntry } from './project'
  * A lista de configurações do projeto. A chave é o nome do arquivo sem `.xml` e sai sempre
  * do nome de exibição (SPEC §3): renomear a configuração troca a chave, e o arquivo é
  * renomeado ao salvar. A lista fica em ordem de chave, como a pasta no disco.
+ *
+ * No Windows, `Loja.xml` e `loja.xml` são o mesmo arquivo. Por isso duas chaves que só
+ * diferem na caixa contam como a mesma: uma colide com a outra, e renomear para uma
+ * delas mantém a chave antiga. Uma chave com maiúsculas só vem de arquivo criado fora do app.
  */
 
 export interface EntryChange {
@@ -28,11 +32,23 @@ export function configurationKey(name: string, taken: ReadonlySet<string>): stri
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '') || FALLBACK_KEY
-  if (!taken.has(base)) return base
+  const takenIgnoringCase = new Set([...taken].map((key) => key.toLowerCase()))
+  if (!takenIgnoringCase.has(base)) return base
   for (let suffix = 2; ; suffix++) {
     const candidate = `${base}-${suffix}`
-    if (!taken.has(candidate)) return candidate
+    if (!takenIgnoringCase.has(candidate)) return candidate
   }
+}
+
+/** A chave depois de renomear. Fica a mesma quando só a caixa mudaria: é o mesmo arquivo. */
+export function keyAfterRename(key: string, name: string, taken: ReadonlySet<string>): string {
+  const next = configurationKey(name, taken)
+  return sameKey(next, key) ? key : next
+}
+
+/** As duas chaves apontam para o mesmo arquivo no Windows? */
+export function sameKey(a: string, b: string): boolean {
+  return a.toLowerCase() === b.toLowerCase()
 }
 
 export function addConfiguration(
@@ -68,7 +84,8 @@ export function renameConfiguration(
   if (trimmed === '') return err('Informe o nome.')
   if (trimmed === source.configuration.name) return ok({ entries, key })
   const others = entries.filter((entry) => entry.key !== key)
-  return ok(insert(others, { ...source.configuration, name: trimmed }))
+  const renamed = { ...source.configuration, name: trimmed }
+  return ok(insert(others, renamed, keyAfterRename(key, trimmed, keysOf(others))))
 }
 
 export function removeConfiguration(
@@ -89,10 +106,18 @@ export function replaceConfiguration(
   return entries.with(index, { key, configuration })
 }
 
-function insert(entries: readonly ConfigurationEntry[], configuration: Configuration): EntryChange {
-  const key = configurationKey(configuration.name, new Set(entries.map((entry) => entry.key)))
+/** Põe a configuração na lista, com a chave indicada ou com uma nova, tirada do nome. */
+function insert(
+  entries: readonly ConfigurationEntry[],
+  configuration: Configuration,
+  key = configurationKey(configuration.name, keysOf(entries))
+): EntryChange {
   return {
     entries: [...entries, { key, configuration }].sort((a, b) => a.key.localeCompare(b.key)),
     key
   }
+}
+
+function keysOf(entries: readonly ConfigurationEntry[]): Set<string> {
+  return new Set(entries.map((entry) => entry.key))
 }
