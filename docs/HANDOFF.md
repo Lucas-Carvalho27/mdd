@@ -4,15 +4,15 @@ Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação       | Onde está                                                                                                                                                                                                                                                                          |
-| ------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
-| 2B. Diagrama visual       | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
-| 3. Configurador           | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
-| 4. Assets                 | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
-| **5. Geração**            | **A planejar** | —                                                                                                                                                                                                                                                                                  |
+| Fase                      | Situação         | Onde está                                                                                                                                                                                                                                                                                     |
+| ------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída        | `main` (GitHub)                                                                                                                                                                                                                                                                               |
+| 1. Domínio e persistência | Concluída        | `main` (GitHub)                                                                                                                                                                                                                                                                               |
+| 2A. Edição do modelo      | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                           |
+| 2B. Diagrama visual       | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                           |
+| 3. Configurador           | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md)            |
+| 4. Assets                 | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                                 |
+| **5. Geração**            | **Plano pronto** | branch `fase-5-geracao`, ainda fora da `main`. Desenho em [docs/superpowers/specs/2026-09-24-fase-5-geracao-design.md](superpowers/specs/2026-09-24-fase-5-geracao-design.md); plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md) |
 
 O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B, 3 e 4, também:
 
@@ -134,9 +134,13 @@ A SPEC §9 descreve a entrega da Fase 5:
 
 A aceitação: gerar `loja-basica` produz o equivalente a `docs/examples/produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.
 
-Para começar, peça ao Claude, numa sessão nova:
+O desenho foi aprovado e o plano foi escrito em 24/09/2026, no branch `fase-5-geracao`. O plano traz o código já verificado num protótipo descartável: cada tarefa foi aplicada sozinha sobre o commit do desenho, o roteiro dela falhou antes e deu a saída do plano depois, e o `geracao-ui.mjs`, a regressão das Fases 2A, 3 e 4 e o `aceitacao-5.mjs` passaram no modo de desenvolvimento. Falta executar o plano (Tarefas 1 a 5), inclusive a aceitação no `mdd.exe` e a checagem à mão do "Abrir pasta".
 
-> Leia docs/HANDOFF.md e escreva o plano da Fase 5, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
+As saídas do protótipo e o modelo usado para montar o plano estão em `.checks/` (fora do git): `out-fase-5-proto/`, `plan-template-5.md`, `build-plan-5.py` e `verify-plan-5.py`.
+
+Para continuar, peça ao Claude, numa sessão nova:
+
+> Leia docs/HANDOFF.md e execute o plano da Fase 5 no branch fase-5-geracao.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
