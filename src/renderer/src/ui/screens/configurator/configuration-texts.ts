@@ -1,6 +1,10 @@
 import type { DecisionState } from '@/domain/configuration/configuration'
 import type { OrphanReference } from '@/domain/configuration/references'
-import { configurationStatus, type Resolution } from '@/domain/configuration/resolution'
+import {
+  configurationStatus,
+  type ConfigurationStatus,
+  type Resolution
+} from '@/domain/configuration/resolution'
 
 /** Textos do configurador que mais de um componente usa. */
 
@@ -30,15 +34,28 @@ export function statusText(resolution: Resolution): string {
   if (resolution.kind === 'empty-model') parts.push('Modelo vazio: nenhum produto é possível')
   else if (resolution.kind === 'conflict') parts.push('Em conflito')
   else if (status.complete) parts.push('Válida', 'completa')
-  else {
-    const missing = [
-      plural(status.undecidedCount, 'indecisa', 'indecisas'),
-      plural(status.missingValueCount, 'atributo sem valor', 'atributos sem valor')
-    ].filter((part) => part !== null)
-    parts.push('Válida', `incompleta (${missing.join(', ')})`)
-  }
+  else parts.push('Válida', `incompleta (${missingText(status)})`)
   if (status.stale) parts.push('desatualizada')
   return parts.join(' · ')
+}
+
+/** Por que o botão "Gerar produto" está desligado, ou `null` quando dá para gerar (SPEC §4.2). */
+export function generationBlockedReason(resolution: Resolution): string | null {
+  const status = configurationStatus(resolution)
+  if (resolution.kind === 'empty-model') return 'O modelo não admite nenhum produto.'
+  if (resolution.kind === 'conflict') return 'Resolva o conflito entre as decisões para gerar.'
+  if (status.complete) return null
+  return `Complete a configuração para gerar: ${missingText(status)}.`
+}
+
+/** "2 indecisas, 1 atributo sem valor". */
+function missingText(status: ConfigurationStatus): string {
+  return [
+    plural(status.undecidedCount, 'indecisa', 'indecisas'),
+    plural(status.missingValueCount, 'atributo sem valor', 'atributos sem valor')
+  ]
+    .filter((part) => part !== null)
+    .join(', ')
 }
 
 function plural(count: number, one: string, many: string): string | null {

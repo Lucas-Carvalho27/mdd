@@ -9,6 +9,7 @@ import { ConfigurationStatusBar } from '@/ui/screens/configurator/ConfigurationS
 import { AssetsWorkspace } from '@/ui/screens/assets/AssetsWorkspace'
 import { LinkAssetDialog } from '@/ui/screens/assets/LinkAssetDialog'
 import { ConfiguratorWorkspace } from '@/ui/screens/configurator/ConfiguratorWorkspace'
+import { GenerationDialogs } from '@/ui/screens/configurator/GenerationDialogs'
 import { hasUnsavedChanges } from '@/ui/stores/project-store'
 import { useProjectStore } from '@/ui/stores/project-store-context'
 import { CloseProjectDialog } from './dialogs/CloseProjectDialog'
@@ -138,6 +139,11 @@ export function ProjectScreen({
       <ConfigurationDialogs
         dialog={dialog}
         configurations={project.configurations}
+        onClose={() => setDialog(null)}
+      />
+      <GenerationDialogs
+        dialog={dialog}
+        onOpenDialog={openDialog}
         onClose={() => setDialog(null)}
       />
       <ConflictDialog />

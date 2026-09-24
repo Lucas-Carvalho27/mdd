@@ -35,9 +35,15 @@ import {
   type AssetsServices,
   type AssetsState
 } from './assets-actions'
+import {
+  createGenerationActions,
+  GENERATION_CLOSED,
+  type GenerationServices,
+  type GenerationState
+} from './generation-actions'
 
 /** Casos de uso e serviços de que a store precisa; a composition root entrega as implementações. */
-export interface ProjectStoreServices extends AssetsServices {
+export interface ProjectStoreServices extends AssetsServices, GenerationServices {
   readonly openProject: {
     execute(): Promise<OpenProjectResult>
     reopen(rootPath: string): Promise<OpenProjectResult>
@@ -55,7 +61,7 @@ export interface ProjectStoreServices extends AssetsServices {
   readonly unsavedChanges: UnsavedChangesIndicator
 }
 
-export interface ProjectState extends AssetsState {
+export interface ProjectState extends AssetsState, GenerationState {
   readonly session: ProjectSession | null
   /** O projeto como está no disco; comparar com a sessão diz se há alterações. */
   readonly saved: Project | null
@@ -153,7 +159,8 @@ const CLOSED = {
   conflicts: [],
   notice: null,
   lastSavedAt: null,
-  ...ASSETS_CLOSED
+  ...ASSETS_CLOSED,
+  ...GENERATION_CLOSED
 } satisfies Partial<ProjectState>
 
 /** Estado de tela do editor. As regras ficam no domínio e nos casos de uso, não aqui. */
@@ -236,6 +243,7 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
       busy: false,
       recents: [],
       ...createAssetsActions(set, get, services),
+      ...createGenerationActions(set, get, services),
 
       async loadRecents() {
         set({ recents: await services.recentProjects.list() })
