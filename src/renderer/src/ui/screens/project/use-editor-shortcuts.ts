@@ -15,14 +15,20 @@ type Shortcut =
   | 'move-up'
   | 'move-down'
 
+export interface ShortcutScope {
+  /** Com um diálogo aberto, nenhum atalho vale: as teclas são do diálogo. */
+  readonly enabled: boolean
+  /** Fora da aba Modelo, só Ctrl+S vale: a estrutura não se edita no configurador. */
+  readonly editing: boolean
+}
+
 /**
  * Atalhos da SPEC §7: Tab filha, Enter irmã, F2 renomear, Delete excluir, Alt+↑/↓ reordenar,
  * Ctrl+Z/Ctrl+Y desfazer/refazer, Ctrl+S salvar. Enquanto se digita num campo, só Ctrl+S vale.
- * Com um diálogo aberto (`enabled` falso), nenhum atalho vale: as teclas são do diálogo.
  */
 export function useEditorShortcuts(
   openDialog: (dialog: EditorDialog) => void,
-  enabled: boolean
+  { enabled, editing }: ShortcutScope
 ): void {
   const store = useProjectStoreApi()
 
@@ -34,7 +40,7 @@ export function useEditorShortcuts(
       const state = store.getState()
       const shortcut = shortcutFor(event)
       if (shortcut === undefined || state.session === null || state.conflicts.length > 0) return
-      if (shortcut !== 'save' && isTyping(event.target)) return
+      if (shortcut !== 'save' && (!editing || isTyping(event.target))) return
 
       if (shortcut === 'save' || shortcut === 'undo' || shortcut === 'redo') {
         event.preventDefault()
@@ -75,7 +81,7 @@ export function useEditorShortcuts(
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [store, openDialog, enabled])
+  }, [store, openDialog, enabled, editing])
 }
 
 function shortcutFor(event: KeyboardEvent): Shortcut | undefined {

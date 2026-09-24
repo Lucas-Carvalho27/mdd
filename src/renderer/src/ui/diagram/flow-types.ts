@@ -6,8 +6,11 @@ import type { GroupArc } from './diagram-layout'
 
 export type FeatureFlowNode = Node<{ feature: DiagramFeature }, 'feature'>
 
+/** A mesma feature no modo configuração (SPEC §7). */
+export type ConfiguredFeatureFlowNode = Node<{ feature: DiagramFeature }, 'configured-feature'>
+
 export type GroupArcFlowNode = Node<{ arc: GroupArc }, 'group-arc'>
 
-export type DiagramFlowNode = FeatureFlowNode | GroupArcFlowNode
+export type DiagramFlowNode = FeatureFlowNode | ConfiguredFeatureFlowNode | GroupArcFlowNode
 
 export type VariabilityFlowEdge = Edge<{ marker: EdgeMarker }, 'variability'>

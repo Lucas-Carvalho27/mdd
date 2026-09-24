@@ -6,10 +6,16 @@ import { useProjectStore } from '@/ui/stores/project-store-context'
 
 interface ProjectHeaderProps {
   readonly session: ProjectSession
+  /** Desfazer e refazer valem só para o modelo; o configurador não tem histórico (SPEC §2). */
+  readonly historyEnabled: boolean
   readonly onClose: () => void
 }
 
-export function ProjectHeader({ session, onClose }: ProjectHeaderProps): React.JSX.Element {
+export function ProjectHeader({
+  session,
+  historyEnabled,
+  onClose
+}: ProjectHeaderProps): React.JSX.Element {
   const busy = useProjectStore((state) => state.busy)
   const unsaved = useProjectStore(hasUnsavedChanges)
   const lastSavedAt = useProjectStore((state) => state.lastSavedAt)
@@ -36,8 +42,8 @@ export function ProjectHeader({ session, onClose }: ProjectHeaderProps): React.J
       <Button
         variant="ghost"
         size="icon"
-        disabled={undoLabel === undefined}
-        title={undoLabel ? `Desfazer: ${undoLabel} (Ctrl+Z)` : 'Nada para desfazer'}
+        disabled={!historyEnabled || undoLabel === undefined}
+        title={historyTitle(historyEnabled, 'Desfazer', undoLabel, 'Ctrl+Z')}
         onClick={undo}
       >
         <Undo2 />
@@ -45,8 +51,8 @@ export function ProjectHeader({ session, onClose }: ProjectHeaderProps): React.J
       <Button
         variant="ghost"
         size="icon"
-        disabled={redoLabel === undefined}
-        title={redoLabel ? `Refazer: ${redoLabel} (Ctrl+Y)` : 'Nada para refazer'}
+        disabled={!historyEnabled || redoLabel === undefined}
+        title={historyTitle(historyEnabled, 'Refazer', redoLabel, 'Ctrl+Y')}
         onClick={redo}
       >
         <Redo2 />
@@ -59,4 +65,15 @@ export function ProjectHeader({ session, onClose }: ProjectHeaderProps): React.J
       </Button>
     </header>
   )
+}
+
+function historyTitle(
+  enabled: boolean,
+  action: 'Desfazer' | 'Refazer',
+  label: string | undefined,
+  shortcut: string
+): string {
+  if (!enabled) return `${action} vale só na aba Modelo`
+  if (label === undefined) return `Nada para ${action.toLowerCase()}`
+  return `${action}: ${label} (${shortcut})`
 }

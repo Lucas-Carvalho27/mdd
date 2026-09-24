@@ -8,4 +8,8 @@ export type EditorDialog =
   | { readonly kind: 'delete-feature'; readonly featureId: string }
   | { readonly kind: 'create-group'; readonly parentId: string }
   | { readonly kind: 'close-project' }
+  | { readonly kind: 'new-configuration' }
+  | { readonly kind: 'rename-configuration'; readonly key: string }
+  | { readonly kind: 'duplicate-configuration'; readonly key: string }
+  | { readonly kind: 'delete-configuration'; readonly key: string }
   | null

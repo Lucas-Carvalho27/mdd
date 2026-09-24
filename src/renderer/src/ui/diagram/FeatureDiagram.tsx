@@ -31,13 +31,18 @@ import {
   type DiagramLayout,
   type DropTarget
 } from './diagram-layout'
+import { ConfiguredFeatureNode } from './ConfiguredFeatureNode'
 import { FeatureNode } from './FeatureNode'
 import type { DiagramFlowNode, VariabilityFlowEdge } from './flow-types'
 import { GroupArcNode } from './GroupArcNode'
 import { measureFeature } from './measure-feature'
 import { VariabilityEdge } from './VariabilityEdge'
 
-const NODE_TYPES = { feature: FeatureNode, 'group-arc': GroupArcNode }
+const NODE_TYPES = {
+  feature: FeatureNode,
+  'configured-feature': ConfiguredFeatureNode,
+  'group-arc': GroupArcNode
+}
 const EDGE_TYPES = { variability: VariabilityEdge }
 const FIT_VIEW_OPTIONS = { padding: 0.15, maxZoom: 1 }
 // O React Flow desliga o mouse em nós que não são arrastáveis nem selecionáveis, como a
@@ -58,26 +63,40 @@ interface Hover extends DropHighlight {
   readonly target: DropTarget
 }
 
+/** Editar a estrutura (aba Modelo) ou decidir as features de uma configuração (SPEC §7). */
+export type DiagramMode =
+  { readonly kind: 'edit'; readonly actions: FeatureActions } | { readonly kind: 'configure' }
+
 interface FeatureDiagramProps {
   readonly model: FeatureModel
-  readonly actions: FeatureActions
+  readonly mode: DiagramMode
 }
 
 /**
  * Diagrama do Feature Model (SPEC §7, ADR 0007): layout sempre calculado, arrastar um nó
  * muda o pai da feature, e toda edição passa pelos comandos do histórico.
  */
-export function FeatureDiagram({ model, actions }: FeatureDiagramProps): React.JSX.Element {
+export function FeatureDiagram({ model, mode }: FeatureDiagramProps): React.JSX.Element {
   return (
     <ReactFlowProvider>
-      <FeatureActionsContext value={actions}>
-        <DiagramCanvas model={model} />
-      </FeatureActionsContext>
+      {mode.kind === 'edit' ? (
+        <FeatureActionsContext value={mode.actions}>
+          <DiagramCanvas model={model} editing />
+        </FeatureActionsContext>
+      ) : (
+        <DiagramCanvas model={model} editing={false} />
+      )}
     </ReactFlowProvider>
   )
 }
 
-function DiagramCanvas({ model }: { readonly model: FeatureModel }): React.JSX.Element {
+interface DiagramCanvasProps {
+  readonly model: FeatureModel
+  /** No modo configuração, a estrutura é só leitura: nada se arrasta nem tem menu. */
+  readonly editing: boolean
+}
+
+function DiagramCanvas({ model, editing }: DiagramCanvasProps): React.JSX.Element {
   const collapsed = useProjectStore((state) => state.collapsedFeatureIds)
   const selectedId = useProjectStore((state) => state.selectedFeatureId)
   const check = useProjectStore((state) => state.check)
@@ -102,7 +121,10 @@ function DiagramCanvas({ model }: { readonly model: FeatureModel }): React.JSX.E
     }
   }, [graph])
 
-  const laidOut = useMemo(() => (placed === null ? [] : toFlowNodes(placed)), [placed])
+  const laidOut = useMemo(
+    () => (placed === null ? [] : toFlowNodes(placed, editing)),
+    [placed, editing]
+  )
   const edges = useMemo(() => (placed === null ? [] : toFlowEdges(placed.graph)), [placed])
 
   // Os nós seguem o layout; entre um layout e outro, só o arrasto muda a posição de um nó.
@@ -219,19 +241,19 @@ function destinationOf(target: DropTarget): MoveDestination {
 }
 
 /** Features em pré-ordem (a ordem do DOM), depois os arcos dos grupos. */
-function toFlowNodes({ graph, layout }: Placed): DiagramFlowNode[] {
+function toFlowNodes({ graph, layout }: Placed, editing: boolean): DiagramFlowNode[] {
   const features: DiagramFlowNode[] = graph.features.map((feature) => {
     const box = layout.boxes.get(feature.id)!
-    return {
+    const node = {
       id: feature.id,
-      type: 'feature',
       position: { x: box.x, y: box.y },
       width: box.width,
       height: box.height,
-      draggable: !feature.isRoot,
+      draggable: editing && !feature.isRoot,
       style: FEATURE_NODE_STYLE,
       data: { feature }
     }
+    return editing ? { ...node, type: 'feature' } : { ...node, type: 'configured-feature' }
   })
   const arcs: DiagramFlowNode[] = layout.arcs.map((arc) => ({
     id: arc.group.id,
