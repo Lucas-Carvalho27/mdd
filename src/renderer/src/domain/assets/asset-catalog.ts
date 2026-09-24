@@ -26,6 +26,16 @@ export function fileNameOf(path: string): string {
   return path.slice(path.lastIndexOf('/') + 1)
 }
 
+/** Um asset por caminho, o primeiro: a mesma imagem vinculada em duas âncoras conta uma vez. */
+export function firstPerPath(assets: readonly Asset[]): Asset[] {
+  const seen = new Set<string>()
+  return assets.filter((asset) => {
+    if (seen.has(asset.path)) return false
+    seen.add(asset.path)
+    return true
+  })
+}
+
 /** Como o asset aparece na interface: o nome, ou o nome do arquivo quando não tem nome. */
 export function assetLabel(asset: Asset): string {
   return asset.name ?? fileNameOf(asset.path)
