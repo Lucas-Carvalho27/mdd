@@ -13,15 +13,12 @@ import type { XmlSchemaValidator } from '@/application/ports/xml-schema-validato
 import type { AssetCatalog } from '@/domain/assets/asset-catalog'
 import type { Configuration } from '@/domain/configuration/configuration'
 import type { FeatureModel } from '@/domain/feature-model/feature-model'
+import { ASSETS_PATH, CONFIGURATIONS_DIRECTORY, MODEL_PATH } from '@/domain/project/project-layout'
 import { err, ok, type Result } from '@/domain/shared/result'
 import { decodeAssetCatalog, encodeAssetCatalog } from './assets-codec'
 import { decodeConfiguration, encodeConfiguration } from './configuration-codec'
 import { decodeFeatureModel, encodeFeatureModel } from './feature-model-codec'
 import { XmlDocumentFile, type XmlDocumentFormat } from './xml-document-file'
-
-const MODEL_PATH = 'model.xml'
-const ASSETS_PATH = 'assets.xml'
-const CONFIGURATIONS_DIRECTORY = 'configurations'
 
 const featureModelFormat: XmlDocumentFormat<FeatureModel> = {
   schema: 'feature-model',
