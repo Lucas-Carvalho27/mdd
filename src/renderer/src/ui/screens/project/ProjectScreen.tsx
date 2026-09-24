@@ -55,7 +55,7 @@ export function ProjectScreen({
 
       {notice !== null && (
         <div className="flex items-center gap-2 border-b bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
-          <span className="flex-1">Edição recusada: {notice}</span>
+          <span className="flex-1">{notice}</span>
           <Button size="icon-sm" variant="ghost" title="Dispensar" onClick={dismissNotice}>
             <X />
           </Button>
