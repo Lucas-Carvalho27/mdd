@@ -1,4 +1,4 @@
-import { Copy, Pencil, Trash2 } from 'lucide-react'
+import { Copy, FileOutput, Pencil, Trash2 } from 'lucide-react'
 import type { ConfigurationEntry, Project } from '@/domain/project/project'
 import { Button } from '@/ui/components/ui/button'
 import { FeatureDiagram, type DiagramMode } from '@/ui/diagram/FeatureDiagram'
@@ -8,6 +8,9 @@ import { useProjectStore } from '@/ui/stores/project-store-context'
 import { AttributeValuesPanel } from './AttributeValuesPanel'
 import { ConfigurationList } from './ConfigurationList'
 import { ConfigurationProblems } from './ConfigurationProblems'
+import { generationBlockedReason } from './configuration-texts'
+import { GenerationBanner } from './GenerationBanner'
+import { useGenerateProduct } from './use-generate-product'
 
 const CONFIGURE: DiagramMode = { kind: 'configure' }
 
@@ -39,6 +42,7 @@ export function ConfiguratorWorkspace({
         ) : (
           <>
             <ConfigurationToolbar entry={entry} onOpenDialog={onOpenDialog} />
+            <GenerationBanner configurationKey={entry.key} />
             <ConfigurationProblems model={project.model} />
             <div className="min-h-0 flex-1 rounded-md border">
               <FeatureDiagram model={project.model} mode={CONFIGURE} />
@@ -93,11 +97,39 @@ function ConfigurationToolbar({
         >
           <Trash2 /> Excluir…
         </Button>
+        <GenerateButton configurationKey={key} onOpenDialog={onOpenDialog} />
       </div>
       <p className="text-xs text-muted-foreground">
         Clique numa feature para alternar entre indecisa, selecionada e desselecionada. O cadeado
         marca o que o modelo decide.
       </p>
     </div>
+  )
+}
+
+/** "Gerar produto" (SPEC §7): só com a configuração completa; a dica diz o que falta. */
+function GenerateButton({
+  configurationKey,
+  onOpenDialog
+}: {
+  readonly configurationKey: string
+  readonly onOpenDialog: (dialog: EditorDialog) => void
+}): React.JSX.Element {
+  const resolution = useProjectStore((state) => state.openResolution())
+  const generating = useProjectStore((state) => state.generating)
+  const generate = useGenerateProduct(onOpenDialog)
+  const blocked = resolution === null ? null : generationBlockedReason(resolution)
+
+  return (
+    // Um botão desligado não mostra a dica: ela fica no elemento de fora.
+    <span title={blocked ?? undefined}>
+      <Button
+        size="sm"
+        disabled={resolution === null || blocked !== null || generating}
+        onClick={() => void generate(configurationKey)}
+      >
+        <FileOutput /> {generating ? 'Gerando…' : 'Gerar produto'}
+      </Button>
+    </span>
   )
 }

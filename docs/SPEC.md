@@ -125,11 +125,13 @@ Um asset tem `id` único (no mesmo formato de ID de feature), `kind` (`fragment`
 Entrada: uma configuração **completa**. Saída: `saida/<nome-do-arquivo-da-configuração>/`.
 
 1. **Plano (domínio, puro).** Calcula as features selecionadas em pré-ordem, os valores finais dos atributos (fixo → `default`; configurável → valor da configuração ou `default`), a árvore de seções (uma seção por feature selecionada, aninhada como na árvore) e, para cada seção, os assets incluídos (§4.3).
-2. **Verificação.** Todos os arquivos do plano existem e todos os fragmentos são XML bem-formado. Se houver qualquer problema, **nada é gravado** e todos os problemas são listados de uma vez.
+2. **Verificação.** Todos os arquivos do plano existem, e todos os fragmentos são XML bem-formado em UTF-8, sem prefixos de namespace sem declaração e sem entidades além das cinco do XML e das referências numéricas (`&nbsp;`, por exemplo, deixaria de existir fora do arquivo original, porque o DOCTYPE fica de fora). Um fragmento que não está em UTF-8 é recusado: com a declaração de outra codificação, na linha 1; sem declaração, na linha do primeiro byte que não é UTF-8 (um acento salvo em Latin-1, por exemplo). Se houver qualquer problema, **nada é gravado** e todos os problemas são listados de uma vez, com o arquivo, a linha e o asset.
 3. **Escrita.** Grava numa pasta temporária `saida/.<nome>.tmp/`:
-   - `product.xml` conforme `product.xsd`. Cada fragmento vira `<fragment asset="…" xml:base="<pasta do fragmento>/">` contendo o elemento raiz do arquivo (sem declaração XML nem DOCTYPE, com namespaces preservados). Um fragmento na raiz do projeto recebe `xml:base="./"`.
-   - Cada recurso incluído é copiado para `<saída>/<path>`, mantendo a estrutura de pastas.
-4. **Troca.** Se `saida/<nome>/` já existir, pede confirmação para substituir. Depois remove a pasta antiga e renomeia a temporária.
+   - `product.xml` conforme `product.xsd`. Cada fragmento vira `<fragment asset="…" xml:base="<pasta do fragmento>/">` contendo o elemento raiz do arquivo com o texto exatamente como está (sem BOM, declaração XML, DOCTYPE nem os comentários de fora da raiz). Se a raiz não declara um namespace padrão, ela recebe `xmlns=""`, para os elementos sem prefixo não herdarem o `urn:mdd:product`. Um fragmento na raiz do projeto recebe `xml:base="./"`.
+   - Cada recurso incluído é copiado byte a byte para `<saída>/<path>`, mantendo a estrutura de pastas.
+4. **Troca.** Antes da pergunta, a geração recupera a versão anterior: uma `saida/.<nome>.old/` sem a pasta `saida/<nome>/` (a troca e a volta falharam, ou o app caiu entre as duas trocas) volta a ser `saida/<nome>/`. Se ela não voltar, a geração para sem apagar nada e diz onde está a versão anterior. Só então, se `saida/<nome>/` existir, pede confirmação para substituir. Depois renomeia a pasta antiga para `saida/.<nome>.old/`, renomeia a temporária para o lugar dela e apaga a `.old`. Se algo falhar, a temporária é apagada e a pasta antiga fica, ou volta, no lugar; no Windows, um arquivo da pasta aberto em outro programa impede a troca. As sobras de uma geração interrompida são apagadas na seguinte: a temporária e uma `.old` junto da pasta do produto (ela sobrou de uma troca que deu certo).
+
+A geração usa o projeto como está na tela, com as alterações não salvas; os fragmentos e os recursos vêm do disco. Gerar não entra no histórico de desfazer.
 
 Referência de resultado: [docs/examples/produto-esperado/loja-basica/](examples/produto-esperado/loja-basica/). A comparação ignora espaços em branco e `generatedAt`.
 
@@ -242,17 +244,18 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 
 ### 6.2 Ports (em `application/ports`)
 
-| Port                                                                          | Responsabilidade                                                                                                                                                                 | Adapter v1                                                  |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `ProjectStorage`                                                              | Ler, escrever, listar, conferir (`stat`), copiar, renomear e remover arquivos e pastas dentro do projeto. A escrita recebe o hash esperado para detectar alteração externa (§8). | `ElectronProjectStorage`                                    |
-| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                                           | `Xml*Repository` (codecs + `ProjectStorage`)                |
-| `ConstraintSolver`                                                            | Carregar uma `Formula` e responder a satisfatibilidade sob uma suposição (um literal), devolvendo uma solução. Cada resolução carrega a fórmula num solver novo (ADR 0002).      | `LogicSolverConstraintSolver`                               |
-| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a pasta de destino e escrever o produto gerado.                                                                                                    | `XmlProductDeriver`                                         |
-| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                                                  | `ElectronAssetOpener`                                       |
-| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto.                                                                                                                                                     | `ElectronProjectFolderPicker`                               |
-| `ProjectFilePicker`                                                           | Escolher um arquivo dentro do projeto, num diálogo que começa na raiz. Devolve o caminho relativo e recusa um arquivo de fora.                                                   | `ElectronProjectFilePicker`                                 |
-| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD.                                                                                                                  | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
-| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                                         | `SystemClock`                                               |
+| Port                                                                          | Responsabilidade                                                                                                                                                                                                                                        | Adapter v1                                                  |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `ProjectStorage`                                                              | Ler, escrever, listar, conferir (`stat`), copiar, renomear e remover arquivos e pastas dentro do projeto; renomear e apagar pastas só dentro de `saida/`. A escrita recebe o hash esperado para detectar alteração externa (§8).                        | `ElectronProjectStorage`                                    |
+| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                                                                                                                  | `Xml*Repository` (codecs + `ProjectStorage`)                |
+| `ConstraintSolver`                                                            | Carregar uma `Formula` e responder a satisfatibilidade sob uma suposição (um literal), devolvendo uma solução. Cada resolução carrega a fórmula num solver novo (ADR 0002).                                                                             | `LogicSolverConstraintSolver`                               |
+| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a hora da geração, conferir as fontes e devolver os arquivos do produto (textos e cópias), ou todos os problemas. A pasta temporária e a troca ficam com o caso de uso `WriteProductFolder`, igual para qualquer formato. | `XmlProductDeriver`                                         |
+| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                                                                                                                         | `ElectronAssetOpener`                                       |
+| `OutputFolderOpener`                                                          | Abrir uma pasta gerada (`saida/<nome>`) no gerenciador de arquivos.                                                                                                                                                                                     | `ElectronOutputFolderOpener`                                |
+| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto.                                                                                                                                                                                                                            | `ElectronProjectFolderPicker`                               |
+| `ProjectFilePicker`                                                           | Escolher um arquivo dentro do projeto, num diálogo que começa na raiz. Devolve o caminho relativo e recusa um arquivo de fora.                                                                                                                          | `ElectronProjectFilePicker`                                 |
+| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD. Sem schema, só XML bem-formado (fragmentos da geração).                                                                                                                                 | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
+| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                                                                                                                | `SystemClock`                                               |
 
 ### 6.3 Processo main e IPC
 
@@ -260,10 +263,10 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 - O preload expõe só `window.mdd`, tipado por `src/shared/ipc.ts`.
 - O main mantém a **raiz do projeto aberto** e recusa qualquer operação de arquivo fora dela.
 - Canais:
-  - **Arquivos:** `readText`, `writeText` (com hash esperado), `stat`, `list`, `copy`, `rename`, `remove` (com hash esperado), `ensureDir`
-  - **XML:** `validateXml` (etapas 1 e 2 da leitura, §5)
+  - **Arquivos:** `readText`, `writeText` (com hash esperado; cria as pastas), `stat`, `list`, `copy` (cria as pastas), `remove` (com hash esperado), e `rename` e `removeDirectory`, só dentro de `saida/`
+  - **XML:** `validateXml` (etapas 1 e 2 da leitura, §5; sem schema, só XML bem-formado)
   - **Diálogos:** `openProjectFolder`, `pickFileInProject`, `confirm`
-  - **Shell:** `openPath` (`shell.openPath`, só para arquivos do projeto)
+  - **Shell:** `openPath` (`shell.openPath`, para arquivos do projeto e pastas dentro de `saida/`)
   - **Projetos recentes:** `listRecentProjects` e `reopenProject` (os 10 últimos, gravados em `userData`; só pastas da lista podem ser reabertas sem o diálogo)
   - **Janela:** `setUnsavedChanges` (o main pergunta antes de fechar a janela com alterações não salvas)
 
@@ -329,7 +332,10 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
   - no caso de conflito, a lista de decisões manuais com a ação de remover cada uma;
   - os valores inválidos, com a ação de remover cada um.
 - Desfazer, refazer e os atalhos de edição valem só na aba Modelo; no configurador, só Ctrl+S.
-- Botão **Gerar produto** (Fase 5), habilitado só quando a configuração está completa.
+- Botão **Gerar produto**, ligado só quando a configuração está completa; desligado, a dica diz o que falta. Gera do que está na tela, com as alterações não salvas.
+  - Se `saida/<nome>/` já existe, pergunta antes de substituir.
+  - Os problemas aparecem num diálogo com todos os itens (arquivo, linha, asset e mensagem) e o aviso de que nada foi gravado.
+  - O sucesso aparece numa faixa verde acima do diagrama, com a pasta, a hora, "Abrir pasta" (no gerenciador de arquivos) e ×. A faixa é da configuração gerada: some ao trocar de configuração e volta ao voltar para ela.
 
 **Assets:**
 

@@ -18,14 +18,15 @@ const SCHEMAS: Record<XmlSchemaName, { fileName: string; contents: string }> = {
 
 const MESSAGE_PREFIX = /^(Schemas validity error|Schemas parser error|parser error)\s*:\s*/
 
+/** Sem schema (`null`), só confere se o conteúdo é XML bem-formado (fragmentos, SPEC §4.4). */
 export async function validateAgainstSchema(
-  schema: XmlSchemaName,
+  schema: XmlSchemaName | null,
   fileName: string,
   content: string
 ): Promise<XmlSchemaIssue[]> {
   const result = await validateXML({
     xml: [{ fileName, contents: content }],
-    schema: [SCHEMAS[schema]]
+    schema: schema === null ? [] : [SCHEMAS[schema]]
   })
   if (result.valid) return []
   const issues = result.errors

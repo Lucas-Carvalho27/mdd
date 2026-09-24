@@ -4,15 +4,15 @@ Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação       | Onde está                                                                                                                                                                                                                                                                          |
-| ------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 1. Domínio e persistência | Concluída      | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 2A. Edição do modelo      | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
-| 2B. Diagrama visual       | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
-| 3. Configurador           | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
-| 4. Assets                 | Concluída      | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
-| **5. Geração**            | **A planejar** | —                                                                                                                                                                                                                                                                                  |
+| Fase                      | Situação  | Onde está                                                                                                                                                                                                                                                                          |
+| ------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 1. Domínio e persistência | Concluída | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 2A. Edição do modelo      | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
+| 2B. Diagrama visual       | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
+| 3. Configurador           | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
+| 4. Assets                 | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
+| 5. Geração                | Concluída | `main`. Plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)                    |
 
 O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B, 3 e 4, também:
 
@@ -24,6 +24,7 @@ O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado
 - pergunta o que fazer quando um arquivo foi alterado fora do app, e confirma antes de fechar com alterações;
 - resolve cada configuração com o solver SAT e a mostra no diagrama em modo configuração, com decisões por clique, valores de atributos, lista de configurações e faixas para configurações desatualizadas ou em conflito.
 - vincula arquivos do projeto às features na aba Assets, com o estado de cada arquivo (ok ou ausente), trocar arquivo, reordenar, desvincular e abrir no programa padrão, e mostra os assets ancorados no painel da feature.
+- gera o produto de uma configuração completa em `saida/<nome>/`, com o `product.xml` e os recursos copiados, conferindo todas as fontes antes e sem gravar nada quando há problema.
 
 Documentos de referência:
 
@@ -123,20 +124,37 @@ Isso cobre o que os roteiros só simulam: a volta real do foco pelo Windows e o 
 
 O branch `fase-4-assets` foi mesclado na `main` em 24/09/2026 e enviado ao GitHub.
 
-## Próximo passo: Fase 5 (geração)
+## Aceitação da Fase 5 (feita em 24/09/2026)
 
-A SPEC §9 descreve a entrega da Fase 5:
+O desenho está em [docs/superpowers/specs/2026-09-24-fase-5-geracao-design.md](superpowers/specs/2026-09-24-fase-5-geracao-design.md), e o plano, em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md). O plano foi escrito com o código já verificado num protótipo descartável. A execução foi feita no branch `fase-5-geracao`, com um commit por tarefa, cada tarefa revisada e aprovada, e o `src` terminou idêntico ao do protótipo (34 arquivos).
 
-- o plano de geração (domínio, SPEC §4.4 passo 1);
-- a verificação dos arquivos antes de gravar;
-- o `XmlProductDeriver`;
-- a pasta temporária e a troca.
+**Roteiros, todos com a saída esperada no plano:**
 
-A aceitação: gerar `loja-basica` produz o equivalente a `docs/examples/produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.
+- `generation-plan-check.mts` (Tarefa 1), `output-guard-check.mts` (Tarefa 2), `fragment-source-check.mts` e `generate-product-check.mts` (Tarefa 3, 10 casos, inclusive a trava do Windows no caso 9), `generation-store-check.mts` (Tarefa 4): cada um falhou antes da sua tarefa e deu a saída do plano depois;
+- `geracao-ui.mjs`, no modo de desenvolvimento (Tarefa 4, Passo 16) e no `mdd.exe` (Tarefa 5, Passo 3): confirma que a geração roda dentro do `app.asar`, com o `xmllint` no main.
 
-Para começar, peça ao Claude, numa sessão nova:
+**Regressão** (Tarefa 4, Passo 17): `ui-check.mjs` (2A), `configurador-ui.mjs` (Fase 3), `assets-ui.mjs` (Fase 4), `configurator-store-check.mts` e `assets-store-check.mts`: iguais ao esperado. O `assets-ui.mjs` saiu vazio (só `app fechado`) na primeira rodada, logo depois da rodada anterior, com as portas 9229 e 9333 ainda em `TIME_WAIT`; numa segunda rodada, com uns segundos de pausa, saiu igual ao plano — sem relação com esta fase (veja "Armadilhas"). O `diagrama-ui.mjs` (2B) não rodou: a fase não mexe no diagrama nem na aba Modelo.
 
-> Leia docs/HANDOFF.md e escreva o plano da Fase 5, prototipando e verificando o código numa cópia descartável antes, como nas fases anteriores.
+**No `mdd.exe` empacotado** (Tarefa 5, Passos 1 a 3): `npm run build:win` sem erro (`building target=nsis file=dist\mdd-0.1.0-setup.exe`). O `aceitacao-5.mjs` saiu igual ao plano: parte 1, com `pag_boleto` selecionado e `boleto.xml` ausente, o diálogo "Não foi possível gerar" listou `docs/pagamento/boleto.xml [doc_boleto] Arquivo ausente.`, e a pasta `saida/` não foi criada; parte 2, o `product.xml` gerado é equivalente ao `produto-esperado/loja-basica/product.xml`, e o `pix-fluxo.svg` é idêntico.
+
+**Checagem à mão** (Tarefa 5, Passo 4), feita pelo usuário no `mdd.exe`, sobre uma cópia do exemplo em `.checks/aceitacao-manual/`: gerou `loja-basica` pela interface, a faixa verde apareceu com a pasta e a hora, e "Abrir pasta" abriu o Explorer em `saida\loja-basica`, com o `product.xml` e `docs\img\pix-fluxo.svg`. Ele respondeu que tudo pareceu certo.
+
+**Revisão final do branch inteiro** (`git diff 7de6ede..92a5e4a`): encontrou três problemas importantes, corrigidos no próprio branch antes do merge:
+
+- **I1, a geração seguinte apagava a única versão anterior.** Quando a troca e a volta falhavam, ou o app caía entre as duas trocas, a versão anterior ficava só em `saida/.<chave>.old/`, e a geração seguinte a apagava como sobra, sem perguntar. Agora a geração a põe de volta em `saida/<chave>/` antes da pergunta de substituir (`WriteProductFolder.recover`); se não conseguir, para sem apagar nada e diz onde ela está.
+- **I2, "Substituir" podia substituir a pasta de outra configuração.** O diálogo guardava só a pasta, e a store gerava a configuração aberta no momento: gerar A, abrir B durante a geração e confirmar "Substituir `saida/A/`?" substituía `saida/B/` sem perguntar. Agora a geração leva a chave, e o diálogo guarda a sua.
+- **I3, fragmento fora do UTF-8 passava com os acentos trocados.** Sem declaração de codificação, um fragmento salvo em Latin-1 chegava com U+FFFD no lugar dos acentos e passava no `xmllint`. Agora é um problema na linha do primeiro byte inválido.
+
+Também foram corrigidos cinco itens menores: no máximo 4 fragmentos conferidos ao mesmo tempo (cada `xmllint` abre um worker); uma exceção do caso de uso não deixa mais o botão em "Gerando…"; o problema de uma gravação que falha aponta o caminho no projeto; a faixa verde some ao renomear ou excluir a configuração gerada e numa falha na escrita dela; e o ADR 0006 registra que os valores padrão de atributos da DTD (como o `@class` do DITA) saem junto com o DOCTYPE. Os demais itens menores da revisão ficaram registrados sem correção, cada um com o motivo. O registro completo, com os problemas, as correções, as versões novas do `generate-product-check.mts` e do `generation-store-check.mts` e a saída de cada roteiro antes e depois, está em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md).
+
+O branch `fase-5-geracao` foi mesclado na `main` em 24/09/2026.
+
+## Próximo passo
+
+Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas. O que resta, para o usuário escolher:
+
+- as checagens manuais ainda não confirmadas das Fases 0 e 1 (veja "Checagens manuais ainda não confirmadas" abaixo);
+- os itens da fase "Depois" da SPEC §9.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
@@ -162,7 +180,7 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **Uma fase por vez, com um plano por fase.** Antes de escrever o plano, o código é prototipado e verificado numa cópia descartável do repositório. O plano contém o código já testado.
 - **Sem testes automatizados** (ADR 0008). A verificação usa typecheck, lint e scripts descartáveis em `.checks/`, rodados com `npx tsx` ou `node`. A interface é checada pelo protocolo de depuração do Chromium (`--remote-debugging-port`).
 - **Um branch por fase**, com um commit por tarefa e merge local na `main` ao fim, depois das checagens.
-- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B. Os da Fase 3 (`resolution-check.mts`, `configurations-check.mts`, `configurator-store-check.mts`, `quit.mjs`, `configurador-ui.mjs` e `aceitacao-3.mjs`) estão no plano da Fase 3. O `save-safety-check.mts` está nas correções da Fase 3 ([docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md)). Os da Fase 4 (`asset-edits-check.mts`, `asset-files-check.mts`, `project-root-check.mts`, `assets-store-check.mts`, `main-process.mjs`, `run-ui.sh`, `assets-ui.mjs` e `aceitacao-4.mjs`) estão no plano da Fase 4, cada um num passo "Escrever `.checks/<nome>`"; o `ui-check.mjs` precisa das duas mudanças da 2B (plano da 2B, Tarefa 4, Passo 6). O `run-ui.sh` prepara a cópia do exemplo, abre o app, espera a tela inicial, roda um roteiro e fecha: prefira-o a montar os comandos à mão. Num plano, cada roteiro vem depois de uma linha "Crie `.checks/<nome>`:", e dá para extraí-los com um script pequeno em vez de copiar à mão.
+- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B. Os da Fase 3 (`resolution-check.mts`, `configurations-check.mts`, `configurator-store-check.mts`, `quit.mjs`, `configurador-ui.mjs` e `aceitacao-3.mjs`) estão no plano da Fase 3. O `save-safety-check.mts` está nas correções da Fase 3 ([docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md)). Os da Fase 4 (`asset-edits-check.mts`, `asset-files-check.mts`, `project-root-check.mts`, `assets-store-check.mts`, `main-process.mjs`, `run-ui.sh`, `assets-ui.mjs` e `aceitacao-4.mjs`) estão no plano da Fase 4, cada um num passo "Escrever `.checks/<nome>`"; o `ui-check.mjs` precisa das duas mudanças da 2B (plano da 2B, Tarefa 4, Passo 6). Os da Fase 5 (`generation-plan-check.mts`, `output-guard-check.mts`, `fragment-source-check.mts`, `generation-support.mts`, `generate-product-check.mts`, `generation-store-check.mts`, `geracao-ui.mjs` e `aceitacao-5.mjs`) estão no plano da Fase 5; as versões corrigidas do `generate-product-check.mts` e do `generation-store-check.mts` estão nas correções da Fase 5 ([docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)). O `run-ui.sh` prepara a cópia do exemplo, abre o app, espera a tela inicial, roda um roteiro e fecha: prefira-o a montar os comandos à mão. Num plano, cada roteiro vem depois de uma linha "Crie `.checks/<nome>`:", e dá para extraí-los com um script pequeno em vez de copiar à mão.
 - **Para dirigir a interface sem o diálogo nativo:** rode o app com `--user-data-dir` apontando para uma pasta própria e com um `recent-projects.json` que já contém o projeto. O projeto abre pela lista de recentes. O roteiro `ui-check.mjs` da 2A faz isso.
 - **Para responder os diálogos nativos sem a tela:** rode o app também com `--inspect=9229` (funciona no `mdd.exe` empacotado) e conecte no inspetor do Node (`http://127.0.0.1:9229/json`). Com `Runtime.evaluate` e `includeCommandLineAPI: true`, o `require('electron')` fica disponível. Aí basta trocar `dialog.showOpenDialog` por uma função que devolve `{ canceled: false, filePaths: [pasta] }`, e `dialog.showMessageBoxSync` por uma que devolve o índice do botão escolhido. O main lê `electron.dialog.*` na hora da chamada, então a troca vale na hora. Para simular o X da janela, chame `BrowserWindow.getAllWindows()[0].close()`, que dispara o mesmo evento `close`.
 
@@ -196,3 +214,8 @@ Estas foram deixadas de lado porque dependiam do diálogo nativo de pastas. Agor
 - **`diagrama-ui.mjs` instável:** os arrastos e o clique logo depois de "Ajustar à tela" falham às vezes, cada vez num ponto diferente, também na versão de antes da Fase 4 (uma em três rodadas). Se a saída divergir a partir de um arrasto ou parar em `não achei`, rode de novo.
 - **Tela inicial logo depois de um build:** demora mais que alguns segundos para mostrar os recentes. Espere a lista aparecer antes de clicar (o `run-ui.sh` faz isso).
 - **Roteiros de interface abrem janelas na tela do usuário:** os cliques vão direto para a janela do app, sem tomar o mouse, mas as janelas abrindo e fechando incomodam. Combine com o usuário antes de rodar, e não abra o `mdd.exe` na mão enquanto eles rodam.
+- **`xmllint` e `@xmldom/xmldom` se completam:** o `xmllint` é rigoroso com a sintaxe, mas aceita prefixo de namespace sem declaração e, com DOCTYPE de DTD externa, entidades como `&nbsp;`; o `xmldom` pega esses dois casos, mas aceita `&` solto e atributo sem aspas. Para conferir um fragmento, rode os dois, nessa ordem.
+- **Posições do `@xmldom/xmldom`:** ele converte as quebras de linha antes de ler, e as posições deixam de bater com o texto original. Passe `normalizeLineEndings: (source) => source` e conte as linhas como ele (`\r\n`, `\r` e `\n`). Ele também recusa o BOM: tire-o antes.
+- **Renomear pasta no Windows:** falha com `EPERM` se um arquivo dela estiver aberto em outro processo (mesmo com permissão de exclusão) e com `EBUSY` se ela for o diretório atual de outro processo. Para reproduzir num roteiro, um PowerShell segura o arquivo (`generation-support.mts`).
+- **BOM no código:** escreva `'\u{FEFF}'`. A forma de quatro dígitos pode virar um BOM literal, invisível, ao passar pela ferramenta de escrita.
+- **Rodadas seguidas do `run-ui.sh`:** logo depois de uma rodada, as portas 9229 e 9333 podem ficar em `TIME_WAIT`, e o roteiro seguinte sai vazio (só `app fechado`). Espere uns segundos entre as rodadas e rode de novo.

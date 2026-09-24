@@ -6,7 +6,11 @@ import type {
 
 /** Validação XSD feita no processo main (xmllint-wasm), chamada por IPC. */
 export class ElectronXmlSchemaValidator implements XmlSchemaValidator {
-  async validate(schema: XmlSchema, fileName: string, content: string): Promise<XmlSchemaIssue[]> {
+  async validate(
+    schema: XmlSchema | null,
+    fileName: string,
+    content: string
+  ): Promise<XmlSchemaIssue[]> {
     const result = await window.mdd.validateXml(schema, fileName, content)
     return result.ok ? result.value : [{ message: result.error.message }]
   }

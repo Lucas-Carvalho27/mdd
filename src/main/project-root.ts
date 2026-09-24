@@ -1,4 +1,5 @@
 import { isAbsolute, join, relative, resolve, sep } from 'path'
+import { OUTPUT_DIRECTORY } from '../shared/ipc'
 
 /**
  * Guarda a pasta do projeto aberto e resolve caminhos relativos a ela,
@@ -21,6 +22,18 @@ export class ProjectRoot {
     if (isAbsolute(relativePath)) return null
     const absolute = resolve(join(root, relativePath))
     return escapesRoot(relative(root, absolute)) ? null : absolute
+  }
+
+  /**
+   * Como `resolve`, mas só para caminhos dentro da pasta de saída (`saida/`), nunca a própria
+   * pasta. É o limite das operações que apagam ou movem pastas inteiras. No Windows, o
+   * `relative` ignora maiúsculas: `SAIDA/x` fica dentro de `saida/`.
+   */
+  resolveInOutput(relativePath: string): string | null {
+    const absolute = this.resolve(relativePath)
+    if (absolute === null) return null
+    const fromOutput = relative(join(this.requireRoot(), OUTPUT_DIRECTORY), absolute)
+    return fromOutput === '' || escapesRoot(fromOutput) ? null : absolute
   }
 
   /**
