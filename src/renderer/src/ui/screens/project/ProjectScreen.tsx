@@ -10,6 +10,10 @@ import { AssetsWorkspace } from '@/ui/screens/assets/AssetsWorkspace'
 import { LinkAssetDialog } from '@/ui/screens/assets/LinkAssetDialog'
 import { ConfiguratorWorkspace } from '@/ui/screens/configurator/ConfiguratorWorkspace'
 import { GenerationDialogs } from '@/ui/screens/configurator/GenerationDialogs'
+import { FragmentDialogs } from '@/ui/screens/fragments/FragmentDialogs'
+import type { FragmentEditorStates } from '@/ui/screens/fragments/fragment-editor-states'
+import { FragmentStatusBar } from '@/ui/screens/fragments/FragmentStatusBar'
+import { FragmentsWorkspace } from '@/ui/screens/fragments/FragmentsWorkspace'
 import { hasUnsavedChanges } from '@/ui/stores/project-store'
 import { useProjectStore } from '@/ui/stores/project-store-context'
 import { CloseProjectDialog } from './dialogs/CloseProjectDialog'
@@ -31,22 +35,43 @@ export function ProjectScreen({
 }): React.JSX.Element {
   const problems = useProjectStore((state) => state.problems)
   const warnings = useProjectStore((state) => state.warnings)
+  const fragmentWarnings = useProjectStore((state) => state.fragmentWarnings)
   const notice = useProjectStore((state) => state.notice)
   const dismissNotice = useProjectStore((state) => state.dismissNotice)
   const unsaved = useProjectStore(hasUnsavedChanges)
   const close = useProjectStore((state) => state.close)
   const checkAssetFiles = useProjectStore((state) => state.checkAssetFiles)
+  const refreshFragments = useProjectStore((state) => state.refreshFragments)
+  const showFragment = useProjectStore((state) => state.showFragment)
   const [view, setView] = useState<ProjectView>('model')
   const [dialog, setDialog] = useState<EditorDialog>(null)
+  // O desfazer do texto de cada fragmento dura enquanto o projeto está aberto.
+  const [editorStates] = useState<FragmentEditorStates>(() => new Map())
   const openDialog = useCallback((next: EditorDialog) => setDialog(next), [])
+  // Na aba Fragmentos, desfazer e refazer são do texto, e ficam com o editor.
+  const historyEnabled = view === 'model' || view === 'assets'
   useEditorShortcuts(openDialog, {
     enabled: dialog === null,
-    history: view !== 'configurations',
+    history: historyEnabled,
     editing: view === 'model'
   })
-  // Um arquivo pode ter sido renomeado fora do app enquanto a janela estava em segundo plano.
-  const onWindowFocus = useCallback(() => void checkAssetFiles(), [checkAssetFiles])
+  // Um arquivo pode ter sido renomeado ou editado fora do app com a janela em segundo plano.
+  const onWindowFocus = useCallback(() => {
+    void checkAssetFiles()
+    void refreshFragments()
+  }, [checkAssetFiles, refreshFragments])
   useWindowFocus(onWindowFocus)
+  const editFragment = useCallback(
+    (path: string) => {
+      setView('fragments')
+      void showFragment(path)
+    },
+    [showFragment]
+  )
+  const allWarnings = useMemo(
+    () => [...warnings, ...fragmentWarnings.values()],
+    [warnings, fragmentWarnings]
+  )
   const actions = useMemo<FeatureActions>(
     () => ({
       addChild: (featureId) => openDialog({ kind: 'new-feature', placement: 'child', featureId }),
@@ -63,11 +88,7 @@ export function ProjectScreen({
 
   return (
     <main className="flex h-screen flex-col">
-      <ProjectHeader
-        session={session}
-        historyEnabled={view !== 'configurations'}
-        onClose={requestClose}
-      />
+      <ProjectHeader session={session} historyEnabled={historyEnabled} onClose={requestClose} />
 
       {notice !== null && (
         <div className="flex items-center gap-2 border-b bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
@@ -78,10 +99,10 @@ export function ProjectScreen({
         </div>
       )}
 
-      {(problems.length > 0 || warnings.length > 0) && (
+      {(problems.length > 0 || allWarnings.length > 0) && (
         <div className="space-y-2 border-b p-4">
           <ProblemList title="Não foi possível salvar" tone="error" problems={problems} />
-          <ProblemList title="Avisos" tone="warning" problems={warnings} />
+          <ProblemList title="Avisos" tone="warning" problems={allWarnings} />
         </div>
       )}
 
@@ -93,12 +114,27 @@ export function ProjectScreen({
         {view === 'configurations' && (
           <ConfiguratorWorkspace project={project} onOpenDialog={openDialog} />
         )}
-        {view === 'assets' && <AssetsWorkspace project={project} onOpenDialog={openDialog} />}
+        {view === 'assets' && (
+          <AssetsWorkspace
+            project={project}
+            onOpenDialog={openDialog}
+            onEditFragment={editFragment}
+          />
+        )}
+        {view === 'fragments' && (
+          <FragmentsWorkspace
+            project={project}
+            onOpenDialog={openDialog}
+            editorStates={editorStates}
+          />
+        )}
       </div>
 
       <footer className="border-t px-4 py-1 text-xs text-muted-foreground">
         {view === 'configurations' ? (
           <ConfigurationStatusBar />
+        ) : view === 'fragments' ? (
+          <FragmentStatusBar />
         ) : (
           `${project.assets.assets.length} assets · ${project.configurations.length} configurações`
         )}
@@ -146,6 +182,7 @@ export function ProjectScreen({
         onOpenDialog={openDialog}
         onClose={() => setDialog(null)}
       />
+      <FragmentDialogs dialog={dialog} onClose={() => setDialog(null)} />
       <ConflictDialog />
     </main>
   )

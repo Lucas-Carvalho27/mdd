@@ -83,13 +83,20 @@ export function hasModifiedFragments(state: ProjectState): boolean {
   return [...state.fragmentDocuments.values()].some(isModified)
 }
 
-/** Os caminhos da árvore: os do disco e os fragmentos novos, que só existem no editor. */
+/**
+ * Os caminhos da árvore: os do disco e os fragmentos novos, que só existem no editor. Um novo
+ * que apareceu no disco (criado por fora, com qualquer caixa) não se repete.
+ */
 export function fragmentTreePaths(
   files: readonly string[] | null,
   documents: ReadonlyMap<string, FragmentDocument>
 ): string[] {
-  const created = [...documents.values()].filter((document) => document.saved === null)
-  return [...(files ?? []), ...created.map((document) => document.path)]
+  const onDisk = files ?? []
+  const known = new Set(onDisk.map((path) => path.toLowerCase()))
+  const created = [...documents.values()]
+    .filter((document) => document.saved === null && !known.has(document.path.toLowerCase()))
+    .map((document) => document.path)
+  return [...onDisk, ...created]
 }
 
 type SetState = StoreApi<ProjectState>['setState']
@@ -102,6 +109,8 @@ export function createFragmentsActions(
   // Cada leitura das pastas e cada conferência recebem um número; só a última é usada.
   let lastListing = 0
   const lastCheck = new Map<string, number>()
+  /** O texto da última conferência de cada fragmento, para não conferir o mesmo texto de novo. */
+  const checkedText = new Map<string, string>()
 
   const setDocument = (document: FragmentDocument): void => {
     const documents = new Map(get().fragmentDocuments)
@@ -179,6 +188,7 @@ export function createFragmentsActions(
       const session = get().session
       const document = get().fragmentDocuments.get(path)
       if (session === null || document === undefined) return
+      if (get().fragmentProblems.has(path) && checkedText.get(path) === document.text) return
       const check = (lastCheck.get(path) ?? 0) + 1
       lastCheck.set(path, check)
       const problems = await services.fragmentChecker.check(path, document.text)
@@ -186,6 +196,7 @@ export function createFragmentsActions(
       if (!get().fragmentDocuments.has(path)) return
       const all = new Map(get().fragmentProblems)
       all.set(path, problems)
+      checkedText.set(path, document.text)
       set({ fragmentProblems: all })
     },
 
@@ -253,7 +264,10 @@ export function createFragmentsActions(
         // Uma edição feita durante a gravação é mantida: o fragmento continua alterado.
         saved.set(path, { ...current, saved: written })
         const found = result.checked.get(path) ?? []
-        if (current.text === written.text) problems.set(path, found)
+        if (current.text === written.text) {
+          problems.set(path, found)
+          checkedText.set(path, written.text)
+        }
         if (found.length === 0) warnings.delete(path)
         else {
           warnings.set(path, {
