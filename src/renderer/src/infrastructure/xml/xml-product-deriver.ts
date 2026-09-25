@@ -5,7 +5,7 @@ import type { XmlSchemaValidator } from '@/application/ports/xml-schema-validato
 import { firstPerPath, type Asset } from '@/domain/assets/asset-catalog'
 import type { GenerationPlan, PlannedSection } from '@/domain/generation/generation-plan'
 import { err, ok, type Result } from '@/domain/shared/result'
-import { declaredEncoding, extractFragmentRoot, firstUndecodedLine } from './fragment-source'
+import { XmlFragmentChecker } from './xml-fragment-checker'
 import type { DecodeProblem } from './xml-reader'
 import { element, rawXml, textElement, writeXmlDocument, type XmlElement } from './xml-writer'
 
@@ -19,11 +19,11 @@ const FRAGMENTS_AT_ONCE = 4
  */
 export class XmlProductDeriver implements ProductDeriver {
   private readonly storage: ProjectStorage
-  private readonly validator: XmlSchemaValidator
+  private readonly fragments: XmlFragmentChecker
 
   constructor(storage: ProjectStorage, validator: XmlSchemaValidator) {
     this.storage = storage
-    this.validator = validator
+    this.fragments = new XmlFragmentChecker(validator)
   }
 
   async derive(
@@ -56,30 +56,7 @@ export class XmlProductDeriver implements ProductDeriver {
       const message = read.error.code === 'not-found' ? 'Arquivo ausente.' : read.error.message
       return err([problem(asset, { message })])
     }
-    const content = read.value.content
-    // O conteúdo foi lido como UTF-8; com outra codificação, os acentos já chegam trocados.
-    const encoding = declaredEncoding(content)
-    if (encoding !== undefined && !/^utf-?8$/i.test(encoding)) {
-      return err([
-        problem(asset, {
-          line: 1,
-          message: `A codificação ${encoding} não é suportada: salve o arquivo em UTF-8.`
-        })
-      ])
-    }
-    // Sem declaração, a outra codificação aparece nos bytes que não são UTF-8.
-    const undecoded = firstUndecodedLine(content)
-    if (undecoded !== undefined) {
-      return err([
-        problem(asset, {
-          line: undecoded,
-          message: 'O arquivo não está em UTF-8: salve-o em UTF-8.'
-        })
-      ])
-    }
-    const issues = await this.validator.validate(null, asset.path, content)
-    if (issues.length > 0) return err(issues.map((issue) => problem(asset, issue)))
-    const root = extractFragmentRoot(content)
+    const root = await this.fragments.extractRoot(asset.path, read.value.content)
     return root.ok ? root : err(root.error.map((issue) => problem(asset, issue)))
   }
 
