@@ -1,0 +1,20 @@
+título ao abrir                    → Loja Online — mdd
+árvore                             → loja catalogo busca mobile pagamento pag_cartao pag_pix pag_boleto
+Tab abre o diálogo                 → Nova filha de “Busca”
+ID sugerido                        → relatorio
+ID repetido                        → O ID "busca" já existe no modelo.
+filha criada e selecionada         → busca_relatorio | título: • Loja Online — mdd
+renomear                           → Relatório mensal busca_relatorio
+Ctrl+Z desfaz o nome               → Relatório busca_relatorio
+Ctrl+Z remove a feature            → removida | título: Loja Online — mdd
+diálogo de impacto                 → Excluir “PIX”? Dá para desfazer com Ctrl+Z enquanto o projeto estiver aberto. Features excluídas (1) PIX Restrições removidas inteiras (1) pag_pix implies mobile Assets desvinculados (os arquivos continuam no disco) (2) docs/pagamento/pix.xml docs/img/pix-fluxo.svg Configurações que vão abrir como desatualizadas (1) Loja Básica Cancelar Excluir Fechar
+depois de excluir                  → loja catalogo busca mobile pagamento pag_cartao pag_boleto | RESTRIÇÕES (0)
+Ctrl+Z restaura                    → true | RESTRIÇÕES (1)
+Alt+↑ em busca                     → loja busca catalogo mobile pagamento pag_cartao pag_pix pag_boleto
+grupo [4..*] recusado              → Edição recusada: O mínimo do grupo (4) passa do número de membros (3).
+Ctrl+S                             → Loja Online — mdd | busca antes de catalogo no disco: true
+conflito ao salvar                 → Arquivos alterados fora do app Estes arquivos mudaram no disco desde que foram abertos (por exemplo, depois de um git pull) e não foram gravados: model.xml Cancelar Recarregar (descarta minhas alterações) Sobrescrever Fechar
+recarregar                         → loja busca catalogo mobile pagamento pag_cartao pag_pix pag_boleto | título: Loja Online — mdd
+fechar com alteração               → Fechar com alterações não salvas? Se fechar sem salvar, as alterações serão perdidas. Cancelar Fechar sem salvar Salvar e fechar Fechar
+tela inicial                       → mdd
+app fechado

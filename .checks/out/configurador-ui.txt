@@ -1,0 +1,50 @@
+aba                                  → Configurações
+rótulo da aba cortado                → false
+lista                                → conflito loja-basica
+centro sem configuração aberta       → Escolha uma configuração na lista.
+barra de status                      → 2 configurações
+estados                              → loja+🔒 catalogo+🔒 busca+ mobile+🔒 pagamento+🔒 pag_cartao+ pag_pix+ pag_boleto-
+barra de status                      → Loja Básica: Válida · completa
+dica de mobile                       → Decidido pelo modelo
+mobile aria-disabled                 → true
+faixas                               → nenhuma
+título                               → Loja Online — mdd
+clique em mobile                     → loja+🔒 catalogo+🔒 busca+ mobile+🔒 pagamento+🔒 pag_cartao+ pag_pix+ pag_boleto- | Loja Online — mdd
+1º clique em pag_pix                 → loja+🔒 catalogo+🔒 busca+ mobile? pagamento+🔒 pag_cartao+ pag_pix- pag_boleto-
+2º clique em pag_pix                 → loja+🔒 catalogo+🔒 busca+ mobile? pagamento+🔒 pag_cartao+ pag_pix? pag_boleto-
+barra de status                      → Loja Básica: Válida · incompleta (2 indecisas)
+título                               → • Loja Online — mdd
+3º clique em pag_pix                 → loja+🔒 catalogo+🔒 busca+ mobile+🔒 pagamento+🔒 pag_cartao+ pag_pix+ pag_boleto-
+Tab no configurador                  → nada
+botão desfazer                       → true | Desfazer vale só nas abas Modelo e Assets
+painel de valores                    → busca mobile
+valor fora da faixa                  → 100 | o máximo é 500
+valor válido                         → 200 | erro: (nada)
+plataforma sem valor                 → Loja Básica: Válida · incompleta (1 atributo sem valor) | Escolha um valor para a configuração ficar completa.
+plataforma ios                       → Loja Básica: Válida · completa
+arquivo sugerido                     → configurations/loja-basica-2.xml
+criada e aberta                      → conflito loja-basica loja-completa* | Loja Completa: Válida · incompleta (5 indecisas)
+renomeada                            → conflito loja-basica loja-premium*
+nome sugerido na cópia               → Loja Premium (cópia)
+duplicada                            → conflito loja-basica loja-premium loja-premium-copia*
+diálogo de exclusão                  → O arquivo configurations/loja-premium-copia.xml será apagado quando você salvar. Até lá, fechar o projeto sem salvar mantém a configuração.
+excluída                             → conflito loja-basica loja-premium | Escolha uma configuração na lista.
+título depois de salvar              → Loja Online — mdd
+loja-basica.xml                      → <value feature="busca" attribute="max_resultados">200</value> <value feature="mobile" attribute="plataforma">ios</value>
+loja-premium.xml                     → <configuration xmlns="urn:mdd:configuration" schemaVersion="1" name="Loja Premium"/>
+cópia no disco                       → (não existe)
+impacto                              → Features excluídas (1) PIX Restrições removidas inteiras (1) pag_pix implies mobile Assets desvinculados (os arquivos continuam no disco) (2) docs/pagamento/pix.xml docs/img/pix-fluxo.svg Configurações que vão abrir como desatualizadas (1) Loja Básica
+desatualizada: faixas                → orphans
+referência órfã                      → Decisão sobre “pag_pix” (selecionada): a feature não existe mais.
+estados                              → loja+🔒 catalogo+🔒 busca+ mobile? pagamento+🔒 pag_cartao+ pag_boleto-
+barra de status                      → Loja Básica: Válida · incompleta (1 indecisa) · desatualizada
+depois de remover                    → nenhuma | Loja Básica: Válida · incompleta (1 indecisa) | • Loja Online — mdd
+conflito: faixas                     → conflict
+decisões listadas                    → Catálogo — desselecionada Remover Busca — selecionada Remover
+estados em conflito                  → loja? catalogo- busca+ mobile? pagamento? pag_cartao? pag_boleto?
+nó em conflito responde?             → true
+painel de valores                    → Resolva o problema indicado acima do diagrama para editar os valores.
+depois de remover a decisão          → nenhuma | Conflito: Válida · incompleta (3 indecisas)
+estados                              → loja+🔒 catalogo+🔒 busca+ mobile? pagamento+🔒 pag_cartao? pag_boleto?
+erros no console                     → nenhum
+app fechado

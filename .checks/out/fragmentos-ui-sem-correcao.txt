@@ -1,0 +1,44 @@
+1. árvore                            → docs/busca/busca-app.xml 📎 | docs/busca/busca.xml 📎 | docs/loja/visao-geral.xml 📎 | docs/pagamento/boleto.xml 📎 | docs/pagamento/pix.xml 📎
+   status                            → 5 fragmentos
+2. barra                             → docs/pagamento/pix.xml
+   vínculo                           → Guia do PIX · pag_pix
+   realce da tag                     → cor de --xml-tag
+   problemas                         → Nenhum problema: o fragmento pode entrar num produto.
+3. título da janela                  → • Loja Online — mdd
+   árvore                            → docs/busca/busca-app.xml 📎 | docs/busca/busca.xml 📎 | docs/loja/visao-geral.xml 📎 | docs/pagamento/boleto.xml 📎 | docs/pagamento/pix.xml • 📎
+   status                            → 5 fragmentos · 1 com alterações
+   desfazer do cabeçalho             → desligado
+4. Ctrl+Z                            → PIX de volta · Loja Online — mdd
+   Ctrl+Y                            → Pix de novo
+5. Ctrl+S                            → Loja Online — mdd · status 5 fragmentos
+   diferentes do exemplo             → docs/loja/visao-geral.xml docs/pagamento/pix.xml
+6. problemas                         → linha 3 Specification mandates value for attribute com linha 3 attributes construct error linha 3 Couldn't find end of Start Tag titlePagamento line 3 linha 3 Opening and ending tag mismatch: topic line 2 and title
+   marcas no editor                  → 1 sublinhado(s), 1 na margem
+   linha do cursor                   → <titlePagamento com Pix</title>
+7. avisos                            → Avisos docs/pagamento/pix.xml:3 Salvo com erro de XML: Specification mandates value for attribute com
+   gerar loja-basica                 → Não foi possível gerar Nada foi gravado. Problemas docs/pagamento/pix.xml:3 [doc_pix] Specification mandates value for attribute com docs/pagamento/pix.xml:3 [doc_pix] attributes construct error docs/pagamento/pix.xml:3 [doc_pix] Couldn't find end of Start Tag titlePagamento line 3 docs/pagamento/pix.xml:3 [doc_pix] Opening and ending tag mismatch: topic line 2 and title Fechar Fechar
+8. Ctrl+Z depois de trocar de aba    → ">" de volta · Nenhum problema: o fragmento pode entrar num produto.
+   salvo sem erro                    → (sem avisos)
+9. visao-geral.xml no disco          → BOM sim · 5 CRLF, 0 LF sozinho · título Panorama geral da loja
+10. volta do foco                    → <title>Mudou por fora</title> · Loja Online — mdd
+11. Ctrl+S                           → Arquivos alterados fora do app Estes arquivos mudaram no disco desde que foram abertos (por exemplo, depois de um git pull) e não foram gravados: docs/loja/visao-geral.xml Cancelar Recarregar (descarta minhas alterações) Sobrescrever Fechar
+    Sobrescrever                     → <title>Editado por fora</title>
+12. caminho sugerido                 → docs/loja/
+    configurations/x.xml             → Novo fragmento O arquivo é criado ao salvar, com as pastas que faltarem. Caminho Relativo à pasta do projeto, terminando em .xml. A pasta configurations/ é das configurações. Cancelar Criar Fechar
+    árvore                           → docs/busca/busca-app.xml 📎 | docs/busca/busca.xml 📎 | docs/loja/visao-geral.xml 📎 | docs/pagamento/boleto.xml 📎 | docs/pagamento/cartao.xml • novo | docs/pagamento/pix.xml 📎
+    editor                           → "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    problemas                        → linha 2 Start tag expected, '<' not found
+    Vincular…                        → desligado
+    digitado                         → Nenhum problema: o fragmento pode entrar num produto.
+    salvo                            → docs/busca/busca-app.xml 📎 | docs/busca/busca.xml 📎 | docs/loja/visao-geral.xml 📎 | docs/pagamento/boleto.xml 📎 | docs/pagamento/pix.xml 📎 · "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<"…
+13. vínculo                          → Guia do cartão · pag_cartao
+    árvore                           → docs/busca/busca-app.xml 📎 | docs/busca/busca.xml 📎 | docs/loja/visao-geral.xml 📎 | docs/pagamento/boleto.xml 📎 | docs/pagamento/pix.xml 📎
+14. Ctrl+Z no texto                  → texto de volta · vínculo Guia do cartão · pag_cartao
+15. na aba Assets                    → doc_loja editar | doc_busca editar | doc_busca_app editar | cartao editar | doc_pix editar | img_pix - | doc_boleto editar
+    Editar doc_boleto                → docs/pagamento/boleto.xml
+16. antes                            → docs/pagamento/boleto.xml • · 6 fragmentos · 1 com alterações
+    diálogo                          → Descartar alterações? O texto de docs/pagamento/boleto.xml volta a ser o que está no disco. Cancelar Descartar Fechar
+    depois                           → docs/pagamento/boleto.xml · 6 fragmentos · • Loja Online — mdd
+17. Ctrl+S, diferentes do exemplo    → assets.xml docs/loja/visao-geral.xml docs/pagamento/cartao.xml docs/pagamento/pix.xml
+erros no console                     → nenhum
+app fechado

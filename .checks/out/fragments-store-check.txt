@@ -27,7 +27,7 @@ problemas                            → linha 2 Start tag expected, '<' not fou
 título                               → •
 criar o mesmo de novo                → "docs/pagamento/cartao.xml" já existe.
 descartado                           → exibido (nenhum) · salvo · árvore docs/antigo.xml docs/loja/visao-geral.xml docs/pagamento/boleto.xml docs/pagamento/pix.xml
-salvo                                → salvo · no disco o texto digitado
+salvo                                → salvo · no disco o texto digitado · árvore docs/antigo.xml docs/loja/visao-geral.xml docs/pagamento/boleto.xml docs/pagamento/cartao.xml docs/pagamento/pix.xml
 — descartar alterações
 alterado                             → •
 descartado                           → salvo · texto do disco

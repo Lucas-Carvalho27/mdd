@@ -124,7 +124,7 @@ state().changeFragmentText(
   '<?xml version="1.0" encoding="UTF-8"?>\n<topic xmlns="urn:exemplo:doc">\n  <title>Cartão</title>\n</topic>\n'
 )
 await state().save()
-log('salvo', `${unsaved()} · no disco ${folder.show('docs/pagamento/cartao.xml').includes('Cartão') ? 'o texto digitado' : 'outro'}`)
+log('salvo', `${unsaved()} · no disco ${folder.show('docs/pagamento/cartao.xml').includes('Cartão') ? 'o texto digitado' : 'outro'} · árvore ${tree()}`)
 
 console.log('— descartar alterações')
 await state().showFragment('docs/loja/visao-geral.xml')

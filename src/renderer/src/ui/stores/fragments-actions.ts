@@ -258,9 +258,15 @@ export function createFragmentsActions(
       const saved = new Map(get().fragmentDocuments)
       const problems = new Map(get().fragmentProblems)
       const warnings = new Map(get().fragmentWarnings)
+      // Um fragmento novo gravado já está no disco: entra na lista das pastas agora, senão sairia
+      // da árvore até a próxima leitura.
+      const files = get().fragmentFiles
+      const known = new Set(files?.map((path) => path.toLowerCase()))
+      const created: string[] = []
       for (const [path, written] of result.saved) {
         const current = saved.get(path)
         if (current === undefined) continue
+        if (current.saved === null && !known.has(path.toLowerCase())) created.push(path)
         // Uma edição feita durante a gravação é mantida: o fragmento continua alterado.
         saved.set(path, { ...current, saved: written })
         const found = result.checked.get(path) ?? []
@@ -277,7 +283,12 @@ export function createFragmentsActions(
           })
         }
       }
-      set({ fragmentDocuments: saved, fragmentProblems: problems, fragmentWarnings: warnings })
+      set({
+        fragmentFiles: files === null ? null : [...files, ...created],
+        fragmentDocuments: saved,
+        fragmentProblems: problems,
+        fragmentWarnings: warnings
+      })
       return { conflicts: result.conflicts, problems: result.problems }
     }
   }

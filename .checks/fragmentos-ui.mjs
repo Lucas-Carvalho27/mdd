@@ -8,7 +8,7 @@ import { connectMain } from './main-process.mjs'
 
 const [port, inspectPort, projectDir] = process.argv.slice(2)
 const ui = await connect(port)
-await connectMain(inspectPort)
+const main = await connectMain(inspectPort)
 await ui.send('Emulation.setFocusEmulationEnabled', { enabled: true })
 await ui.send('Runtime.enable')
 const errors = []
@@ -26,8 +26,8 @@ const file = (path) => join(projectDir, ...path.split('/'))
 const BOM = '\u{FEFF}'
 const show = (content) => JSON.stringify(content).replace(BOM, '<BOM>')
 
-// O EditorView do CodeMirror, pelo DOM (o `cmView` do conteúdo).
-const VIEW = `document.querySelector('.cm-content').cmView.view`
+// O EditorView do CodeMirror, pelo DOM, como no `EditorView.findFromDOM` (o `cmTile` do conteúdo).
+const VIEW = `document.querySelector('.cm-content').cmTile.root.view`
 const editorText = () => js(`${VIEW}.state.doc.toString()`)
 const tree = () =>
   js(
@@ -116,7 +116,12 @@ log(
   '   realce da tag',
   await js(`(() => {
     const token = [...document.querySelectorAll('.cm-line span')].find((s) => s.textContent === 'title')
-    const tag = getComputedStyle(document.documentElement).getPropertyValue('--xml-tag').trim()
+    // A variável sai minificada do build ("oklch(46% .16 262)"): compara com a cor calculada.
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--xml-tag)'
+    document.body.append(probe)
+    const tag = getComputedStyle(probe).color
+    probe.remove()
     return token && getComputedStyle(token).color === tag ? 'cor de --xml-tag' : 'sem cor'
   })()`)
 )
@@ -262,3 +267,4 @@ await waitFor(`!document.title.startsWith('•')`)
 log('17. Ctrl+S, diferentes do exemplo', fromExample())
 log('erros no console', errors.length === 0 ? 'nenhum' : errors.join(' | '))
 ui.close()
+main.close()
