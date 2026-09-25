@@ -4,18 +4,18 @@ Atualizado em 25/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação     | Onde está                                                                                                                                                                                                                                                                          |
-| ------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída    | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 1. Domínio e persistência | Concluída    | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 2A. Edição do modelo      | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
-| 2B. Diagrama visual       | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
-| 3. Configurador           | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
-| 4. Assets                 | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
-| 5. Geração                | Concluída    | `main`. Plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)                    |
-| 6. Editor de fragmentos   | Em andamento | Plano pronto em [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md); o código ainda não entrou. Veja "Fase 6 em andamento"                                                                                   |
+| Fase                      | Situação  | Onde está                                                                                                                                                                                                                                                                          |
+| ------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 1. Domínio e persistência | Concluída | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 2A. Edição do modelo      | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
+| 2B. Diagrama visual       | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
+| 3. Configurador           | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
+| 4. Assets                 | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
+| 5. Geração                | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)           |
+| 6. Editor de fragmentos   | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md)                                                                                                                                |
 
-O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B, 3 e 4, também:
+O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as fases seguintes, também:
 
 - mostra o modelo num diagrama na notação clássica, com layout automático, zoom, "ajustar à tela" e subárvores recolhíveis;
 - edita o modelo (features, grupos, atributos e restrições), com desfazer/refazer e diálogo de impacto ao excluir;
@@ -26,6 +26,7 @@ O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado
 - resolve cada configuração com o solver SAT e a mostra no diagrama em modo configuração, com decisões por clique, valores de atributos, lista de configurações e faixas para configurações desatualizadas ou em conflito.
 - vincula arquivos do projeto às features na aba Assets, com o estado de cada arquivo (ok ou ausente), trocar arquivo, reordenar, desvincular e abrir no programa padrão, e mostra os assets ancorados no painel da feature.
 - gera o produto de uma configuração completa em `saida/<nome>/`, com o `product.xml` e os recursos copiados, conferindo todas as fontes antes e sem gravar nada quando há problema.
+- cria e edita os fragmentos na aba Fragmentos, num editor de XML com realce e a mesma conferência da geração, e os salva junto com o projeto, mantendo o BOM e as quebras de linha de cada arquivo.
 
 Documentos de referência:
 
@@ -150,48 +151,47 @@ Também foram corrigidos cinco itens menores: no máximo 4 fragmentos conferidos
 
 O branch `fase-5-geracao` foi mesclado na `main` em 24/09/2026.
 
+## Aceitação da Fase 6 (feita em 25/09/2026)
+
+O desenho está em [docs/superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md](superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md), e o plano, em [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md). A fase não estava no roadmap: o usuário pediu um editor de XML dentro do app para os fragmentos.
+
+**Como o código entrou.** O código foi prototipado num clone descartável (branch `prototipo-fase-6`) e verificado lá. Depois, cada tarefa foi aplicada sozinha, em ordem, num branch descartável por tarefa, sobre o `dc1dcd7`: os roteiros novos falharam antes e deram a saída do plano depois, com typecheck e lint limpos (`.checks/por-tarefa.sh`). O plano foi montado por script a partir desse branch e conferido pelo `verify-plan-6.py`. A pedido do usuário, esses seis commits já verificados (um por tarefa, idênticos ao plano) entraram no branch `fase-6-editor-fragmentos`, em vez de o plano ser executado de novo passo a passo. No branch da fase, tudo foi conferido outra vez: typecheck, lint, build e os 13 roteiros sem janela iguais ao plano.
+
+**Achados ao rodar a interface** (antes do plano, no protótipo):
+
+- **Um fragmento novo salvo sumia da árvore** até a próxima leitura das pastas. A correção está no `saveFragments` (`fragments-actions.ts`), e o `fragments-store-check.mts` passou a mostrar a árvore logo depois de salvar.
+- **O roteiro `fragmentos-ui.mjs` tinha três erros próprios:** o `cmTile` do `@codemirror/view` 6.43, a cor minificada pelo build e a conexão com o processo main que não fechava (veja "Armadilhas").
+- **O critério 4 da aceitação não era conferido por nenhum roteiro:** o passo 15 do `fragmentos-ui.mjs` passou a mostrar o estado do arquivo na aba Assets (`cartao:ok`).
+
+**Roteiros, todos com a saída esperada no plano:**
+
+- `fragment-path-check.mts` e `text-format-check.mts` (Tarefa 1), `fragment-checker-check.mts` (Tarefa 2), `save-fragments-check.mts` (Tarefa 3) e `fragments-store-check.mts` (Tarefa 4);
+- `fragmentos-ui.mjs`, no modo de desenvolvimento (Tarefa 5) e no `mdd.exe` gerado pelo `npm run build:win` do branch da fase (Tarefa 6, Passo 2), com saídas idênticas. O `app.asar` não leva `.checks/`.
+
+**Regressão:** `configurations-check` e `save-safety-check` (Tarefa 1), `fragment-source-check` e `generate-product-check` (Tarefa 2), `assets-store-check`, `configurator-store-check` e `generation-store-check` (Tarefa 4), e os roteiros de interface `ui-check`, `configurador-ui`, `assets-ui` e `geracao-ui` (Tarefa 5): todos iguais aos planos das fases anteriores. O `diagrama-ui.mjs` (2B) não rodou: a fase não mexe no diagrama nem na aba Modelo.
+
+**Checagem à mão** (Tarefa 6, Passo 3), feita pelo usuário no `mdd.exe`, sobre uma cópia do exemplo em `.checks/aceitacao-manual/`. Ele respondeu que tudo pareceu perfeito:
+
+1. o `pix.xml` na aba Fragmentos, com as cores do realce, os números de linha e a linha atual destacada, no tema claro;
+2. um `>` apagado: a linha sublinhada, a marca na margem e o problema embaixo, com a linha; Ctrl+Z desfez;
+3. o `pix.xml` editado no Bloco de Notas, sem alteração no app: ao voltar com um clique, o editor mostrou o texto novo.
+
+O tema escuro não foi visto: o app ainda não o liga (nada aplica a classe `.dark`).
+
+**Revisão final do branch inteiro** (`git diff dc1dcd7..` do código): nenhum problema crítico nem importante. Foram conferidos o estado do CodeMirror guardado por arquivo (inclusive com o `StrictMode` do React montando duas vezes), o salvar com edição durante a gravação, o conflito e o "Recarregar", a volta do foco, a listagem de pastas (atalhos de pasta não são seguidos, então não há ciclo) e o CodeMirror só em `ui/screens/fragments/`. Itens menores, registrados sem correção:
+
+- **Ctrl+S segurado:** o `save()` não confere se já há um salvamento em andamento (o botão do cabeçalho fica desligado, mas o atalho não). Dois salvamentos sobrepostos fazem o segundo acusar um conflito falso, que aparece por um instante. Não há perda de dados, e a falha vem da Fase 2A; a Fase 6 só alarga a janela, porque cada fragmento gravado passa pelo `xmllint`. Reproduzido com o `.checks/double-save-check.mts`. Ficou como tarefa separada.
+- **"Recarregar" com o texto igual ao do disco** mantém o histórico de desfazer daquele arquivo. É inofensivo.
+- **Nomes reservados do Windows** (`con.xml`, `nul.xml`, `com1.xml`) não são recusados no caminho novo. Neste Windows 11, eles viram arquivos comuns, gravados e relidos sem problema.
+
+O branch `fase-6-editor-fragmentos` foi mesclado na `main` em 25/09/2026 e enviado ao GitHub. O branch `prototipo-fase-6` continua no GitHub só como fonte dos roteiros: **nunca o mescle**.
+
 ## Próximo passo
 
-Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo). O usuário pediu, em seguida, um editor de XML integrado ao app: um editor de texto simples, com realce de sintaxe, para criar e editar os fragmentos dentro da aplicação. Virou a **Fase 6 (editor de fragmentos)**, em andamento (veja "Fase 6 em andamento" abaixo). Os itens da fase "Depois" da SPEC §9 continuam em aberto.
+As fases 0 a 6 estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo). O que resta, para o usuário escolher:
 
-## Fase 6 em andamento (parada em 25/09/2026)
-
-**Desenho aprovado:** [docs/superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md](superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md). Em resumo:
-
-- editor com CodeMirror 6 numa aba nova, "Fragmentos", só para os fragmentos;
-- o texto salva junto com o projeto, no mesmo "•", Ctrl+S e confirmação ao fechar;
-- erro de XML não impede salvar, mas gera um aviso;
-- "Vincular a uma feature…" no editor e "Editar" na aba Assets;
-- arquivo fora do UTF-8 fica só para leitura;
-- BOM e quebras de linha mantidos.
-
-**Plano pronto:** [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md), com seis tarefas: domínio, conferência de fragmento, aplicação, store, a aba Fragmentos e a aceitação com os documentos (ADR 0009, SPEC e spec do desenho).
-
-- O plano foi montado por script a partir do protótipo (`.checks/plan-template-6.md` e `build-plan-6.py`) e conferido pelo `verify-plan-6.py`: os 62 trechos "Troque / por", aplicados em ordem sobre `dc1dcd7`, reproduzem os arquivos, e cada arquivo inteiro e cada saída aparecem iguais no plano, depois do Prettier.
-- Cada tarefa foi aplicada sozinha, em ordem, num branch descartável por tarefa (`.checks/por-tarefa.sh`): os roteiros novos falharam antes e deram a saída do plano depois, com typecheck e lint limpos. No fim, o `src/` ficou idêntico ao do protótipo.
-- O que o protótipo respondeu, inclusive as correções da spec do desenho, está na seção de mesmo nome do plano.
-
-**O que aconteceu em 25/09/2026:**
-
-- O `fragmentos-ui.mjs` rodou pela primeira vez e achou um defeito: um fragmento novo salvo sumia da árvore até a próxima leitura das pastas. A correção está no `saveFragments` (`fragments-actions.ts`), e o `fragments-store-check.mts` passou a mostrar a árvore logo depois de salvar.
-- O próprio roteiro tinha três erros: o `cmTile` do `@codemirror/view` 6.43, a cor minificada pelo build e a conexão com o processo main que não fechava. Os três viram armadilhas na Tarefa 6 do plano.
-- O passo 15 do roteiro passou a mostrar o estado do arquivo na aba Assets (`cartao:ok`), que é o critério 4 da aceitação.
-- A regressão de interface (`ui-check`, `configurador-ui`, `assets-ui` e `geracao-ui`) e a das stores saíram iguais aos planos.
-- No `mdd.exe` (`npm run build:win`), o `fragmentos-ui.mjs` deu a mesma saída do modo de desenvolvimento (antes da mudança no passo 15, que só acrescenta o estado do arquivo).
-- Os documentos da Tarefa 6 (ADR 0009, SPEC e spec do desenho) foram escritos no protótipo e entram no branch da fase pelo plano.
-
-**Branches** (só no repositório local; o GitHub ainda tem a versão de 24/09):
-
-- `fase-6-editor-fragmentos`: a spec, este handoff e o plano. O código ainda não entrou.
-- `prototipo-fase-6`: o protótipo descartável, com a pasta `.checks/` (os roteiros novos e os das fases anteriores, as saídas conferidas em `.checks/out/` e os scripts do plano). **Nunca mescle este branch:** ele é só a fonte do plano. Como ele tem arquivos em `.checks/` que o git conhece, trabalhe nele num clone separado, e não no clone do branch da fase.
-
-**Próximos passos:**
-
-1. **Executar o plano** no branch `fase-6-editor-fragmentos`, tarefa por tarefa, com revisão (superpowers:subagent-driven-development).
-   - Os roteiros de `.checks/` podem vir do branch do protótipo sem passar pelo índice do git: `git archive prototipo-fase-6 .checks | tar -x`, na raiz (a pasta é ignorada pelo git; num clone novo, use `origin/prototipo-fase-6`). Assim vêm também os roteiros das fases anteriores, já nas versões que os planos esperam.
-   - O `fragment-source-check.mts` de lá já tem o import da Tarefa 2 (Passo 8), e o passo fica só para conferir.
-2. Os roteiros de interface abrem janelas: combinar o momento com o usuário (Tarefa 5, Passos 15 e 16; Tarefa 6, Passo 2).
-3. A checagem à mão com o usuário no `mdd.exe` (Tarefa 6, Passo 3). Depois, o merge local na `main` e o envio ao GitHub.
+- a correção do Ctrl+S segurado (veja "Aceitação da Fase 6");
+- os itens da fase "Depois" da SPEC §9.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
@@ -217,7 +217,7 @@ Estas tinham ficado de lado porque dependiam do diálogo nativo de pastas. Em 24
 - **Uma fase por vez, com um plano por fase.** Antes de escrever o plano, o código é prototipado e verificado numa cópia descartável do repositório. O plano contém o código já testado.
 - **Sem testes automatizados** (ADR 0008). A verificação usa typecheck, lint e scripts descartáveis em `.checks/`, rodados com `npx tsx` ou `node`. A interface é checada pelo protocolo de depuração do Chromium (`--remote-debugging-port`).
 - **Um branch por fase**, com um commit por tarefa e merge local na `main` ao fim, depois das checagens.
-- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B. Os da Fase 3 (`resolution-check.mts`, `configurations-check.mts`, `configurator-store-check.mts`, `quit.mjs`, `configurador-ui.mjs` e `aceitacao-3.mjs`) estão no plano da Fase 3. O `save-safety-check.mts` está nas correções da Fase 3 ([docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md)). Os da Fase 4 (`asset-edits-check.mts`, `asset-files-check.mts`, `project-root-check.mts`, `assets-store-check.mts`, `main-process.mjs`, `run-ui.sh`, `assets-ui.mjs` e `aceitacao-4.mjs`) estão no plano da Fase 4, cada um num passo "Escrever `.checks/<nome>`"; o `ui-check.mjs` precisa das duas mudanças da 2B (plano da 2B, Tarefa 4, Passo 6). Os da Fase 5 (`generation-plan-check.mts`, `output-guard-check.mts`, `fragment-source-check.mts`, `generation-support.mts`, `generate-product-check.mts`, `generation-store-check.mts`, `geracao-ui.mjs` e `aceitacao-5.mjs`) estão no plano da Fase 5; as versões corrigidas do `generate-product-check.mts` e do `generation-store-check.mts` estão nas correções da Fase 5 ([docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)). O `run-ui.sh` prepara a cópia do exemplo, abre o app, espera a tela inicial, roda um roteiro e fecha: prefira-o a montar os comandos à mão. Num plano, cada roteiro vem depois de uma linha "Crie `.checks/<nome>`:", e dá para extraí-los com um script pequeno em vez de copiar à mão.
+- **Os scripts de `.checks/` não vão para o git.** Num clone novo, recrie os que precisar a partir dos planos. O `cdp-eval.mjs` está no plano da Fase 1 (Tarefa 6, Passo 8). O `ui-check.mjs` está no plano da 2A (Tarefa 7, Passo 8). Os roteiros da 2B (`diagram-check.mts`, `store-check.mts`, `cdp.mjs`, `diagrama-ui.mjs`, `main-dialogs.mjs` e `aceitacao-2b.mjs`) estão no plano da 2B. Os da Fase 3 (`resolution-check.mts`, `configurations-check.mts`, `configurator-store-check.mts`, `quit.mjs`, `configurador-ui.mjs` e `aceitacao-3.mjs`) estão no plano da Fase 3. O `save-safety-check.mts` está nas correções da Fase 3 ([docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md)). Os da Fase 4 (`asset-edits-check.mts`, `asset-files-check.mts`, `project-root-check.mts`, `assets-store-check.mts`, `main-process.mjs`, `run-ui.sh`, `assets-ui.mjs` e `aceitacao-4.mjs`) estão no plano da Fase 4, cada um num passo "Escrever `.checks/<nome>`"; o `ui-check.mjs` precisa das duas mudanças da 2B (plano da 2B, Tarefa 4, Passo 6). Os da Fase 5 (`generation-plan-check.mts`, `output-guard-check.mts`, `fragment-source-check.mts`, `generation-support.mts`, `generate-product-check.mts`, `generation-store-check.mts`, `geracao-ui.mjs` e `aceitacao-5.mjs`) estão no plano da Fase 5; as versões corrigidas do `generate-product-check.mts` e do `generation-store-check.mts` estão nas correções da Fase 5 ([docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)). Os da Fase 6 (`fragment-path-check.mts`, `text-format-check.mts`, `fragment-checker-check.mts`, `memory-folder.mts`, `save-fragments-check.mts`, `fragments-store-check.mts` e `fragmentos-ui.mjs`) estão no plano da Fase 6; o `fragment-source-check.mts` da Fase 5 troca um import (Tarefa 2, Passo 8). Mais rápido que recriar: o branch `prototipo-fase-6` guarda todos os roteiros, nas versões que os planos esperam, com as saídas conferidas em `.checks/out/`. Para trazê-los sem passar pelo índice do git, rode na raiz `git archive origin/prototipo-fase-6 .checks | tar -x` (a pasta é ignorada pelo git). O `run-ui.sh` prepara a cópia do exemplo, abre o app, espera a tela inicial, roda um roteiro e fecha: prefira-o a montar os comandos à mão. Num plano, cada roteiro vem depois de uma linha "Crie `.checks/<nome>`:", e dá para extraí-los com um script pequeno em vez de copiar à mão.
 - **Para dirigir a interface sem o diálogo nativo:** rode o app com `--user-data-dir` apontando para uma pasta própria e com um `recent-projects.json` que já contém o projeto. O projeto abre pela lista de recentes. O roteiro `ui-check.mjs` da 2A faz isso.
 - **Para responder os diálogos nativos sem a tela:** rode o app também com `--inspect=9229` (funciona no `mdd.exe` empacotado) e conecte no inspetor do Node (`http://127.0.0.1:9229/json`). Com `Runtime.evaluate` e `includeCommandLineAPI: true`, o `require('electron')` fica disponível. Aí basta trocar `dialog.showOpenDialog` por uma função que devolve `{ canceled: false, filePaths: [pasta] }`, e `dialog.showMessageBoxSync` por uma que devolve o índice do botão escolhido. O main lê `electron.dialog.*` na hora da chamada, então a troca vale na hora. Para simular o X da janela, chame `BrowserWindow.getAllWindows()[0].close()`, que dispara o mesmo evento `close`.
 
@@ -255,4 +255,9 @@ Estas tinham ficado de lado porque dependiam do diálogo nativo de pastas. Em 24
 - **Posições do `@xmldom/xmldom`:** ele converte as quebras de linha antes de ler, e as posições deixam de bater com o texto original. Passe `normalizeLineEndings: (source) => source` e conte as linhas como ele (`\r\n`, `\r` e `\n`). Ele também recusa o BOM: tire-o antes.
 - **Renomear pasta no Windows:** falha com `EPERM` se um arquivo dela estiver aberto em outro processo (mesmo com permissão de exclusão) e com `EBUSY` se ela for o diretório atual de outro processo. Para reproduzir num roteiro, um PowerShell segura o arquivo (`generation-support.mts`).
 - **BOM no código:** escreva `'\u{FEFF}'`. A forma de quatro dígitos pode virar um BOM literal, invisível, ao passar pela ferramenta de escrita.
+- **O CodeMirror nos roteiros:** o `EditorView` sai do DOM por `document.querySelector('.cm-content').cmTile.root.view` (desde o `@codemirror/view` 6.43; antes era `cmView.view`), como faz o `EditorView.findFromDOM`. É uma propriedade interna: ao atualizar o pacote, confira o `fragmentos-ui.mjs`.
+- **Variáveis CSS depois do build:** o build minifica os valores (`oklch(0.46 0.16 262)` vira `oklch(46% .16 262)`), e o `getPropertyValue` devolve o texto minificado. Para comparar uma cor, use a cor calculada de um elemento com `color: var(--nome)`.
+- **Roteiro com `connectMain`:** guarde a conexão e chame `main.close()` no fim. Aberta, ela segura o Node, e o `run-ui.sh` nunca chega a fechar o app.
+- **O CodeMirror e as quebras de linha:** o editor troca `\r\n` e `\r` por `\n` e não sabe do BOM. O `text-format.ts` guarda o formato do arquivo e o devolve ao gravar; sem isso, salvar trocaria o arquivo inteiro no git.
+- **Roteiros no plano e o Prettier:** o Prettier reformata o código dentro dos blocos do Markdown. Um roteiro de `.checks/` (fora do Prettier) só aparece igual no plano se estiver no formato dele; rode `npx prettier --write --ignore-path /dev/null .checks/<roteiro>` antes de montar o plano.
 - **Rodadas seguidas do `run-ui.sh`:** logo depois de uma rodada, as portas 9229 e 9333 podem ficar em `TIME_WAIT`, e o roteiro seguinte sai vazio (só `app fechado`). Espere uns segundos entre as rodadas e rode de novo.
