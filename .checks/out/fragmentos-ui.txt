@@ -34,7 +34,7 @@
 13. vínculo                          → Guia do cartão · pag_cartao
     árvore                           → docs/busca/busca-app.xml 📎 | docs/busca/busca.xml 📎 | docs/loja/visao-geral.xml 📎 | docs/pagamento/boleto.xml 📎 | docs/pagamento/cartao.xml 📎 | docs/pagamento/pix.xml 📎
 14. Ctrl+Z no texto                  → texto de volta · vínculo Guia do cartão · pag_cartao
-15. na aba Assets                    → doc_loja editar | doc_busca editar | doc_busca_app editar | cartao editar | doc_pix editar | img_pix - | doc_boleto editar
+15. na aba Assets                    → doc_loja:ok editar | doc_busca:ok editar | doc_busca_app:ok editar | cartao:ok editar | doc_pix:ok editar | img_pix:ok - | doc_boleto:ok editar
     Editar doc_boleto                → docs/pagamento/boleto.xml
 16. antes                            → docs/pagamento/boleto.xml • · 6 fragmentos · 1 com alterações
     diálogo                          → Descartar alterações? O texto de docs/pagamento/boleto.xml volta a ser o que está no disco. Cancelar Descartar Fechar

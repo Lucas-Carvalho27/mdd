@@ -37,13 +37,22 @@ const problems = () => text('[data-fragment-problems]')
 const summary = () => text('[data-fragments-summary]')
 const bar = () => text('[data-fragment-bar]')
 const dialog = () =>
-  js(`document.querySelector('[role=dialog]')?.innerText.replace(/\\s+/g, ' ').trim() ?? '(sem diálogo)'`)
+  js(
+    `document.querySelector('[role=dialog]')?.innerText.replace(/\\s+/g, ' ').trim() ?? '(sem diálogo)'`
+  )
 const warnings = () =>
   js(
     `[...document.querySelectorAll('main section h2')].find((h) => h.innerText === 'Avisos')?.parentElement.innerText.replace(/\\s+/g, ' ').trim() ?? '(sem avisos)'`
   )
 const mouse = (type, x, y, clickCount) =>
-  send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mouseReleased' ? 0 : 1, clickCount })
+  send('Input.dispatchMouseEvent', {
+    type,
+    x,
+    y,
+    button: 'left',
+    buttons: type === 'mouseReleased' ? 0 : 1,
+    clickCount
+  })
 /** Clica no editor na posição do texto `needle` (+ `delta` caracteres); duas vezes seleciona a palavra. */
 const clickText = async (needle, { delta = 0, clicks = 1 } = {}) => {
   const box = await js(`(() => {
@@ -135,9 +144,17 @@ log('   árvore', await tree())
 log('   status', await summary())
 
 // 4. Ctrl+Z e Ctrl+Y ficam com o editor
-log('   desfazer do cabeçalho', await js(`document.querySelector('header button[title^="Desfazer"]').disabled ? 'desligado' : 'ligado'`))
+log(
+  '   desfazer do cabeçalho',
+  await js(
+    `document.querySelector('header button[title^="Desfazer"]').disabled ? 'desligado' : 'ligado'`
+  )
+)
 await press('z', { ctrl: true })
-log('4. Ctrl+Z', `${(await editorText()).includes('com PIX</title>') ? 'PIX de volta' : 'não voltou'} · ${await title()}`)
+log(
+  '4. Ctrl+Z',
+  `${(await editorText()).includes('com PIX</title>') ? 'PIX de volta' : 'não voltou'} · ${await title()}`
+)
 await press('y', { ctrl: true })
 log('   Ctrl+Y', (await editorText()).includes('com Pix</title>') ? 'Pix de novo' : 'não refez')
 
@@ -152,7 +169,12 @@ await clickText('<title>', { delta: 6 })
 await press('Delete')
 await settle()
 log('6. problemas', await problems())
-log('   marcas no editor', await js(`document.querySelectorAll('.cm-lintRange-error').length + ' sublinhado(s), ' + document.querySelectorAll('.cm-lint-marker-error').length + ' na margem'`))
+log(
+  '   marcas no editor',
+  await js(
+    `document.querySelectorAll('.cm-lintRange-error').length + ' sublinhado(s), ' + document.querySelectorAll('.cm-lint-marker-error').length + ' na margem'`
+  )
+)
 await clickText('<p>')
 await click('[data-fragment-problems] button')
 log('   linha do cursor', await js(`document.querySelector('.cm-activeLine')?.textContent.trim()`))
@@ -175,7 +197,10 @@ await waitFor(`document.querySelector('.cm-content') !== null`)
 await clickText('<p>')
 await press('z', { ctrl: true })
 await settle()
-log('8. Ctrl+Z depois de trocar de aba', `${(await editorText()).includes('<title>Pagamento com Pix') ? '">" de volta' : 'não voltou'} · ${await problems()}`)
+log(
+  '8. Ctrl+Z depois de trocar de aba',
+  `${(await editorText()).includes('<title>Pagamento com Pix') ? '">" de volta' : 'não voltou'} · ${await problems()}`
+)
 await press('s', { ctrl: true })
 await waitFor(`!document.title.startsWith('•')`)
 log('   salvo sem erro', await warnings())
@@ -189,10 +214,16 @@ await type('Panorama')
 await press('s', { ctrl: true })
 await waitFor(`!document.title.startsWith('•')`)
 const visao = readFileSync(file('docs/loja/visao-geral.xml'), 'utf8')
-log('9. visao-geral.xml no disco', `BOM ${visao.startsWith(BOM) ? 'sim' : 'não'} · ${visao.split('\r\n').length - 1} CRLF, ${visao.replaceAll('\r\n', '').split('\n').length - 1} LF sozinho · título ${visao.match(/<title>([^<]+)/)[1]}`)
+log(
+  '9. visao-geral.xml no disco',
+  `BOM ${visao.startsWith(BOM) ? 'sim' : 'não'} · ${visao.split('\r\n').length - 1} CRLF, ${visao.replaceAll('\r\n', '').split('\n').length - 1} LF sozinho · título ${visao.match(/<title>([^<]+)/)[1]}`
+)
 
 // 10. Alterado fora do app: sem alteração no app, o editor mostra o texto novo
-writeFileSync(file('docs/loja/visao-geral.xml'), '<topic>\n  <title>Mudou por fora</title>\n</topic>\n')
+writeFileSync(
+  file('docs/loja/visao-geral.xml'),
+  '<topic>\n  <title>Mudou por fora</title>\n</topic>\n'
+)
 await js(`window.dispatchEvent(new Event('focus'))`)
 await waitFor(`document.querySelector('.cm-content')?.innerText.includes('Mudou por fora')`)
 log('10. volta do foco', `${(await editorText()).split('\n')[1].trim()} · ${await title()}`)
@@ -206,7 +237,10 @@ await waitFor(`document.querySelector('[role=dialog]') !== null`)
 log('11. Ctrl+S', await dialog())
 await click({ text: 'Sobrescrever' })
 await waitFor(`!document.title.startsWith('•')`)
-log('    Sobrescrever', readFileSync(file('docs/loja/visao-geral.xml'), 'utf8').split('\n')[1].trim())
+log(
+  '    Sobrescrever',
+  readFileSync(file('docs/loja/visao-geral.xml'), 'utf8').split('\n')[1].trim()
+)
 
 // 12. Novo fragmento: o caminho sugerido, a recusa e a criação
 await click({ text: 'Novo fragmento' })
@@ -220,7 +254,12 @@ await settle()
 log('    árvore', await tree())
 log('    editor', JSON.stringify(await editorText()))
 log('    problemas', await problems())
-log('    Vincular…', await js(`[...document.querySelectorAll('button')].find((b) => b.innerText.includes('Vincular a uma feature'))?.disabled ? 'desligado' : 'ligado'`))
+log(
+  '    Vincular…',
+  await js(
+    `[...document.querySelectorAll('button')].find((b) => b.innerText.includes('Vincular a uma feature'))?.disabled ? 'desligado' : 'ligado'`
+  )
+)
 await clickText('<?xml')
 await key('End', 'End', 35, 2)
 await type('<topic xmlns="urn:exemplo:doc">\n  <title>Pagamento com cartão</title>\n</topic>\n')
@@ -228,7 +267,10 @@ await settle()
 log('    digitado', await problems())
 await press('s', { ctrl: true })
 await waitFor(`!document.title.startsWith('•')`)
-log('    salvo', `${await tree()} · ${show(readFileSync(file('docs/pagamento/cartao.xml'), 'utf8').slice(0, 40))}…`)
+log(
+  '    salvo',
+  `${await tree()} · ${show(readFileSync(file('docs/pagamento/cartao.xml'), 'utf8').slice(0, 40))}…`
+)
 
 // 13. Vincular a uma feature pelo editor
 await click({ startsWith: 'Vincular a uma feature' })
@@ -243,12 +285,22 @@ log('    árvore', await tree())
 await clickText('Pagamento com cartão', { delta: 14, clicks: 2 })
 await type('crédito')
 await press('z', { ctrl: true })
-log('14. Ctrl+Z no texto', `${(await editorText()).includes('com cartão') ? 'texto de volta' : 'não voltou'} · vínculo ${await text('[data-fragment-link]')}`)
+log(
+  '14. Ctrl+Z no texto',
+  `${(await editorText()).includes('com cartão') ? 'texto de volta' : 'não voltou'} · vínculo ${await text('[data-fragment-link]')}`
+)
 
 // 15. "Editar" na aba Assets
 await click({ text: 'Assets' })
-await waitFor(`document.querySelector('[data-asset-id="doc_cartao"]') !== null || document.querySelector('[data-asset-id="cartao"]') !== null`)
-log('15. na aba Assets', await js(`[...document.querySelectorAll('[data-asset-id]')].map((row) => row.dataset.assetId + ' ' + (row.querySelector('button[title="Editar na aba Fragmentos"]') ? 'editar' : '-')).join(' | ')`))
+await waitFor(
+  `document.querySelector('[data-asset-id="cartao"]') !== null && document.querySelectorAll('[data-file-status=checking]').length === 0`
+)
+log(
+  '15. na aba Assets',
+  await js(
+    `[...document.querySelectorAll('[data-asset-id]')].map((row) => row.dataset.assetId + ':' + row.querySelector('[data-file-status]').dataset.fileStatus + ' ' + (row.querySelector('button[title="Editar na aba Fragmentos"]') ? 'editar' : '-')).join(' | ')`
+  )
+)
 await click('[data-asset-id="doc_boleto"] button[title="Editar na aba Fragmentos"]')
 await waitFor(`document.querySelector('[data-fragment-bar]')?.innerText.includes('boleto')`)
 log('    Editar doc_boleto', await bar())

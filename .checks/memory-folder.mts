@@ -58,7 +58,9 @@ export function memoryFolder(initial: Record<string, string>) {
         const kind = rest.length === 1 ? 'file' : 'directory'
         entries.set(rest[0].toLowerCase(), { name: rest[0], kind })
       }
-      return entries.size === 0 && directory !== '' ? err(missing(directory)) : ok([...entries.values()])
+      return entries.size === 0 && directory !== ''
+        ? err(missing(directory))
+        : ok([...entries.values()])
     },
     async remove(path) {
       files.delete(path.toLowerCase())

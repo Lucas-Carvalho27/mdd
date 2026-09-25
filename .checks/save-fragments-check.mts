@@ -58,7 +58,10 @@ log('caminho novo docs/pagamento/PIX…', repeated.ok ? repeated.value : repeate
 
 console.log('— abrir')
 const pix = await opened('docs/pagamento/pix.xml')
-log('pix.xml', `${JSON.stringify(pix.text)} bom=${pix.format.bom} quebra=${JSON.stringify(pix.format.lineBreak)}`)
+log(
+  'pix.xml',
+  `${JSON.stringify(pix.text)} bom=${pix.format.bom} quebra=${JSON.stringify(pix.format.lineBreak)}`
+)
 log('pix.xml só leitura?', pix.readOnly ?? 'não')
 const latin1 = await opened('docs/pagamento/latin1.xml')
 log('latin1.xml só leitura?', latin1.readOnly ?? 'não')
@@ -90,7 +93,10 @@ log('resultado', summary(brokenResult))
 const pixBroken = { ...broken, saved: brokenResult.saved.get(broken.path) ?? null }
 
 console.log('— alterado fora do app')
-folder.write('docs/pagamento/pix.xml', `${BOM}<?xml version="1.0"?>\r\n<topic>\r\n  <title>git pull</title>\r\n</topic>\r\n`)
+folder.write(
+  'docs/pagamento/pix.xml',
+  `${BOM}<?xml version="1.0"?>\r\n<topic>\r\n  <title>git pull</title>\r\n</topic>\r\n`
+)
 const mine = { ...pixBroken, text: pixBroken.text.replace('</titulo>', '</title>') }
 log('salvar', summary(await save.execute([mine])))
 log('pix.xml no disco', folder.show('docs/pagamento/pix.xml'))
@@ -102,7 +108,13 @@ const novo = { ...newFragment('docs/novo.xml'), text: '<novo/>\n' }
 folder.write('DOCS/NOVO.XML', '<de-fora/>\n')
 log('salvar', summary(await save.execute([novo])))
 log('Sobrescrever', summary(await save.execute([novo], { overwrite: true })))
-log('no disco', folder.names().filter((name) => name.toLowerCase().includes('novo')).join(' '))
+log(
+  'no disco',
+  folder
+    .names()
+    .filter((name) => name.toLowerCase().includes('novo'))
+    .join(' ')
+)
 
 console.log('— apagado por fora, com alteração')
 const visaoEdited = { ...visao, text: visao.text.replace('Loja', 'A loja') }

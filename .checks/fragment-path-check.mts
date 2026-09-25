@@ -26,7 +26,14 @@ for (const path of [
 ]) {
   log(path, isFragmentFile(path, 'saida') ? 'arquivo' : '—')
 }
-for (const path of ['docs', 'configurations', 'saida', '.git', 'docs/.cache', 'docs/configurations']) {
+for (const path of [
+  'docs',
+  'configurations',
+  'saida',
+  '.git',
+  'docs/.cache',
+  'docs/configurations'
+]) {
   log(`${path}/`, isFragmentFolder(path, 'saida') ? 'pasta' : '—')
 }
 

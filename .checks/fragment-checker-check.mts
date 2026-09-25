@@ -29,4 +29,8 @@ for (const [name, content] of Object.entries(cases)) {
 }
 
 const root = await checker.extractRoot('docs/pagamento/pix.xml', pix)
-console.log('raiz extraída do pix.xml'.padEnd(26), '→', root.ok ? root.value.split('\n')[0] : root.error)
+console.log(
+  'raiz extraída do pix.xml'.padEnd(26),
+  '→',
+  root.ok ? root.value.split('\n')[0] : root.error
+)

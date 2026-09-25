@@ -22,7 +22,8 @@ const folder = memoryFolder({
   'docs/loja/visao-geral.xml': example('docs/loja/visao-geral.xml'),
   'docs/pagamento/pix.xml': example('docs/pagamento/pix.xml'),
   'docs/pagamento/boleto.xml': example('docs/pagamento/boleto.xml'),
-  'docs/antigo.xml': '<?xml version="1.0" encoding="ISO-8859-1"?>\n<t>Informa\u{FFFD}\u{FFFD}o</t>\n'
+  'docs/antigo.xml':
+    '<?xml version="1.0" encoding="ISO-8859-1"?>\n<t>Informa\u{FFFD}\u{FFFD}o</t>\n'
 })
 const session = (): ProjectSession => ({
   folder: { rootPath: 'C:\\loja', name: 'loja' },
@@ -85,7 +86,10 @@ state().changeFragmentText(PIX, original)
 log('voltando ao texto do disco', unsaved())
 state().changeFragmentText(PIX, original.replace('Pagamento com PIX', 'Pague com PIX'))
 await state().save()
-log('depois do Ctrl+S', `${unsaved()} · conflitos ${state().conflicts.length} · avisos ${state().fragmentWarnings.size}`)
+log(
+  'depois do Ctrl+S',
+  `${unsaved()} · conflitos ${state().conflicts.length} · avisos ${state().fragmentWarnings.size}`
+)
 log('no disco', folder.show(PIX).includes('Pague com PIX') ? 'título novo' : 'título antigo')
 
 console.log('— com erro de XML')
@@ -94,10 +98,16 @@ state().changeFragmentText(PIX, saved.replace('</title>', '</titulo>'))
 await state().checkFragment(PIX)
 log('problemas', problems(PIX))
 await state().save()
-log('depois do Ctrl+S', `${unsaved()} · avisos: ${[...state().fragmentWarnings.values()].map((w) => `${w.file}:${w.line} ${w.message}`).join(' | ')}`)
+log(
+  'depois do Ctrl+S',
+  `${unsaved()} · avisos: ${[...state().fragmentWarnings.values()].map((w) => `${w.file}:${w.line} ${w.message}`).join(' | ')}`
+)
 state().changeFragmentText(PIX, saved)
 await state().save()
-log('corrigido e salvo', `${unsaved()} · avisos ${state().fragmentWarnings.size} · problemas ${problems(PIX)}`)
+log(
+  'corrigido e salvo',
+  `${unsaved()} · avisos ${state().fragmentWarnings.size} · problemas ${problems(PIX)}`
+)
 
 console.log('— só para leitura')
 await state().showFragment('docs/antigo.xml')
@@ -109,7 +119,10 @@ log('problemas', problems('docs/antigo.xml'))
 console.log('— fragmento novo')
 log('caminho docs/pagamento/PIX.xml', state().checkNewFragmentPath('docs/pagamento/PIX.xml'))
 log('criar configurations/x.xml', state().createFragment('configurations/x.xml'))
-log('criar Docs/Pagamento/cartao.xml', state().createFragment('Docs/Pagamento/cartao.xml') ?? 'criado')
+log(
+  'criar Docs/Pagamento/cartao.xml',
+  state().createFragment('Docs/Pagamento/cartao.xml') ?? 'criado'
+)
 await state().checkFragment('docs/pagamento/cartao.xml')
 log('exibido', `${shownFragment(state())?.path} · ${text('docs/pagamento/cartao.xml')}`)
 log('problemas', problems('docs/pagamento/cartao.xml'))
@@ -117,14 +130,20 @@ log('árvore', tree())
 log('título', unsaved())
 log('criar o mesmo de novo', state().createFragment('docs/pagamento/cartao.xml'))
 state().discardFragment('docs/pagamento/cartao.xml')
-log('descartado', `exibido ${shownFragment(state())?.path ?? '(nenhum)'} · ${unsaved()} · árvore ${tree()}`)
+log(
+  'descartado',
+  `exibido ${shownFragment(state())?.path ?? '(nenhum)'} · ${unsaved()} · árvore ${tree()}`
+)
 state().createFragment('docs/pagamento/cartao.xml')
 state().changeFragmentText(
   'docs/pagamento/cartao.xml',
   '<?xml version="1.0" encoding="UTF-8"?>\n<topic xmlns="urn:exemplo:doc">\n  <title>Cartão</title>\n</topic>\n'
 )
 await state().save()
-log('salvo', `${unsaved()} · no disco ${folder.show('docs/pagamento/cartao.xml').includes('Cartão') ? 'o texto digitado' : 'outro'} · árvore ${tree()}`)
+log(
+  'salvo',
+  `${unsaved()} · no disco ${folder.show('docs/pagamento/cartao.xml').includes('Cartão') ? 'o texto digitado' : 'outro'} · árvore ${tree()}`
+)
 
 console.log('— descartar alterações')
 await state().showFragment('docs/loja/visao-geral.xml')
@@ -132,7 +151,10 @@ const visao = text('docs/loja/visao-geral.xml')
 state().changeFragmentText('docs/loja/visao-geral.xml', 'rascunho')
 log('alterado', unsaved())
 state().discardFragment('docs/loja/visao-geral.xml')
-log('descartado', `${unsaved()} · texto ${text('docs/loja/visao-geral.xml') === visao ? 'do disco' : 'outro'}`)
+log(
+  'descartado',
+  `${unsaved()} · texto ${text('docs/loja/visao-geral.xml') === visao ? 'do disco' : 'outro'}`
+)
 
 console.log('— mudanças fora do app, e a janela volta ao foco')
 folder.write('docs/loja/visao-geral.xml', '<topic>\n  <title>Mudou por fora</title>\n</topic>\n')
@@ -145,7 +167,10 @@ await state().showFragment('docs/loja/visao-geral.xml')
 await state().refreshFragments()
 log('árvore', tree())
 log('visao-geral.xml (sem alteração)', text('docs/loja/visao-geral.xml'))
-log('pix.xml (com alteração)', state().fragmentDocuments.get(PIX)?.text.includes('minha') ? 'mantido' : 'trocado')
+log(
+  'pix.xml (com alteração)',
+  state().fragmentDocuments.get(PIX)?.text.includes('minha') ? 'mantido' : 'trocado'
+)
 log('problemas do exibido', problems('docs/loja/visao-geral.xml'))
 await state().save()
 log('Ctrl+S', `conflitos [${state().conflicts.join(', ')}] · ${unsaved()}`)
@@ -162,14 +187,26 @@ await state().showFragment('docs/loja/visao-geral.xml')
 state().changeFragmentText('docs/loja/visao-geral.xml', '<topic/>\n')
 folder.delete('docs/loja/visao-geral.xml')
 await state().refreshFragments()
-log('visao-geral.xml', `novo? ${state().fragmentDocuments.get('docs/loja/visao-geral.xml')?.saved === null} · árvore ${tree()}`)
+log(
+  'visao-geral.xml',
+  `novo? ${state().fragmentDocuments.get('docs/loja/visao-geral.xml')?.saved === null} · árvore ${tree()}`
+)
 await state().save()
-log('Ctrl+S', `conflitos [${state().conflicts.join(', ')}] · ${unsaved()} · no disco ${folder.show('docs/loja/visao-geral.xml')}`)
+log(
+  'Ctrl+S',
+  `conflitos [${state().conflicts.join(', ')}] · ${unsaved()} · no disco ${folder.show('docs/loja/visao-geral.xml')}`
+)
 
 console.log('— recarregar e fechar')
 state().changeFragmentText('docs/loja/visao-geral.xml', '<topic>rascunho</topic>\n')
 await state().reload()
-log('Recarregar', `exibido ${shownFragment(state())?.path} · ${text('docs/loja/visao-geral.xml')} · ${unsaved()}`)
+log(
+  'Recarregar',
+  `exibido ${shownFragment(state())?.path} · ${text('docs/loja/visao-geral.xml')} · ${unsaved()}`
+)
 state().changeFragmentText('docs/loja/visao-geral.xml', '<topic>outro</topic>\n')
 state().close()
-log('Fechar', `${state().fragmentDocuments.size} abertos · aba ${state().fragmentFiles === null ? 'zerada' : 'não zerada'}`)
+log(
+  'Fechar',
+  `${state().fragmentDocuments.size} abertos · aba ${state().fragmentFiles === null ? 'zerada' : 'não zerada'}`
+)
