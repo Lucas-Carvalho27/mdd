@@ -2,6 +2,8 @@
 
 Aprovado em 24/09/2026. É a primeira fase depois da primeira versão (SPEC §9). Não estava no roadmap: o usuário pediu um editor de XML dentro do app para criar e editar os fragmentos sem outro programa.
 
+> O protótipo refinou alguns pontos deste desenho, já corrigidos abaixo: o `FragmentFiles` no lugar do `ListFragmentFiles`, a codificação no domínio, a grafia das pastas num caminho novo, o aviso que não some ao descartar, o desfazer que dura também ao trocar de aba e o tema escuro, que o app ainda não liga. Veja "O que o protótipo respondeu" no [plano](../plans/2026-09-24-fase-6-editor-fragmentos.md); a SPEC já reflete esses pontos.
+
 ## Objetivo
 
 Criar e editar os **fragmentos** do projeto (os XMLs de documentação que a geração embute no `product.xml`) dentro do app, num editor de texto com realce de sintaxe. A janela ganha a aba **Fragmentos**, com a árvore dos `.xml` do projeto e o editor do arquivo aberto. O texto editado entra no mesmo "•", no mesmo Ctrl+S e na mesma confirmação ao fechar do resto do projeto.
@@ -12,7 +14,7 @@ Criar e editar os **fragmentos** do projeto (os XMLs de documentação que a ger
 2. Abrir `docs/pagamento/pix.xml`, trocar o título e salvar com Ctrl+S: só esse arquivo muda no `git diff`, e a quebra de linha e o BOM ficam como estavam.
 3. Apagar o `>` de uma tag: o problema aparece com a linha, e a geração de `loja-basica` também passa a recusar o arquivo.
 4. Criar `docs/pagamento/cartao.xml`, escrever um conteúdo válido, salvar e vincular à feature `pag_cartao` (que hoje não tem asset) pelo editor: o arquivo aparece na aba Assets como ok.
-5. Checagem à mão com o usuário no `mdd.exe`: a aparência do editor, as cores nos temas claro e escuro e a volta do foco depois de editar um arquivo por fora.
+5. Checagem à mão com o usuário no `mdd.exe`: a aparência do editor, as cores do tema claro e a volta do foco depois de editar um arquivo por fora. O tema escuro não entra: o app ainda não o liga (nada aplica a classe `.dark`).
 
 **Não muda:**
 
@@ -53,8 +55,8 @@ A faixa lateral ganha a quarta aba: Modelo | Configurações | Assets | **Fragme
   - realce de XML, números de linha, linha atual destacada, fechamento automático de tags;
   - Tab indenta (Esc e depois Tab tira o foco do editor, como manda o CodeMirror para acessibilidade);
   - Ctrl+F abre a busca, com os textos do painel em português (`EditorState.phrases`);
-  - Ctrl+Z e Ctrl+Y desfazem e refazem o texto. O histórico de cada arquivo é mantido ao trocar de arquivo, e se perde quando o texto é relido do disco (descartar, atualizar, recarregar);
-  - as cores seguem as variáveis de tema do app, nos temas claro e escuro.
+  - Ctrl+Z e Ctrl+Y desfazem e refazem o texto. O histórico de cada arquivo dura enquanto o projeto está aberto, também ao trocar de arquivo ou de aba (ir a Configurações para gerar e voltar não o perde), e se perde quando o texto é relido do disco (descartar, atualizar, recarregar);
+  - as cores vêm das variáveis de tema do app (`--xml-*`), com valores para o tema claro e o escuro.
 - **Acima do editor, a barra do arquivo:** o caminho e:
   - o vínculo, se o arquivo é de algum asset: o nome do asset e a âncora ("Guia do PIX · `pag_pix`"), com "+N" quando há mais de um;
   - senão, **Vincular a uma feature…**, ligado só quando o arquivo existe no disco. Abre o diálogo de vínculo da aba Assets (`LinkAssetDialog`) com o caminho preenchido;
@@ -73,10 +75,10 @@ Um arquivo que não está em UTF-8 abre **só para leitura**, com uma faixa: "Es
 
 ### Novo fragmento
 
-Um diálogo pede o caminho, sugerindo a pasta do arquivo aberto (por exemplo, `docs/pagamento/`). O caminho aceita `/` ou `\` e é gravado com `/`. É recusado, com o motivo, quando:
+Um diálogo pede o caminho, sugerindo a pasta do arquivo aberto (por exemplo, `docs/pagamento/`). O caminho aceita `/` ou `\` e é gravado com `/`. Ele adota a grafia das pastas que já existem: no Windows, `Docs/Pagamento/cartao.xml` cai na pasta `docs/pagamento/`, e o arquivo novo passa a ser `docs/pagamento/cartao.xml`, para aparecer na árvore junto com os outros. É recusado, com o motivo, quando:
 
 - está vazio, não termina em `.xml`, é absoluto ou tem `..`;
-- tem um trecho vazio (`docs//a.xml`), um caractere que o Windows não aceita (`< > : " | ? *`) ou um trecho terminado em ponto ou espaço;
+- tem um trecho vazio (`docs//a.xml`), um caractere que o Windows não aceita (`< > : " | ? *`), um trecho terminado em ponto ou espaço, ou um trecho começando com ponto (ficaria fora da árvore);
 - é `model.xml` ou `assets.xml`, ou fica em `configurations/` ou `saida/`;
 - já existe no disco ou entre os arquivos novos, sem diferenciar maiúsculas de minúsculas (no Windows, `Pix.xml` e `pix.xml` são o mesmo arquivo).
 
@@ -95,11 +97,13 @@ Os assets do tipo fragmento ganham o botão **Editar**, desligado quando o arqui
 - Cada fragmento só é gravado se o disco ainda estiver como na última leitura (precondição de hash). Um arquivo novo só é gravado se ainda não existir (`must-not-exist`).
 - Um fragmento alterado fora do app entra no **diálogo de conflito que já existe**, junto com os arquivos do projeto. "Sobrescrever" grava por cima; "Recarregar" relê tudo do disco e descarta as alterações, inclusive as dos fragmentos.
 - Uma edição feita durante a gravação é mantida, como no `SaveProject`: o arquivo continua com "•".
-- **Erro de XML não impede salvar.** Cada fragmento gravado com problema gera um aviso na faixa de avisos, com o arquivo, a linha e a mensagem do primeiro problema: "Salvo com erro de XML: …". O aviso do arquivo some quando ele é salvo sem problema, ao descartar e ao fechar o projeto. A geração continua recusando o fragmento quebrado.
+- **Erro de XML não impede salvar.** Cada fragmento gravado com problema gera um aviso na faixa de avisos, com o arquivo, a linha e a mensagem do primeiro problema: "Salvo com erro de XML: …". O aviso do arquivo some quando ele é salvo sem problema e ao fechar o projeto. Descartar não o tira, porque o disco continua com o erro. A geração continua recusando o fragmento quebrado.
+- Um fragmento novo gravado continua na árvore, agora como arquivo do disco.
+- O "Salvo às …" do cabeçalho só aparece quando o projeto e os fragmentos foram gravados sem conflito nem erro. Se o projeto for fechado ou trocado durante a gravação, o resultado não mexe na sessão nova.
 
 ### Não estragar o arquivo
 
-- **BOM e quebra de linha:** ao abrir, o app guarda se o arquivo tinha BOM e se usava CRLF ou LF (CRLF quando aparece algum `\r\n`). O editor trabalha sem BOM e com `\n`. Ao gravar, o texto volta para o formato original. Sem isso, o CodeMirror trocaria tudo por LF, e o arquivo mudaria inteiro no git.
+- **BOM e quebra de linha:** ao abrir, o app guarda se o arquivo tinha BOM e se usava CRLF ou LF (CRLF quando aparece algum `\r\n`). O editor trabalha sem BOM e com `\n`. Ao gravar, o texto volta para o formato original. Sem isso, o CodeMirror trocaria tudo por LF, e o arquivo mudaria inteiro no git. Um arquivo com quebras misturadas, ou com `\r` sozinho, só muda se for editado: ao gravar, sai todo em CRLF (ou LF). Um arquivo sem alteração nunca é gravado.
 - **Codificação:** veja "Arquivo só para leitura".
 
 ### Alteração feita por fora
@@ -128,25 +132,26 @@ As camadas são as de sempre (ADR 0008), com o lint de fronteiras.
 - `domain/project/project-layout.ts`: os nomes `model.xml`, `assets.xml` e `configurations`, hoje soltos em `xml-repositories.ts`, `open-project.ts` e `create-project.ts`, que passam a usá-los daqui. A pasta `saida` continua vindo da composition root.
 - `domain/fragments/fragment-path.ts`: as regras de um caminho de fragmento novo (acima) e quais arquivos e pastas aparecem na árvore.
 - `domain/fragments/text-format.ts`: identifica o BOM e a quebra de linha, converte o conteúdo do arquivo para o texto do editor e o texto do editor de volta para o formato do arquivo.
+- `domain/fragments/encoding.ts`: a codificação declarada, a linha do primeiro byte que não é UTF-8 e o problema que isso dá. Saiu do `fragment-source.ts` da geração, porque o `OpenFragment` também precisa dela.
 
 **Aplicação:**
 
 - `application/fragments/fragment-document.ts`: o arquivo aberto. Guarda o caminho, o texto atual, o texto salvo (`null` num arquivo novo), o hash da última leitura ou gravação, o formato (BOM e quebra de linha) e o motivo de ficar só para leitura, quando houver. `isModified(document)` compara o texto atual com o salvo.
 - Porta `FragmentChecker`: `check(path, content)` devolve os problemas (`FileProblem[]`), lista vazia quando está tudo certo.
-- `ListFragmentFiles`: percorre as pastas pela porta `ProjectStorage` e devolve os caminhos que entram na árvore.
+- `FragmentFiles`: `list()` percorre as pastas pela porta `ProjectStorage` e devolve os caminhos que entram na árvore; `checkNewPath()` confere o caminho de um fragmento novo. As duas dependem das mesmas regras e do nome da pasta de saída, que vem da composition root.
 - `OpenFragment`: lê o arquivo, identifica o formato e decide se fica só para leitura.
 - `SaveFragments`: grava os documentos alterados com as precondições e devolve os documentos atualizados, os conflitos e os problemas, no formato do `SaveProject`, para a store juntar os dois.
 
 **Infraestrutura:**
 
-- `XmlFragmentChecker`: recebe as conferências que hoje estão em `XmlProductDeriver.loadFragment` (codificação, "�", `xmllint`, `@xmldom/xmldom` e a extração da raiz). Implementa a porta `FragmentChecker` e dá ao `XmlProductDeriver` a raiz extraída. Assim o editor e a geração conferem do mesmo jeito. A saída do `generate-product-check.mts` tem de continuar igual.
+- `XmlFragmentChecker`: recebe as conferências que hoje estão em `XmlProductDeriver.loadFragment` (codificação, "�", `xmllint`, `@xmldom/xmldom` e a extração da raiz). Implementa a porta `FragmentChecker` e dá ao `XmlProductDeriver` a raiz extraída. Assim o editor e a geração conferem do mesmo jeito. O `XmlProductDeriver` mantém o construtor `(storage, validator)` e cria o `XmlFragmentChecker` por dentro, então a saída do `generate-product-check.mts` continua igual, sem mudar o roteiro.
 
 **Interface:**
 
 - `ui/stores/fragments-actions.ts`, no molde do `assets-actions.ts`: os caminhos da árvore, os documentos abertos, o caminho exibido, os problemas por arquivo, e as ações listar, abrir, editar, criar, descartar e atualizar.
 - `project-store.ts`: o `hasUnsavedChanges` passa a olhar os fragmentos; o `save` chama o `SaveFragments` depois do `SaveProject` e junta conflitos, problemas e avisos; fechar e recarregar limpam os documentos.
-- `ui/screens/fragments/`: `FragmentsWorkspace`, `FragmentTree`, `FragmentBar`, `FragmentProblems`, `FragmentEditor` (guarda o estado do CodeMirror de cada arquivo, o que mantém o desfazer ao trocar de arquivo), `xml-editor-setup.ts` (extensões, tema e textos em português), `NewFragmentDialog` e `DiscardFragmentDialog`.
-- Telas que já existem: `ViewRail` (a aba), `ProjectScreen` (a aba, os atalhos, a barra de status e a volta do foco), `AssetList` (o botão "Editar"). O `LinkAssetDialog` é reaproveitado sem mudança.
+- `ui/screens/fragments/`: `FragmentsWorkspace`, `FragmentTree` (com a árvore montada em `fragment-tree.ts`), `FragmentBar`, `FragmentProblems`, `FragmentStatusBar`, `FragmentEditor` (troca o estado do CodeMirror de cada arquivo ao mudar de arquivo), `fragment-editor-states.ts` (o tipo do mapa desses estados), `xml-editor-setup.ts` (extensões, tema e textos em português) e `FragmentDialogs.tsx` (`NewFragmentDialog` e `DiscardFragmentDialog`).
+- Telas que já existem: `ViewRail` (a aba), `ProjectScreen` (a aba, os atalhos, a barra de status, a volta do foco e o mapa dos estados do editor, que dura enquanto o projeto está aberto), `AssetsWorkspace` e `AssetList` (o botão "Editar"). O `LinkAssetDialog` é reaproveitado sem mudança.
 
 ## Verificação
 
