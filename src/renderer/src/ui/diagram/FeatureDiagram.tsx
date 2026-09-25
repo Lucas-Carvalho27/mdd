@@ -207,6 +207,8 @@ function DiagramCanvas({ model, editing }: DiagramCanvasProps): React.JSX.Elemen
         selectionKeyCode={null}
         multiSelectionKeyCode={null}
         disableKeyboardA11y
+        // O zoom fica na roda do mouse e nos botões; o duplo clique aproximava sem aviso.
+        zoomOnDoubleClick={false}
         nodeDragThreshold={4}
         minZoom={0.2}
         maxZoom={2}
