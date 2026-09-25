@@ -1,5 +1,6 @@
 import { EMPTY_ASSET_CATALOG } from '@/domain/assets/asset-catalog'
 import { createFeatureModel } from '@/domain/feature-model/new-model'
+import { MODEL_PATH } from '@/domain/project/project-layout'
 import { fileError, type FileProblem } from '../file-problem'
 import type { ProjectFolderPicker } from '../ports/project-folder-picker'
 import type { FeatureModelRepository } from '../ports/repositories'
@@ -29,7 +30,7 @@ export class CreateProject {
   /** Sem `rootId`, o ID da raiz é gerado a partir do nome. */
   async execute(name: string, rootId?: string): Promise<CreateProjectResult> {
     const model = createFeatureModel(name, rootId)
-    if (!model.ok) return { status: 'failed', problems: [fileError('model.xml', model.error)] }
+    if (!model.ok) return { status: 'failed', problems: [fileError(MODEL_PATH, model.error)] }
 
     const picked = await this.deps.picker.pick()
     if (!picked.ok) return { status: 'failed', problems: [fileError('.', picked.error.message)] }
@@ -39,7 +40,7 @@ export class CreateProject {
     if (!saved.ok) {
       const problem =
         saved.error.kind === 'conflict'
-          ? fileError('model.xml', 'Esta pasta já tem um projeto. Use "Abrir projeto".')
+          ? fileError(MODEL_PATH, 'Esta pasta já tem um projeto. Use "Abrir projeto".')
           : saved.error.problem
       return { status: 'failed', problems: [problem] }
     }

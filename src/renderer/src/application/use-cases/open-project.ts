@@ -2,6 +2,7 @@ import { EMPTY_ASSET_CATALOG } from '@/domain/assets/asset-catalog'
 import { validateAssetCatalog } from '@/domain/assets/validation'
 import { validateFeatureModel } from '@/domain/feature-model/validation'
 import type { ConfigurationEntry } from '@/domain/project/project'
+import { ASSETS_PATH, MODEL_PATH } from '@/domain/project/project-layout'
 import { fileError, fromValidationIssues, type FileProblem } from '../file-problem'
 import type { PickedFolder, ProjectFolderPicker } from '../ports/project-folder-picker'
 import type { RecentProjects } from '../ports/recent-projects'
@@ -62,7 +63,7 @@ export class OpenProject {
     if (!model.ok) return { status: 'failed', problems: model.error }
 
     const problems: FileProblem[] = fromValidationIssues(
-      'model.xml',
+      MODEL_PATH,
       validateFeatureModel(model.value.value)
     )
 
@@ -70,7 +71,7 @@ export class OpenProject {
     if (!assets.ok) problems.push(...assets.error)
     const catalog = assets.ok && assets.value !== null ? assets.value.value : EMPTY_ASSET_CATALOG
     problems.push(
-      ...fromValidationIssues('assets.xml', validateAssetCatalog(catalog, model.value.value))
+      ...fromValidationIssues(ASSETS_PATH, validateAssetCatalog(catalog, model.value.value))
     )
 
     const configurations: ConfigurationEntry[] = []
