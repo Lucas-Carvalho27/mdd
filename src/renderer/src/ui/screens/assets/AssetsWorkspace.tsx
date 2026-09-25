@@ -13,6 +13,8 @@ import { useLinkAsset } from './use-link-asset'
 interface AssetsWorkspaceProps {
   readonly project: Project
   readonly onOpenDialog: (dialog: EditorDialog) => void
+  /** Abre o fragmento na aba Fragmentos. */
+  readonly onEditFragment: (path: string) => void
 }
 
 /**
@@ -21,7 +23,8 @@ interface AssetsWorkspaceProps {
  */
 export function AssetsWorkspace({
   project,
-  onOpenDialog
+  onOpenDialog,
+  onEditFragment
 }: AssetsWorkspaceProps): React.JSX.Element {
   const asset = useProjectStore(selectedAsset)
   const selectedFeatureId = useProjectStore((state) => state.selectedFeatureId)
@@ -61,7 +64,7 @@ export function AssetsWorkspace({
               um fragmento XML entra no produto gerado, e um recurso é copiado para a saída.
             </p>
           ) : (
-            <AssetList groups={groups} />
+            <AssetList groups={groups} onEditFragment={onEditFragment} />
           )}
         </div>
       </section>
