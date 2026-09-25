@@ -24,4 +24,6 @@ export type EditorDialog =
       readonly problems: readonly FileProblem[]
       readonly note: string
     }
+  | { readonly kind: 'new-fragment' }
+  | { readonly kind: 'discard-fragment'; readonly path: string }
   | null

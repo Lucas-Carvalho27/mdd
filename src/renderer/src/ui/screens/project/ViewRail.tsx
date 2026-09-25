@@ -1,13 +1,14 @@
-import { ListChecks, Network, Paperclip } from 'lucide-react'
+import { FileCode2, ListChecks, Network, Paperclip } from 'lucide-react'
 import { cn } from 'cn'
 
 /** As abas da barra lateral (SPEC §7). */
-export type ProjectView = 'model' | 'configurations' | 'assets'
+export type ProjectView = 'model' | 'configurations' | 'assets' | 'fragments'
 
 const VIEWS = [
   { view: 'model', label: 'Modelo', Icon: Network },
   { view: 'configurations', label: 'Configurações', Icon: ListChecks },
-  { view: 'assets', label: 'Assets', Icon: Paperclip }
+  { view: 'assets', label: 'Assets', Icon: Paperclip },
+  { view: 'fragments', label: 'Fragmentos', Icon: FileCode2 }
 ] as const
 
 interface ViewRailProps {
