@@ -1,6 +1,6 @@
 # Handoff — onde paramos e como continuar
 
-Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
+Atualizado em 25/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
@@ -13,7 +13,7 @@ Atualizado em 24/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 | 3. Configurador           | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
 | 4. Assets                 | Concluída    | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
 | 5. Geração                | Concluída    | `main`. Plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)                    |
-| 6. Editor de fragmentos   | Em andamento | Desenho aprovado no branch `fase-6-editor-fragmentos`; protótipo no branch `prototipo-fase-6`. Veja "Fase 6 em andamento"                                                                                                                                                          |
+| 6. Editor de fragmentos   | Em andamento | Plano pronto em [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md); o código ainda não entrou. Veja "Fase 6 em andamento"                                                                                   |
 
 O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as Fases 2A, 2B, 3 e 4, também:
 
@@ -154,7 +154,7 @@ O branch `fase-5-geracao` foi mesclado na `main` em 24/09/2026.
 
 Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo). O usuário pediu, em seguida, um editor de XML integrado ao app: um editor de texto simples, com realce de sintaxe, para criar e editar os fragmentos dentro da aplicação. Virou a **Fase 6 (editor de fragmentos)**, em andamento (veja "Fase 6 em andamento" abaixo). Os itens da fase "Depois" da SPEC §9 continuam em aberto.
 
-## Fase 6 em andamento (parada em 24/09/2026)
+## Fase 6 em andamento (parada em 25/09/2026)
 
 **Desenho aprovado:** [docs/superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md](superpowers/specs/2026-09-24-fase-6-editor-fragmentos-design.md). Em resumo:
 
@@ -165,59 +165,33 @@ Com a Fase 5, as fases 0 a 5 da primeira versão estão concluídas, e as checag
 - arquivo fora do UTF-8 fica só para leitura;
 - BOM e quebras de linha mantidos.
 
-**Branches:**
+**Plano pronto:** [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md), com seis tarefas: domínio, conferência de fragmento, aplicação, store, a aba Fragmentos e a aceitação com os documentos (ADR 0009, SPEC e spec do desenho).
 
-- `fase-6-editor-fragmentos` (GitHub): só a spec e este handoff. O código ainda não entrou.
-- `prototipo-fase-6` (GitHub): o protótipo descartável, um commit por tarefa sobre o commit da spec (`e70285f`). O último commit (`459ebc3`) traz a pasta `.checks/`, que fica fora do git na `main`: os roteiros novos da Fase 6, os das fases anteriores, os modelos e scripts de plano e as saídas conferidas, em `.checks/out/`. **Nunca mescle este branch:** ele é só a fonte do plano. Como ele tem arquivos em `.checks/` que o git conhece, trabalhe nele num clone separado (ou num `git worktree`), e não no clone do branch da fase. Os refinamentos da store feitos durante a Tarefa 5 (não conferir de novo o mesmo texto, não repetir na árvore um arquivo novo que apareceu no disco) ficaram no commit da T5, mas o arquivo `fragments-actions.ts` é da Tarefa 4.
+- O plano foi montado por script a partir do protótipo (`.checks/plan-template-6.md` e `build-plan-6.py`) e conferido pelo `verify-plan-6.py`: os 62 trechos "Troque / por", aplicados em ordem sobre `dc1dcd7`, reproduzem os arquivos, e cada arquivo inteiro e cada saída aparecem iguais no plano, depois do Prettier.
+- Cada tarefa foi aplicada sozinha, em ordem, num branch descartável por tarefa (`.checks/por-tarefa.sh`): os roteiros novos falharam antes e deram a saída do plano depois, com typecheck e lint limpos. No fim, o `src/` ficou idêntico ao do protótipo.
+- O que o protótipo respondeu, inclusive as correções da spec do desenho, está na seção de mesmo nome do plano.
 
-**Tarefas do protótipo** (cada arquivo pertence a uma tarefa só):
+**O que aconteceu em 25/09/2026:**
 
-1. **Domínio:** `project-layout.ts` (os nomes `model.xml`, `assets.xml` e `configurations`, agora usados por `xml-repositories.ts`, `open-project.ts` e `create-project.ts`), `fragment-path.ts` e `text-format.ts`.
-2. **Conferência:** `domain/fragments/encoding.ts`, porta `FragmentChecker` e `XmlFragmentChecker`, com as conferências que estavam no `XmlProductDeriver.loadFragment`.
-3. **Aplicação:** `fragment-document.ts`, `FragmentFiles`, `OpenFragment` e `SaveFragments`.
-4. **Store:** `fragments-actions.ts`, `project-store.ts` e `composition-root.ts`.
-5. **Interface:**
-   - os pacotes `@codemirror/*` e `@lezer/highlight` no `package.json`;
-   - as cores `--xml-*` no `index.css`;
-   - a pasta `ui/screens/fragments/`;
-   - `ViewRail`, `editor-dialog.ts`, `ProjectScreen`, `AssetsWorkspace` e `AssetList`.
+- O `fragmentos-ui.mjs` rodou pela primeira vez e achou um defeito: um fragmento novo salvo sumia da árvore até a próxima leitura das pastas. A correção está no `saveFragments` (`fragments-actions.ts`), e o `fragments-store-check.mts` passou a mostrar a árvore logo depois de salvar.
+- O próprio roteiro tinha três erros: o `cmTile` do `@codemirror/view` 6.43, a cor minificada pelo build e a conexão com o processo main que não fechava. Os três viram armadilhas na Tarefa 6 do plano.
+- O passo 15 do roteiro passou a mostrar o estado do arquivo na aba Assets (`cartao:ok`), que é o critério 4 da aceitação.
+- A regressão de interface (`ui-check`, `configurador-ui`, `assets-ui` e `geracao-ui`) e a das stores saíram iguais aos planos.
+- No `mdd.exe` (`npm run build:win`), o `fragmentos-ui.mjs` deu a mesma saída do modo de desenvolvimento (antes da mudança no passo 15, que só acrescenta o estado do arquivo).
+- Os documentos da Tarefa 6 (ADR 0009, SPEC e spec do desenho) foram escritos no protótipo e entram no branch da fase pelo plano.
 
-**O que já foi verificado no protótipo** (as saídas estão em `.checks/out/`, no branch do protótipo):
+**Branches** (só no repositório local; o GitHub ainda tem a versão de 24/09):
 
-- Tarefas 1 a 4: typecheck e lint limpos, e cada roteiro com a saída esperada.
-  - Roteiros novos: `fragment-path-check.mts`, `text-format-check.mts`, `fragment-checker-check.mts`, `save-fragments-check.mts` e `fragments-store-check.mts`, os dois últimos sobre a pasta em memória `memory-folder.mts`.
-- Regressão, igual à de antes:
-  - `configurations-check` e `save-safety-check` (T1);
-  - `fragment-source-check` e `generate-product-check` (T2, 71 linhas iguais);
-  - `assets-store-check`, `configurator-store-check` e `generation-store-check` (T4).
-- Tarefa 5: typecheck, lint e `npm run build` limpos. **O roteiro de interface `fragmentos-ui.mjs` ainda não rodou:** o usuário parou antes de liberar a abertura de janelas.
-
-**O que o protótipo respondeu** (a levar para a spec do desenho e para a SPEC na tarefa de documentos):
-
-- `ListFragmentFiles` virou `FragmentFiles`, com `list()` e `checkNewPath()`: as duas coisas dependem das mesmas regras e do nome da pasta de saída.
-- A detecção de codificação (`declaredEncoding`, `firstUndecodedLine` e `encodingProblem`) foi para `domain/fragments/encoding.ts`, porque o `OpenFragment` também precisa dela. O `.checks/fragment-source-check.mts` passa a importar `declaredEncoding` do domínio; no branch do protótipo, ele já está ajustado.
-- O `XmlProductDeriver` mantém o construtor `(storage, validator)` e cria o `XmlFragmentChecker` por dentro. Assim o `generate-product-check.mts` não muda.
-- Um caminho novo adota a grafia das pastas que já existem: `Docs/Pagamento/cartao.xml` vira `docs/pagamento/cartao.xml`.
-- O aviso "Salvo com erro de XML" some quando o arquivo é salvo sem problema e ao fechar o projeto. **Não some ao descartar**, porque o disco continua com o erro. A spec diz que some ao descartar: corrigir.
-- O desfazer do texto dura enquanto o projeto está aberto, também ao trocar de aba. O `ProjectScreen` guarda o estado do CodeMirror de cada arquivo (`fragment-editor-states.ts`). Sem isso, ir a Configurações para gerar e voltar perdia o Ctrl+Z.
-- **O app não tem tema escuro ligado:** nada aplica a classe `.dark`. O editor usa as variáveis do tema e acompanha quando o tema escuro existir, mas a checagem à mão só pode ver o tema claro. Ajustar o item 5 da aceitação.
-- O "Salvo às …" do cabeçalho só aparece quando o projeto e os fragmentos foram gravados sem conflito nem erro. O `save` também deixou de mexer na sessão se o projeto for fechado durante a gravação.
-- Um arquivo com quebras de linha misturadas, ou com `\r` sozinho, só muda se for editado: ao gravar, sai todo em CRLF (ou LF). Um arquivo sem alteração nunca é gravado.
+- `fase-6-editor-fragmentos`: a spec, este handoff e o plano. O código ainda não entrou.
+- `prototipo-fase-6`: o protótipo descartável, com a pasta `.checks/` (os roteiros novos e os das fases anteriores, as saídas conferidas em `.checks/out/` e os scripts do plano). **Nunca mescle este branch:** ele é só a fonte do plano. Como ele tem arquivos em `.checks/` que o git conhece, trabalhe nele num clone separado, e não no clone do branch da fase.
 
 **Próximos passos:**
 
-1. **Clonar o protótipo** num lugar descartável: `git clone -b prototipo-fase-6 https://github.com/Lucas-Carvalho27/mdd.git <pasta>` e `npm ci`. Os roteiros já vêm em `.checks/`.
-2. **Combinar com o usuário e rodar** `bash .checks/run-ui.sh dev .checks/fragmentos-ui.mjs 9229` no clone. Os roteiros abrem janelas: pergunte antes. Corrigir o que falhar e guardar a saída.
-3. Regressão de interface: `ui-check.mjs`, `configurador-ui.mjs`, `assets-ui.mjs` e `geracao-ui.mjs`.
-4. **Tarefa 6, documentos:**
-   - ADR 0009 (CodeMirror);
-   - SPEC §2, §6.2, §7, §8 e §9;
-   - as correções da spec do desenho listadas acima.
-
-   Depois, `npm run build:win` e `fragmentos-ui.mjs` no `mdd.exe`.
-
-5. **Montar o plano** `docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md` por script, como na Fase 5 (`.checks/build-plan-5.py` e `verify-plan-5.py`, com `BASE_BRANCH` apontando para o último commit do branch da fase antes do código). Antes, refazer os commits do protótipo por tarefa: um branch novo a partir desse commit e, para cada tarefa, `git checkout prototipo-fase-6 -- <arquivos da tarefa>` e um commit. Conferir que o roteiro de cada tarefa falha antes dela e dá a saída do plano depois.
-6. Executar o plano no branch `fase-6-editor-fragmentos`, tarefa por tarefa, com revisão. Fazer a checagem à mão com o usuário no `mdd.exe` e depois o merge.
+1. **Executar o plano** no branch `fase-6-editor-fragmentos`, tarefa por tarefa, com revisão (superpowers:subagent-driven-development).
+   - Os roteiros de `.checks/` podem vir do branch do protótipo sem passar pelo índice do git: `git archive prototipo-fase-6 .checks | tar -x`, na raiz (a pasta é ignorada pelo git; num clone novo, use `origin/prototipo-fase-6`). Assim vêm também os roteiros das fases anteriores, já nas versões que os planos esperam.
+   - O `fragment-source-check.mts` de lá já tem o import da Tarefa 2 (Passo 8), e o passo fica só para conferir.
+2. Os roteiros de interface abrem janelas: combinar o momento com o usuário (Tarefa 5, Passos 15 e 16; Tarefa 6, Passo 2).
+3. A checagem à mão com o usuário no `mdd.exe` (Tarefa 6, Passo 3). Depois, o merge local na `main` e o envio ao GitHub.
 
 ## Decisão sobre IDs (registrada na SPEC e no ADR 0004)
 
