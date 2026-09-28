@@ -13,6 +13,7 @@ Aplicação desktop (Electron + React + TypeScript), de uso pessoal e com arquiv
 4. **Gerar** o `product.xml` de documentação de cada produto, que ferramentas externas convertem depois para as mídias finais.
 5. **Editar os fragmentos** dentro do app, num editor de XML (Fase 6).
 6. **Gerar a página** `index.html` de cada produto, a partir de fragmentos em HTML (Fase 7, ADR 0010).
+7. **Ver a página** da configuração aberta dentro do app, ao vivo (Fase 8, ADR 0011).
 
 A arquitetura é em camadas, com SOLID e Clean Code. Não há testes automatizados na primeira versão (ADR 0008); a aceitação de cada fase é manual, com o projeto de exemplo (§9).
 
@@ -30,7 +31,7 @@ A arquitetura é em camadas, com SOLID e Clean Code. Não há testes automatizad
 
 - Fase 6: editor de fragmentos, para criar e editar os fragmentos do projeto dentro do app, com realce de XML e a conferência da geração (ADR 0009). Ele não edita `model.xml`, `assets.xml` nem as configurações como texto, não renomeia nem exclui arquivos e só abre `.xml` e, desde a Fase 7, `.html`.
 - Fase 7: páginas HTML (ADR 0010). Fragmentos em HTML, a moldura, os marcadores de atributo e o sumário; a geração passa a montar também o `index.html`. O desenho está em [docs/superpowers/specs/2026-09-28-fase-7-paginas-html-design.md](superpowers/specs/2026-09-28-fase-7-paginas-html-design.md).
-- Fase 8: a aba Páginas, com a página ao vivo. As decisões já tomadas estão no fim do desenho da Fase 7.
+- Fase 8: a aba Páginas, com a página da configuração aberta ao vivo, num quadro isolado do app (ADR 0011). O desenho está em [docs/superpowers/specs/2026-09-28-fase-8-aba-paginas-design.md](superpowers/specs/2026-09-28-fase-8-aba-paginas-design.md).
 
 **Fora da primeira versão (fase "Depois"):** clones, restrições com atributos, análises do modelo (`ModelAnalyzer`: features mortas etc.), variabilidade anotativa, renderers por mídia, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes automatizados.
 
@@ -293,6 +294,8 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
   - **Shell:** `openPath` (`shell.openPath`, para arquivos do projeto e pastas dentro de `saida/`)
   - **Projetos recentes:** `listRecentProjects` e `reopenProject` (os 10 últimos, gravados em `userData`; só pastas da lista podem ser reabertas sem o diálogo)
   - **Janela:** `setUnsavedChanges` (o main pergunta antes de fechar a janela com alterações não salvas)
+  - **Visualização:** `setPreviewPage` (a página da aba Páginas, que o main serve em `mdd-page://pagina/index.html`, Fase 8)
+- O esquema próprio `mdd-page:` (ADR 0011) serve a página da visualização e os arquivos do projeto aberto, só para leitura e sem cache. A página roda num `<iframe>` com sandbox, sem `allow-same-origin`: numa origem opaca, sem acesso ao app. A CSP do app aceita só esse esquema em quadros (`frame-src mdd-page:`). Uma janela aberta pela página vai para o navegador do sistema só se for `https:`, `http:` ou `mailto:`.
 
 O solver roda no renderer, de forma síncrona. Se ficar lento em modelos grandes, ele passa para um Web Worker trocando só o adapter.
 
@@ -306,7 +309,7 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 **Janela do projeto:**
 
-- barra lateral com as abas **Modelo**, **Configurações**, **Assets** e **Fragmentos**;
+- barra lateral com as abas **Modelo**, **Configurações**, **Assets**, **Fragmentos** e **Páginas**;
 - área central com o diagrama;
 - painel direito de propriedades;
 - barra de status.
@@ -396,6 +399,16 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 - Sem arquivo aberto, o centro explica o que é um fragmento e mostra o botão "Novo fragmento".
 - Barra de status: "N fragmentos · M com alterações".
 
+**Páginas** (Fase 8, ADR 0011):
+
+- À esquerda, a lista de configurações, só para escolher: é a mesma configuração aberta da aba Configurações. No centro, a página da configuração, montada ao vivo a partir do projeto como está na tela, com as decisões e os valores não salvos e com o texto dos fragmentos abertos no editor. Nada é gravado em `saida/`.
+- A página é montada ao entrar na aba e meio segundo depois da última mudança no que entra nela (um fragmento aberto, a moldura, o modelo, os assets, a configuração), quando a janela volta ao foco e no botão **Recarregar**. A rolagem continua onde estava.
+- A barra: o nome da configuração, as larguras **Celular** (375 px), **Tablet** (768 px) e **Largura toda**, **Recarregar** e **Gerar produto**. Sem `moldura.html`, a barra avisa que a página usa a moldura padrão e oferece **Criar moldura**, que cria o arquivo com a moldura padrão e o abre na aba Fragmentos.
+- Com problemas, a página aparece mesmo assim, no melhor esforço (um marcador que não resolve fica como está escrito), com a lista embaixo; clicar num problema abre o arquivo na aba Fragmentos, na linha. A geração continua recusando.
+- Sem página, o centro explica o motivo: nenhuma configuração aberta; a configuração incompleta, com o texto da dica de "Gerar produto"; ou o projeto sem fragmento HTML, com o botão "Novo fragmento".
+- Um link para fora da página (`https:`, `http:`, `mailto:`) abre no navegador do sistema; o Ctrl+S com o foco na página salva o projeto.
+- A faixa verde da geração, nas abas Configurações e Páginas, tem **Abrir no navegador**, que abre o `index.html` gerado no programa padrão, quando o projeto tem página.
+
 ## 8. Comportamentos transversais
 
 - **Salvar é manual** (Ctrl+S) e grava tudo o que tiver alteração (modelo, assets e configurações, e depois os fragmentos, inclusive apagando os arquivos das configurações excluídas ou renomeadas). Os arquivos só são apagados depois que todas as configurações foram gravadas; se alguma gravação falhar, a exclusão fica para o próximo salvar. Como no Windows `Loja.xml` e `loja.xml` são o mesmo arquivo, duas chaves de configuração que só diferem na caixa contam como a mesma. O título da janela mostra `•` quando há algo não salvo. Fechar a janela ou o projeto com alterações pendentes pede confirmação.
@@ -423,7 +436,7 @@ A aceitação de cada fase é manual e usa `docs/examples/loja-online`.
 | **5. Geração**                | Plano, verificação, `XmlProductDeriver`, pasta temporária e troca                                                                                                                                                              | Gerar `loja-basica` produz o equivalente a `produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.                                                                                                                                                                                                                                                |
 | **6. Editor de fragmentos**   | Aba Fragmentos com o CodeMirror 6 (ADR 0009): árvore dos `.xml`, editor com realce e a conferência da geração, novo fragmento, vínculo pelo editor, "Editar" na aba Assets, salvar junto com o projeto                         | A árvore mostra os 5 `.xml` de `docs/`, sem o `model.xml`, o `assets.xml` e `configurations/`. Trocar o título do `pix.xml` e salvar muda só esse arquivo, com a quebra de linha e o BOM de antes. Apagar o `>` de uma tag mostra o problema com a linha, e a geração de `loja-basica` passa a recusar o arquivo. Criar `docs/pagamento/cartao.xml`, salvar e vinculá-lo a `pag_cartao` pelo editor faz o arquivo aparecer na aba Assets como ok. |
 | **7. Páginas HTML**           | Fragmentos HTML, moldura, marcadores, sumário, a página `index.html` na geração, o editor de HTML e o exemplo `herby` (ADR 0010)                                                                                               | Sobre o exemplo `herby`: gerar `completa-atibaia` produz um `index.html` idêntico ao de `produto-esperado/herby-completa-atibaia/`. Uma tag aberta num fragmento e um marcador de feature não selecionada fazem a geração recusar, com o arquivo e a linha. Gerar `loja-basica` do `loja-online` continua sem `index.html`.                                                                                                                       |
-| **8. Aba Páginas**            | A página ao vivo dentro do app (decisões no desenho da Fase 7)                                                                                                                                                                 | A definir no desenho da Fase 8.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **8. Aba Páginas**            | A aba Páginas, com a página da configuração aberta ao vivo num `<iframe>` isolado, servido pelo esquema `mdd-page:` (ADR 0011)                                                                                                 | Sobre o exemplo `herby`: a página de `completa-atibaia` aparece na aba, sem acesso ao app (`window.mdd` não existe nela). Editar um fragmento sem salvar muda a página, na mesma rolagem. As larguras de 375 e 768 px acionam as media queries. Um link `https:` abre no navegador do sistema. "Abrir no navegador" abre o `index.html` gerado.                                                                                                   |
 | **Depois**                    | `ModelAnalyzer`, variabilidade anotativa, renderers por mídia, restrições com atributos, clones, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes                                           | —                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## 10. Em aberto
