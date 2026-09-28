@@ -1,4 +1,6 @@
 import type { FileProblem } from '@/application/file-problem'
+import { EditedFragmentsStorage } from '@/application/fragments/edited-fragments-storage'
+import type { PagePreview, PagePreviewer } from '@/application/ports/page-previewer'
 import type { ProductDeriver, ProductFile } from '@/application/ports/product-deriver'
 import type { ProjectStorage } from '@/application/ports/project-storage'
 import { firstPerPath, type Asset } from '@/domain/assets/asset-catalog'
@@ -42,13 +44,22 @@ interface Prepared {
   readonly reserved: readonly Marker[]
 }
 
+/** O que sai de uma montagem: a página, os arquivos citados e os problemas. */
+interface Built {
+  readonly page: string
+  readonly copies: readonly string[]
+  readonly problems: readonly FileProblem[]
+  readonly defaultFrame: boolean
+}
+
 /**
- * A página do produto (SPEC §4.4, Fase 7): a moldura com as seções das features selecionadas,
- * os marcadores trocados, os caminhos corrigidos para o `index.html`, o sumário e o CSS e o JS
- * incluídos. Devolve o `index.html` e as cópias dos arquivos citados, ou todos os problemas.
- * Os recursos são copiados pelo `XmlProductDeriver`, como antes.
+ * A página do produto (SPEC §4.4, Fases 7 e 8): a moldura com as seções das features
+ * selecionadas, os marcadores trocados, os caminhos corrigidos para o `index.html`, o sumário
+ * e o CSS e o JS incluídos. Na geração, devolve o `index.html` e as cópias dos arquivos
+ * citados, ou todos os problemas; os recursos são copiados pelo `XmlProductDeriver`. Na
+ * visualização, monta a página mesmo com problemas, com o texto dos fragmentos abertos.
  */
-export class HtmlPageDeriver implements ProductDeriver {
+export class HtmlPageDeriver implements ProductDeriver, PagePreviewer {
   private readonly storage: ProjectStorage
 
   constructor(storage: ProjectStorage) {
@@ -57,86 +68,131 @@ export class HtmlPageDeriver implements ProductDeriver {
 
   async derive(plan: GenerationPlan): Promise<Result<readonly ProductFile[], FileProblem[]>> {
     if (!plan.hasPage) return ok([])
+    const built = await this.build(plan, this.storage, 'generation')
+    if (built.problems.length > 0) return err([...built.problems])
+    return ok([
+      { kind: 'text', path: PAGE_PATH, content: built.page },
+      ...built.copies.map((path): ProductFile => ({ kind: 'copy', path }))
+    ])
+  }
+
+  async preview(plan: GenerationPlan, edited: ReadonlyMap<string, string>): Promise<PagePreview> {
+    const built = await this.build(
+      plan,
+      new EditedFragmentsStorage(this.storage, edited),
+      'preview'
+    )
+    return { page: built.page, problems: built.problems, defaultFrame: built.defaultFrame }
+  }
+
+  /**
+   * Monta a página. Na visualização, os arquivos citados não são conferidos (o navegador
+   * mostra a falta), e uma moldura que não pôde ser lida dá lugar à moldura padrão.
+   */
+  private async build(
+    plan: GenerationPlan,
+    storage: ProjectStorage,
+    mode: 'generation' | 'preview'
+  ): Promise<Built> {
     const fragments = firstPerPath(planHtmlFragments(plan.root))
-    const loaded = await Promise.all([
-      this.loadFrame(),
-      ...fragments.map((asset) => this.loadFragment(asset))
+    const [frameRead, ...fragmentReads] = await Promise.all([
+      loadFrame(storage),
+      ...fragments.map((asset) => loadFragment(storage, asset))
     ])
     const problems: FileProblem[] = []
-    const prepared: Prepared[] = []
-    loaded.forEach((result, index) => {
-      if (!result.ok) {
-        problems.push(...result.error)
-        return
+    const prepareRead = (
+      read: Result<Loaded, FileProblem[]>,
+      subject: string | undefined
+    ): Prepared | null => {
+      if (!read.ok) {
+        problems.push(...read.error)
+        return null
       }
-      const subject = index === 0 ? undefined : fragments[index - 1].id
-      const done = prepare(result.value.file, result.value.content, plan, subject)
+      const done = prepare(read.value.file, read.value.content, plan, subject)
       problems.push(...done.problems)
-      if (done.prepared !== null) prepared.push(done.prepared)
+      return done.prepared
+    }
+    const frame =
+      prepareRead(frameRead, undefined) ??
+      prepare(FRAME_PATH, DEFAULT_FRAME, plan, undefined).prepared
+    const parts = fragmentReads.flatMap((read, index) => {
+      const part = prepareRead(read, fragments[index].id)
+      return part === null ? [] : [part]
     })
+    const prepared = frame === null ? parts : [frame, ...parts]
     // Os arquivos citados são conferidos também num arquivo com problema: todos de uma vez.
-    problems.push(...(await this.checkCited(prepared)))
-    if (problems.length > 0) return err(problems)
+    if (mode === 'generation') problems.push(...(await checkCited(storage, prepared)))
 
-    const [frame, ...parts] = prepared
     const textByPath = new Map(
       parts.map((part) => [part.file, trimmed(apply(part.text, part.edits))])
     )
-    const page = assemble(frame, plan, (asset) => textByPath.get(asset.path) ?? '')
-    const copies = uniquePaths(prepared.flatMap((part) => part.cited.map((cited) => cited.path)))
-    return ok([
-      { kind: 'text', path: PAGE_PATH, content: page },
-      ...copies.map((path): ProductFile => ({ kind: 'copy', path }))
-    ])
+    const textOf = (asset: Asset): string => textByPath.get(asset.path) ?? ''
+    return {
+      page: frame === null ? '' : assemble(frame, plan, textOf),
+      copies: uniquePaths(prepared.flatMap((part) => part.cited.map((cited) => cited.path))),
+      problems,
+      defaultFrame: frameRead.ok && frameRead.value.missing
+    }
   }
+}
 
-  private async loadFrame(): Promise<Result<{ file: string; content: string }, FileProblem[]>> {
-    const read = await this.storage.readText(FRAME_PATH)
-    if (read.ok) return ok({ file: FRAME_PATH, content: read.value.content })
-    if (read.error.code === 'not-found') return ok({ file: FRAME_PATH, content: DEFAULT_FRAME })
-    return err([{ file: FRAME_PATH, severity: 'error', message: read.error.message }])
+/** Um arquivo lido, e se era a moldura que não existe (e veio a padrão no lugar). */
+interface Loaded {
+  readonly file: string
+  readonly content: string
+  readonly missing: boolean
+}
+
+async function loadFrame(storage: ProjectStorage): Promise<Result<Loaded, FileProblem[]>> {
+  const read = await storage.readText(FRAME_PATH)
+  if (read.ok) return ok({ file: FRAME_PATH, content: read.value.content, missing: false })
+  if (read.error.code === 'not-found') {
+    return ok({ file: FRAME_PATH, content: DEFAULT_FRAME, missing: true })
   }
+  return err([{ file: FRAME_PATH, severity: 'error', message: read.error.message }])
+}
 
-  private async loadFragment(
-    asset: Asset
-  ): Promise<Result<{ file: string; content: string }, FileProblem[]>> {
-    const read = await this.storage.readText(asset.path)
-    if (read.ok) return ok({ file: asset.path, content: read.value.content })
-    const message = read.error.code === 'not-found' ? 'Arquivo ausente.' : read.error.message
-    return err([{ file: asset.path, subject: asset.id, severity: 'error', message }])
-  }
+async function loadFragment(
+  storage: ProjectStorage,
+  asset: Asset
+): Promise<Result<Loaded, FileProblem[]>> {
+  const read = await storage.readText(asset.path)
+  if (read.ok) return ok({ file: asset.path, content: read.value.content, missing: false })
+  const message = read.error.code === 'not-found' ? 'Arquivo ausente.' : read.error.message
+  return err([{ file: asset.path, subject: asset.id, severity: 'error', message }])
+}
 
-  /** Cada arquivo citado precisa existir e ser um arquivo; é conferido uma vez só. */
-  private async checkCited(prepared: readonly Prepared[]): Promise<FileProblem[]> {
-    const seen = new Set<string>()
-    const checks = prepared.flatMap((part) =>
-      part.cited.flatMap((cited) => {
-        const key = cited.path.toLowerCase()
-        if (seen.has(key)) return []
-        seen.add(key)
-        return [{ part, cited }]
-      })
-    )
-    const results = await Promise.all(
-      checks.map(async ({ part, cited }): Promise<FileProblem[]> => {
-        const generated = [PAGE_PATH, PRODUCT_PATH].find(
-          (path) => path === cited.path.toLowerCase()
-        )
-        if (generated !== undefined) {
-          const message = `O arquivo ${cited.path} do projeto substituiria o ${generated} gerado: mude o nome dele.`
-          return [problemAt(part.file, part.text, { offset: cited.offset, message }, part.subject)]
-        }
-        const entry = await this.storage.stat(cited.path)
-        if (entry.ok && entry.value === 'file') return []
-        const message =
-          entry.ok && entry.value === 'directory'
-            ? `O caminho aponta para uma pasta: ${cited.path}.`
-            : `O arquivo citado não existe: ${cited.path}.`
+/** Cada arquivo citado precisa existir e ser um arquivo; é conferido uma vez só. */
+async function checkCited(
+  storage: ProjectStorage,
+  prepared: readonly Prepared[]
+): Promise<FileProblem[]> {
+  const seen = new Set<string>()
+  const checks = prepared.flatMap((part) =>
+    part.cited.flatMap((cited) => {
+      const key = cited.path.toLowerCase()
+      if (seen.has(key)) return []
+      seen.add(key)
+      return [{ part, cited }]
+    })
+  )
+  const results = await Promise.all(
+    checks.map(async ({ part, cited }): Promise<FileProblem[]> => {
+      const generated = [PAGE_PATH, PRODUCT_PATH].find((path) => path === cited.path.toLowerCase())
+      if (generated !== undefined) {
+        const message = `O arquivo ${cited.path} do projeto substituiria o ${generated} gerado: mude o nome dele.`
         return [problemAt(part.file, part.text, { offset: cited.offset, message }, part.subject)]
-      })
-    )
-    return results.flat()
-  }
+      }
+      const entry = await storage.stat(cited.path)
+      if (entry.ok && entry.value === 'file') return []
+      const message =
+        entry.ok && entry.value === 'directory'
+          ? `O caminho aponta para uma pasta: ${cited.path}.`
+          : `O arquivo citado não existe: ${cited.path}.`
+      return [problemAt(part.file, part.text, { offset: cited.offset, message }, part.subject)]
+    })
+  )
+  return results.flat()
 }
 
 /**
@@ -199,6 +255,8 @@ function prepare(
       })
     }
   }
+  // Os problemas do arquivo na ordem das linhas: os da conferência vêm antes dos marcadores.
+  problems.sort((a, b) => (a.line ?? 0) - (b.line ?? 0))
   return { prepared: { file, subject, text, source, edits, cited, reserved }, problems }
 }
 

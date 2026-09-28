@@ -9,7 +9,7 @@ import {
   childFeatures,
   featuresInPreOrder
 } from '../feature-model/traversal'
-import { fragmentFormat } from '../fragments/fragment-format'
+import { projectHasPage } from '../pages/page-assembly'
 import { err, ok, type Result } from '../shared/result'
 
 /*
@@ -89,9 +89,7 @@ export function planGeneration(
       .map((feature) => plannedFeature(feature, configuration)),
     root: sectionOf(model.root),
     resources: firstPerPath(included.filter((asset) => asset.kind === 'resource')),
-    hasPage: catalog.assets.some(
-      (asset) => asset.kind === 'fragment' && fragmentFormat(asset.path) === 'html'
-    ),
+    hasPage: projectHasPage(catalog),
     modelAttributes: attributeIdsByFeature(model.root)
   })
 }
