@@ -91,7 +91,7 @@ Referência a um arquivo dentro do projeto vinculada a uma feature; pode ser um 
 _Avoid_: artefato, anexo, documento
 
 **Fragmento**:
-Asset que é um arquivo XML bem-formado e é embutido no produto gerado.
+Asset que é um arquivo XML bem-formado ou um trecho de HTML, e é embutido no produto gerado: o XML no `product.xml`, o HTML na página.
 _Avoid_: trecho, snippet, capítulo
 
 **Recurso**:
@@ -115,8 +115,24 @@ Processo que transforma uma configuração completa em um produto gerado.
 _Avoid_: build, exportação, derivação (use só em conversa sobre SPL em geral)
 
 **Produto gerado**:
-Pasta de saída com o `product.xml` e os recursos copiados, correspondente a uma configuração.
+Pasta de saída com o `product.xml`, a página (quando o projeto tem fragmentos HTML) e os arquivos copiados, correspondente a uma configuração.
 _Avoid_: produto (sem qualificador), release, pacote
+
+**Página**:
+O `index.html` do produto gerado: a moldura com as seções das features selecionadas, montada a partir dos fragmentos HTML.
+_Avoid_: site, template, documento HTML
+
+**Moldura**:
+O arquivo `moldura.html` na raiz do projeto, com o que fica em volta das seções na página: o `<head>`, o cabeçalho e o rodapé.
+_Avoid_: modelo (é o Feature Model), template, layout
+
+**Marcador**:
+Trecho `{{…}}` de um fragmento HTML ou da moldura que a geração troca: pelo valor de um atributo (`{{feature.atributo}}`), pelo nome da configuração (`{{produto}}`), pelas seções (`{{conteudo}}`) ou pelo sumário (`{{sumario}}`).
+_Avoid_: variável, placeholder, tag
+
+**Sumário**:
+Lista aninhada de links para as seções da página, com as features selecionadas que têm conteúdo.
+_Avoid_: índice, agenda, menu
 
 **Seção**:
 Parte do produto gerado que corresponde a uma feature selecionada e contém seus fragmentos e as seções das features filhas.
