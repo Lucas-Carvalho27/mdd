@@ -34,6 +34,7 @@
     "elkjs": "^0.12.0",
     "logic-solver": "^2.0.1",
     "lucide-react": "^1.47.0",
+    "parse5": "^8.0.1",
     "radix-ui": "^1.6.7",
     "xmllint-wasm": "^5.3.0",
     "zustand": "^5.0.15"

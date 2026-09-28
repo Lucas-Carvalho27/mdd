@@ -1,3 +1,5 @@
+import { FragmentCheckerByFormat } from '@/application/fragments/fragment-checker-by-format'
+import { CombinedProductDeriver } from '@/application/generation/combined-product-deriver'
 import { CheckAssetFiles } from '@/application/use-cases/check-asset-files'
 import { CreateProject } from '@/application/use-cases/create-project'
 import { FragmentFiles } from '@/application/use-cases/fragment-files'
@@ -16,6 +18,8 @@ import { ElectronProjectStorage } from '@/infrastructure/electron/electron-proje
 import { ElectronRecentProjects } from '@/infrastructure/electron/electron-recent-projects'
 import { ElectronUnsavedChangesIndicator } from '@/infrastructure/electron/electron-unsaved-changes-indicator'
 import { ElectronXmlSchemaValidator } from '@/infrastructure/electron/electron-xml-schema-validator'
+import { HtmlFragmentChecker } from '@/infrastructure/html/html-fragment-checker'
+import { HtmlPageDeriver } from '@/infrastructure/html/html-page-deriver'
 import { LogicSolverConstraintSolver } from '@/infrastructure/solver/logic-solver-constraint-solver'
 import { SystemClock } from '@/infrastructure/system/system-clock'
 import {
@@ -45,8 +49,11 @@ export function createAppStore(): ProjectStore {
   }
   // Uma só resolução para a tela e a geração: o resultado guardado serve às duas.
   const resolveConfiguration = new ResolveConfiguration(new LogicSolverConstraintSolver())
-  // O editor de fragmentos confere como a geração confere.
-  const fragmentChecker = new XmlFragmentChecker(validator)
+  // O editor de fragmentos confere como a geração confere, com o checker de cada formato.
+  const fragmentChecker = new FragmentCheckerByFormat({
+    xml: new XmlFragmentChecker(validator),
+    html: new HtmlFragmentChecker()
+  })
   return createProjectStore({
     openProject: new OpenProject({ picker, recents, ...repositories }),
     createProject: new CreateProject({ picker, models }),
@@ -59,7 +66,10 @@ export function createAppStore(): ProjectStore {
     assetOpener: new ElectronAssetOpener(),
     generateProduct: new GenerateProduct({
       resolveConfiguration,
-      deriver: new XmlProductDeriver(storage, validator),
+      deriver: new CombinedProductDeriver([
+        new XmlProductDeriver(storage, validator),
+        new HtmlPageDeriver(storage)
+      ]),
       writer: new WriteProductFolder(storage, OUTPUT_DIRECTORY),
       clock: new SystemClock()
     }),
