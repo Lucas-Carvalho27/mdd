@@ -4,7 +4,12 @@ import { storedValue } from '../configuration/attribute-values'
 import type { Configuration } from '../configuration/configuration'
 import { configurationStatus, isSelected, type Resolution } from '../configuration/resolution'
 import type { Feature, FeatureModel } from '../feature-model/feature-model'
-import { childFeatures, featuresInPreOrder } from '../feature-model/traversal'
+import {
+  attributeIdsByFeature,
+  childFeatures,
+  featuresInPreOrder
+} from '../feature-model/traversal'
+import { fragmentFormat } from '../fragments/fragment-format'
 import { err, ok, type Result } from '../shared/result'
 
 /*
@@ -45,6 +50,13 @@ export interface GenerationPlan {
    * assets.xml. Não aparecem no product.xml: só são copiados.
    */
   readonly resources: readonly Asset[]
+  /** Gera a página (Fase 7): o projeto tem algum asset fragmento `.html`, incluído ou não. */
+  readonly hasPage: boolean
+  /**
+   * Todas as features do modelo, com os IDs dos atributos, e não só as selecionadas: um
+   * marcador de uma feature que existe mas não foi selecionada tem uma mensagem própria.
+   */
+  readonly modelAttributes: ReadonlyMap<string, readonly string[]>
 }
 
 export function planGeneration(
@@ -76,7 +88,11 @@ export function planGeneration(
       .filter((feature) => selected.has(feature.id))
       .map((feature) => plannedFeature(feature, configuration)),
     root: sectionOf(model.root),
-    resources: firstPerPath(included.filter((asset) => asset.kind === 'resource'))
+    resources: firstPerPath(included.filter((asset) => asset.kind === 'resource')),
+    hasPage: catalog.assets.some(
+      (asset) => asset.kind === 'fragment' && fragmentFormat(asset.path) === 'html'
+    ),
+    modelAttributes: attributeIdsByFeature(model.root)
   })
 }
 

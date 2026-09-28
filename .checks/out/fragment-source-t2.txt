@@ -1,0 +1,17 @@
+simples                    → "<topic xmlns=\"urn:x\">\n  <p>a</p>\n</topic>"
+sem namespace              → "<topic xmlns=\"\">\n  <p>a</p>\n</topic>"
+prefixo na raiz            → "<d:topic xmlns=\"\" xmlns:d=\"urn:d\"><p/></d:topic>"
+BOM e CRLF                 → "<t xmlns=\"\" a=\"1\">\r\n  <p/>\r\n</t>"
+DOCTYPE interno            → "<t xmlns=\"\"><![CDATA[</t>]]><!-- </t> --></t>"
+CR sozinho                 → "<t xmlns=\"\">\r<p/></t>"
+emoji antes                → "<t xmlns=\"\"/>"
+raiz vazia                 → "<t xmlns=\"\"/>"
+DOCTYPE externo e &nbsp;   → linha 4: A entidade &nbsp; não é suportada: use o próprio caractere ou uma referência numérica, como &#160;. | linha 5: A entidade &copy; não é suportada: use o próprio caractere ou uma referência numérica, como &#160;.
+entidade interna           → linha 6: A entidade &e; não é suportada: use o próprio caractere ou uma referência numérica, como &#160;.
+prefixo sem declaração     → linha 3: Há um prefixo de namespace sem declaração (xmlns:…).
+referências válidas        → "<t xmlns=\"\">&amp;&lt;&gt;&quot;&apos;&#233;&#xE9;</t>"
+--- codificação declarada
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?><t" → UTF-8
+"<BOM><?xml version='1.0' encoding='iso-8859-" → iso-8859-1
+"<?xml version=\"1.0\"?><t/>"                  → undefined
+"<t/>"                                         → undefined

@@ -1,0 +1,20 @@
+antes da resposta                    → verificando…
+boleto.xml                           → missing
+busca.xml                            → ok
+conferência nova: boleto.xml         → ok
+depois da antiga responder           → ok
+cancelado                            → null | aviso: null
+fora do projeto                      → null
+aviso                                → Arquivo recusado: O arquivo precisa estar dentro da pasta do projeto. Copie-o para dentro e vincule de novo.
+vincular                             → true | selecionado: capa | alterado: true
+antes da conferência                 → verificando…
+conferências depois de vincular      → 7 assets
+depois da conferência                → ok
+ID repetido                          → false | Edição recusada: Já existe um asset com o ID "capa".
+desfazer o vínculo                   → selecionado: (nenhum) | alterado: false
+trocar arquivo                       → docs/pagamento/boleto-novo.xml | ok
+rótulo do desfazer                   → Trocar arquivo por "boleto-novo.xml"
+abrir                                → docs/img/pix-fluxo.svg | aviso: null
+abrir o que sumiu                    → Não foi possível abrir "boleto.xml": "docs/pagamento/boleto.xml" não existe.
+conferiu de novo                     → 1
+fechado                              → 0 estados | selecionado: null

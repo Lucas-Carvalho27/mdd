@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<featureModel xmlns="urn:mdd:feature-model" schemaVersion="1" name="Herby">
+  <feature id="herby" name="Herby">
+    <attribute id="produto" name="Nome da plataforma" type="string" default="Herby"/>
+    <attribute id="url_scan" name="Página para escanear o QR Code pelo navegador" type="string" default="hby.app/scan"/>
+    <attribute id="site" name="Site institucional" type="string" default="www.herbyvision.com"/>
+    <attribute id="contato_whatsapp" name="WhatsApp de suporte" type="string" default="(32) 99847-8737"/>
+    <attribute id="contato_email" name="E-mail de contato" type="string" default="contato@herbyvision.com"/>
+    <attribute id="titulo_tutorial" name="Título da capa" type="string" default="Plataforma Herby"/>
+    <attribute id="rede" name="Rede de ensino atendida" type="string" default=""/>
+    <attribute id="ano" name="Ano da avaliação" type="string" default="2026"/>
+    <attribute id="sistema_externo" name="Sistema da rede usado para baixar os cartões" type="string" default="SAEV"/>
+    <feature id="preparacao" name="Preparação" variability="optional">
+      <feature id="acesso_a_plataforma" name="Acesso à Plataforma" variability="optional">
+        <description>06</description>
+      </feature>
+      <feature id="informacoes_gerais" name="Informações Gerais" variability="optional">
+        <description>01</description>
+        <attribute id="avaliacao" name="Nome da avaliação" type="string" default="avaliação"/>
+        <attribute id="data_treinamento" name="Treinamento para preenchimento do template" type="string" default="21/05/2026"/>
+        <attribute id="prazo_envio_template" name="Prazo para envio do template" type="string" default="03/06/2026"/>
+        <attribute id="data_liberacao_cartoes" name="Liberação dos cartões e dos links de acesso" type="string" default="05/06/2026"/>
+      </feature>
+      <feature id="gestao_da_base_de_dados" name="Gestão da Base de Dados" variability="optional">
+        <description>07</description>
+        <feature id="lixeira" name="Lixeira" variability="optional">
+          <description>08</description>
+        </feature>
+        <feature id="sincronizacao_rede_estadual" name="Sincronização (rede estadual)" variability="optional">
+          <description>09</description>
+        </feature>
+      </feature>
+      <feature id="template_de_dados" name="Template de Dados" variability="optional">
+        <description>18</description>
+        <attribute id="contato_operacoes" name="E-mail para envio do template de dados" type="string" default="operacoes@herbyvision.com"/>
+        <attribute id="url_template" name="Link público do template de dados" type="string" default="https://docs.google.com/spreadsheets/d/1FZi8DrgjNUPo9mvHq13gQWXs-pqD02nx/edit?usp=drive_link&amp;ouid=110608327084149723324&amp;rtpof=true&amp;sd=true"/>
+      </feature>
+    </feature>
+    <feature id="impressao_dos_cartoes" name="Impressão dos Cartões" variability="optional">
+      <group min="1" max="1">
+        <feature id="impressao_na_herby" name="Impressão na Herby"/>
+        <feature id="impressao_no_saev" name="Impressão no SAEV"/>
+      </group>
+    </feature>
+    <feature id="aplicacao_e_correcao" name="Aplicação e Correção" variability="optional">
+      <group min="1" max="*">
+        <feature id="processamento_por_foto" name="Processamento por Foto">
+          <feature id="educacao_especial" name="Educação Especial" variability="optional"/>
+        </feature>
+        <feature id="avaliacao_de_fluencia_audio" name="Avaliação de Fluência (áudio)">
+          <feature id="correcao_por_ia" name="Correção por IA" variability="optional"/>
+        </feature>
+      </group>
+    </feature>
+    <feature id="monitoramento_e_resultados" name="Monitoramento e Resultados" variability="optional">
+      <feature id="progresso" name="Progresso" variability="optional"/>
+      <feature id="resultados" name="Resultados" variability="optional">
+        <feature id="resultados_detalhados" name="Resultados Detalhados" variability="optional"/>
+        <feature id="relatorios" name="Relatórios" variability="optional"/>
+        <feature id="graficos" name="Gráficos" variability="optional"/>
+        <feature id="qr_code_de_resultados" name="QR Code de Resultados" variability="optional"/>
+      </feature>
+    </feature>
+  </feature>
+</featureModel>

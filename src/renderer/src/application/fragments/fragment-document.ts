@@ -1,3 +1,4 @@
+import { initialFragmentText } from '@/domain/fragments/fragment-format'
 import { NEW_FILE_FORMAT, type TextFormat } from '@/domain/fragments/text-format'
 
 /** O fragmento como está no disco, na última leitura ou gravação. */
@@ -20,11 +21,9 @@ export interface FragmentDocument {
   readonly readOnly?: string
 }
 
-/** Um fragmento novo começa só com a declaração XML e uma linha em branco. */
-export const NEW_FRAGMENT_TEXT = '<?xml version="1.0" encoding="UTF-8"?>\n'
-
+/** Um fragmento novo começa com o texto do formato dele (`initialFragmentText`). */
 export function newFragment(path: string): FragmentDocument {
-  return { path, text: NEW_FRAGMENT_TEXT, saved: null, format: NEW_FILE_FORMAT }
+  return { path, text: initialFragmentText(path), saved: null, format: NEW_FILE_FORMAT }
 }
 
 /** Tem alteração não salva: um arquivo novo sempre tem. */

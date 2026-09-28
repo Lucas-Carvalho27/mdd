@@ -1,0 +1,12 @@
+1. conflitos                             → configurations/loja-premium.xml
+   disco depois de salvar                → loja-basica.xml="Loja Básica" loja-premium.xml="Premium de fora"
+   disco depois de sobrescrever          → loja-premium.xml="Loja Premium"
+   hashes depois                         → loja-premium
+2. chave da nova "Loja"                  → loja-2
+3. conflitos                             → configurations/loja.xml
+   disco depois de salvar                → Loja.xml="Loja antiga"
+   disco depois de sobrescrever          → Loja.xml="Loja"
+   hashes depois                         → loja
+4. chave depois de renomear              → Loja
+   conflitos                             → (nenhum)
+   disco depois de salvar                → Loja.xml="Loja"

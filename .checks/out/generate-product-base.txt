@@ -1,0 +1,71 @@
+1. gerar loja-basica                     → gerado em saida/loja-basica às 2026-09-24T14:03:05.123Z
+   arquivos em saida/                    → loja-basica/docs/img/pix-fluxo.svg, loja-basica/product.xml
+   igual ao esperado (sem espaços)       → true
+   conforme o product.xsd                → sim
+   generatedAt                           → 2026-09-24T14:03:05Z
+   .svg idêntico                         → true
+   fragmentos intactos no product.xml    → true
+<?xml version="1.0" encoding="UTF-8"?>
+<product xmlns="urn:mdd:product" schemaVersion="1" name="Loja Básica" model="Loja Online" generatedAt="2026-09-24T14:03:05Z">
+  <features>
+    <feature id="loja" name="Loja Online">
+      <attribute id="versao">1.0</attribute>
+    </feature>
+    <feature id="catalogo" name="Catálogo"/>
+    <feature id="busca" name="Busca">
+      <attribute id="max_resultados">100</attribute>
+    </feature>
+    <feature id="mobile" name="App mobile">
+      <attribute id="plataforma">android</attribute>
+2. gerar de novo                         → precisa confirmar: saida/loja-basica
+   pasta intacta                         → true
+3. substituir                            → gerado em saida/loja-basica às 2026-09-24T15:00:00.000Z
+   arquivos em saida/                    → loja-basica/docs/img/pix-fluxo.svg, loja-basica/product.xml
+   generatedAt                           → 2026-09-24T15:00:00Z
+4. boleto ausente                        → problems
+                                           docs/pagamento/boleto.xml [doc_boleto] Arquivo ausente.
+   saida/ existe?                        → false
+5. vários problemas                      → problems
+                                           docs/loja/visao-geral.xml:1 [doc_loja] A codificação ISO-8859-1 não é suportada: salve o arquivo em UTF-8.
+                                           docs/busca/busca.xml:4 [doc_busca] A entidade &nbsp; não é suportada: use o próprio caractere ou uma referência numérica, como &#160;.
+                                           docs/pagamento/pix.xml:4 [doc_pix] Opening and ending tag mismatch: title line 3 and topic
+                                           docs/img/pix-fluxo.svg [img_pix] Arquivo ausente.
+   saida/ existe?                        → false
+6. sem namespace                         → gerado em saida/loja-basica às 2026-09-24T14:03:05.123Z
+   o fragmento no product.xml            → "          <topic xmlns=\"\" id=\"app\">\r\n  <pre>  linha 1\r\n    linha 2</pre>\r\n</topic>"
+   namespace do <topic> embutido         → null
+   conforme o product.xsd                → sim
+7. troca falha                           → write-failed
+                                           saida/loja-basica/ Não foi possível colocar o produto em saida/loja-basica/: falha simulada
+   arquivos em saida/                    → loja-basica/docs/img/pix-fluxo.svg, loja-basica/product.xml
+8. troca e volta falham                  → write-failed (anterior em saida/.loja-basica.old/)
+                                           saida/loja-basica/ Não foi possível colocar o produto em saida/loja-basica/: falha simulada
+   arquivos em saida/                    → .loja-basica.old/docs/img/pix-fluxo.svg, .loja-basica.old/product.xml
+9. arquivo aberto                        → write-failed
+                                           saida/loja-basica/ Não foi possível substituir saida/loja-basica/: feche os arquivos dessa pasta e gere de novo.
+   arquivos em saida/                    → loja-basica/docs/img/pix-fluxo.svg, loja-basica/product.xml
+   product.xml anterior intacto          → true
+10. chave inexistente                    → problems
+                                           configurations/nao-existe.xml A configuração não existe mais.
+    incompleta                           → problems
+                                           configurations/loja-basica.xml A configuração precisa estar completa para gerar o produto.
+11. gerar depois da falha                → precisa confirmar: saida/loja-basica
+    arquivos em saida/                   → loja-basica/a-mao.txt, loja-basica/docs/img/pix-fluxo.svg, loja-basica/product.xml
+    substituir                           → gerado em saida/loja-basica às 2026-09-24T17:00:00.000Z
+    arquivos em saida/                   → loja-basica/docs/img/pix-fluxo.svg, loja-basica/product.xml
+12. a volta da .old falha                → write-failed (anterior em saida/.loja-basica.old/)
+                                           saida/.loja-basica.old/ Não foi possível pôr a versão anterior de volta em saida/loja-basica/: falha simulada
+    arquivos em saida/                   → .loja-basica.old/docs/img/pix-fluxo.svg, .loja-basica.old/product.xml, .loja-basica.tmp/product.xml
+13. fragmento em Latin-1                 → problems
+                                           docs/busca/busca.xml:3 [doc_busca] O arquivo não está em UTF-8: salve-o em UTF-8.
+    saida/ existe?                       → false
+14. gravação falha                       → write-failed
+                                           saida/.loja-basica.tmp/product.xml Não foi possível gravar saida/.loja-basica.tmp/product.xml: disco cheio
+    arquivos em saida/                   → (não existe)
+15. 14 fragmentos                        → problems
+                                           docs/extra/extra-02.xml:3 [extra_02] Opening and ending tag mismatch: p line 2 and topic
+                                           docs/extra/extra-09.xml [extra_09] Arquivo ausente.
+    conferências ao mesmo tempo          → 4
+    corrigidos                           → gerado em saida/loja-basica às 2026-09-24T14:03:05.123Z
+    conferências ao mesmo tempo          → 4
+    ordem no product.xml                 → doc_loja extra_01 extra_02 extra_03 extra_04 extra_05 extra_06 extra_07 extra_08 extra_09 extra_10 doc_busca doc_busca_app doc_pix
