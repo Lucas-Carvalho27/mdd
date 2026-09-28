@@ -5294,7 +5294,7 @@ Esperado: a mesma saída do Passo 15 da Tarefa 4. Ela confirma que o parse5 e o 
 
 - [ ] **Passo 3: Checagem à mão com o usuário**
 
-Prepare uma cópia do exemplo em `.checks/aceitacao-manual/herby` (`cp -r docs/examples/herby .checks/aceitacao-manual/herby`). Com o `dist/win-unpacked/mdd.exe`, o usuário:
+Prepare uma cópia do exemplo em `.checks/aceitacao-herby` (`cp -r docs/examples/herby .checks/aceitacao-herby`; a `.checks/aceitacao-manual/` já tem a cópia do `loja-online`, e o herby dentro dela apareceria no projeto da loja). Com o `dist/win-unpacked/mdd.exe`, o usuário:
 
 1. abre a cópia, vai à aba Fragmentos e abre `fragmentos/plataforma.html`: o realce de HTML e o marcador `{{herby.produto}}` com cor própria;
 2. digita `{{herby.` numa linha e vê a lista de sugestões; escolhe uma com Enter;
