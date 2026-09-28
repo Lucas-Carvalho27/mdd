@@ -25,7 +25,8 @@ const cases: [string, string][] = [
 ]
 for (const [from, url] of cases) {
   const cited = resolveCitedUrl(from, url)
-  const shown = cited.kind === 'file' ? `file ${cited.path} → ${pageUrl(cited.path, cited.suffix)}` : cited.kind
+  const shown =
+    cited.kind === 'file' ? `file ${cited.path} → ${pageUrl(cited.path, cited.suffix)}` : cited.kind
   console.log(`${from} + ${JSON.stringify(url)} → ${shown}`)
 }
 console.log(`pageUrl: ${pageUrl('Slides por Feature/06 - Acesso à Plataforma.pptx', '')}`)

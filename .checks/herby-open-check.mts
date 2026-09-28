@@ -24,5 +24,10 @@ const result = await open.execute()
 console.log(result.status)
 if (result.status === 'opened') {
   const { project } = result.session
-  console.log(`${project.assets.assets.length} assets, ${project.configurations.length} configurações, avisos: ${result.warnings.length}`)
-} else console.log(JSON.stringify(result, null, 1).slice(0, 1500))
+  console.log(
+    `${project.assets.assets.length} assets, ${project.configurations.length} configurações, avisos: ${result.warnings.length}`
+  )
+} else {
+  console.log(JSON.stringify(result, null, 1).slice(0, 1500))
+  process.exitCode = 1
+}

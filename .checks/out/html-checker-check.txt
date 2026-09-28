@@ -1,25 +1,25 @@
 HTML normal: ok
-div aberto: 
+div aberto:
     2: A tag <div> é aberta aqui e não é fechada neste arquivo.
-section a mais: 
+section a mais:
     2: </section> sem a tag de abertura, ou fechada fora de ordem.
-fora de ordem: 
+fora de ordem:
     1: A tag <i> é aberta aqui e não é fechada neste arquivo.
     1: </i> sem a tag de abertura, ou fechada fora de ordem.
-html e body: 
+html e body:
     1: Um fragmento não pode ter <!doctype>, <html>, <head> nem <body>: eles ficam na moldura.
     2: Um fragmento não pode ter <!doctype>, <html>, <head> nem <body>: eles ficam na moldura.
     4: Um fragmento não pode ter <!doctype>, <html>, <head> nem <body>: eles ficam na moldura.
     5: Um fragmento não pode ter <!doctype>, <html>, <head> nem <body>: eles ficam na moldura.
-doctype: 
+doctype:
     1: Um fragmento não pode ter <!doctype>, <html>, <head> nem <body>: eles ficam na moldura.
-td fora da tabela: 
+td fora da tabela:
     2: O navegador ignora a tag <td> neste lugar.
     2: </td> sem a tag de abertura, ou fechada fora de ordem.
-div/: 
+div/:
     1: No HTML, /> não fecha esta tag: escreva a tag de fechamento.
     1: A tag <div> é aberta aqui e não é fechada neste arquivo.
-sintaxe: 
+sintaxe:
     1: Atributo repetido na mesma tag.
     2: Entidade desconhecida (como &foo;).
     2: Falta o ; no fim da entidade.
@@ -28,28 +28,28 @@ svg: ok
 template: ok
 texto com < em script e style: ok
 comentário: ok
-UTF-8: 
+UTF-8:
     1: O arquivo não está em UTF-8: salve-o em UTF-8.
-BOM e CRLF: 
+BOM e CRLF:
     2: A tag <div> é aberta aqui e não é fechada neste arquivo.
 --- marcadores
 lugares que valem: ok
-dentro da tag: 
+dentro da tag:
     1: Um marcador não pode ficar dentro da tag, fora do valor de um atributo.
-dentro do script: 
+dentro do script:
     1: Marcadores não valem dentro de <script>.
-sintaxe e reservados: 
+sintaxe e reservados:
     1: Falta o }} que fecha o marcador.
     2: Marcador desconhecido: {{contuedo}}. Use {{feature.atributo}} ou {{produto}}.
     2: {{conteudo}} só vale na moldura.
     2: {{sumario}} só vale na moldura.
 --- moldura
 moldura padrão: ok
-moldura sem </body> nem conteúdo: 
+moldura sem </body> nem conteúdo:
     1: A moldura precisa ter </body>.
     1: A moldura precisa de {{conteudo}}, onde entram as seções.
-conteúdo fora do body: 
+conteúdo fora do body:
     4: {{conteudo}} precisa ficar no texto do <body>.
     7: {{sumario}} precisa ficar no texto do <body>.
-conteúdo repetido: 
+conteúdo repetido:
     1: {{conteudo}} só pode aparecer uma vez.

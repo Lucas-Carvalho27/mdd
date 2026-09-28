@@ -9,14 +9,36 @@
  *   … fragmentos
  *     como gravar, mas sem as configurações.
  */
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync
+} from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { Element, Node } from '@xmldom/xmldom'
 import { ResolveConfiguration } from '@/application/use-cases/resolve-configuration'
 import type { Asset } from '@/domain/assets/asset-catalog'
-import type { AttributeValue, Configuration, ManualDecision } from '@/domain/configuration/configuration'
-import { configurationStatus, isSelected, type ConfigurationStatus } from '@/domain/configuration/resolution'
-import type { Attribute, Feature, FeatureChild, FeatureModel } from '@/domain/feature-model/feature-model'
+import type {
+  AttributeValue,
+  Configuration,
+  ManualDecision
+} from '@/domain/configuration/configuration'
+import {
+  configurationStatus,
+  isSelected,
+  type ConfigurationStatus
+} from '@/domain/configuration/resolution'
+import type {
+  Attribute,
+  Feature,
+  FeatureChild,
+  FeatureModel
+} from '@/domain/feature-model/feature-model'
 import { childFeatures, featuresInPreOrder } from '@/domain/feature-model/traversal'
 import { validateFeatureModel } from '@/domain/feature-model/validation'
 import { configurationKey } from '@/domain/project/configuration-entries'
@@ -119,12 +141,16 @@ interface Variable {
   readonly byProfile: ReadonlyMap<string, string>
 }
 
-const variables: Variable[] = elements(readXml(`${ORIGINAL_FRAGMENTS}/_variaveis.xml`)).map((node) => ({
-  name: attr(node, 'nome')!,
-  defaultValue: attr(node, 'padrao') ?? '',
-  description: attr(node, 'descricao') ?? attr(node, 'nome')!,
-  byProfile: new Map(elements(node).map((value) => [attr(value, 'perfil')!, value.textContent ?? '']))
-}))
+const variables: Variable[] = elements(readXml(`${ORIGINAL_FRAGMENTS}/_variaveis.xml`)).map(
+  (node) => ({
+    name: attr(node, 'nome')!,
+    defaultValue: attr(node, 'padrao') ?? '',
+    description: attr(node, 'descricao') ?? attr(node, 'nome')!,
+    byProfile: new Map(
+      elements(node).map((value) => [attr(value, 'perfil')!, value.textContent ?? ''])
+    )
+  })
+)
 const variableByName = new Map(variables.map((variable) => [variable.name, variable]))
 const ownerOf = (name: string): string => OWNER_OF_VARIABLE[name] ?? ROOT
 
@@ -172,7 +198,10 @@ function withVariables(feature: Feature): Feature {
   const children: FeatureChild[] = renamed.children.map((child) =>
     child.kind === 'feature'
       ? { kind: 'feature', feature: withVariables(child.feature) }
-      : { kind: 'group', group: { ...child.group, members: child.group.members.map(withVariables) } }
+      : {
+          kind: 'group',
+          group: { ...child.group, members: child.group.members.map(withVariables) }
+        }
   )
   return { ...renamed, attributes: [...renamed.attributes, ...attributes], children }
 }
@@ -242,7 +271,11 @@ function inline(element: Element): string {
 function withProfiles(element: Element, lines: string[]): string[] {
   const profiles = attr(element, 'perfis')
   if (profiles === undefined) return lines
-  return [`<template data-perfis="${escapeAttribute(profiles)}">`, ...lines.map(indent), '</template>']
+  return [
+    `<template data-perfis="${escapeAttribute(profiles)}">`,
+    ...lines.map(indent),
+    '</template>'
+  ]
 }
 
 function image(element: Element): string[] {
@@ -256,7 +289,11 @@ function image(element: Element): string[] {
 
 function list(element: Element): string[] {
   const tag = attr(element, 'tipo') === 'numerada' ? 'ol' : 'ul'
-  return [`<${tag}>`, ...elements(element).map((item) => indent(`<li>${inline(item)}</li>`)), `</${tag}>`]
+  return [
+    `<${tag}>`,
+    ...elements(element).map((item) => indent(`<li>${inline(item)}</li>`)),
+    `</${tag}>`
+  ]
 }
 
 function table(element: Element): string[] {
@@ -270,7 +307,11 @@ function table(element: Element): string[] {
   return [
     '<table>',
     ...(header.length > 0
-      ? [indent('<thead>'), ...header.flatMap((line) => row(elements(line), 'th')).map((l) => indent(indent(l))), indent('</thead>')]
+      ? [
+          indent('<thead>'),
+          ...header.flatMap((line) => row(elements(line), 'th')).map((l) => indent(indent(l))),
+          indent('</thead>')
+        ]
       : []),
     indent('<tbody>'),
     ...rows.flatMap((line) => row(elements(line), 'td')).map((l) => indent(indent(l))),
@@ -356,7 +397,10 @@ function toHtml(source: SourceFragment): string {
 /** O texto do título, com as variáveis no valor padrão: vira o nome do asset. */
 function plainTitle(source: SourceFragment): string {
   const title = elements(source.root).find((child) => child.localName === 'titulo')!
-  return inline(title).replace(/\{\{[a-z_]+\.([a-z_]+)\}\}/g, (_, name: string) => variableByName.get(name)!.defaultValue)
+  return inline(title).replace(
+    /\{\{[a-z_]+\.([a-z_]+)\}\}/g,
+    (_, name: string) => variableByName.get(name)!.defaultValue
+  )
 }
 
 // ---------- assets ----------
@@ -370,7 +414,13 @@ const fragmentAssets: Asset[] = sources.map((source) => ({
   anchor: source.featureId,
   name: plainTitle(source)
 }))
-const cssAsset: Asset = { id: 'css_herby', kind: 'resource', path: 'css/herby.css', anchor: ROOT, name: 'Estilo da página' }
+const cssAsset: Asset = {
+  id: 'css_herby',
+  kind: 'resource',
+  path: 'css/herby.css',
+  anchor: ROOT,
+  name: 'Estilo da página'
+}
 /** Agrupados pela âncora, na pré-ordem do modelo (SPEC §4.3). */
 const assets: Asset[] = preorder.flatMap((feature) => [
   ...fragmentAssets.filter((asset) => asset.anchor === feature.id),
@@ -393,7 +443,8 @@ function wantedFeatures(profile: string): Set<string> {
   const wanted = new Set<string>([ROOT])
   for (const source of sources) {
     if (!source.profiles.has(profile)) continue
-    for (let id: string | undefined = source.featureId; id !== undefined; id = parentOf.get(id)) wanted.add(id)
+    for (let id: string | undefined = source.featureId; id !== undefined; id = parentOf.get(id))
+      wanted.add(id)
   }
   return wanted
 }
@@ -421,12 +472,17 @@ function buildConfiguration(profile: string): BuiltConfiguration {
     if (!wanted.has(feature.id)) continue
     for (const attribute of feature.attributes) {
       const value = variableByName.get(attribute.id)?.byProfile.get(profile)
-      if (value !== undefined) values.push({ featureId: feature.id, attributeId: attribute.id, value })
+      if (value !== undefined)
+        values.push({ featureId: feature.id, attributeId: attribute.id, value })
     }
   }
   let decisions: ManualDecision[] = []
   const notes: string[] = []
-  const configurationWith = (list: ManualDecision[]): Configuration => ({ name, decisions: list, values })
+  const configurationWith = (list: ManualDecision[]): Configuration => ({
+    name,
+    decisions: list,
+    values
+  })
 
   // Em pré-ordem, decide só o que continua indeciso: o arquivo fica com as decisões mínimas.
   for (const feature of preorder) {
@@ -435,7 +491,10 @@ function buildConfiguration(profile: string): BuiltConfiguration {
     const status = resolution.features.get(feature.id)!
     const want = wanted.has(feature.id)
     if (status.kind === 'undecided') {
-      const attempt = [...decisions, { featureId: feature.id, state: want ? 'selected' : 'deselected' } as const]
+      const attempt = [
+        ...decisions,
+        { featureId: feature.id, state: want ? 'selected' : 'deselected' } as const
+      ]
       if (resolver.execute(model, configurationWith(attempt)).kind === 'conflict') {
         notes.push(`${feature.id}: ${want ? 'selecionar' : 'excluir'} dá conflito com o modelo`)
       } else {
@@ -454,7 +513,15 @@ function buildConfiguration(profile: string): BuiltConfiguration {
       ? [...resolution.features].filter(([, status]) => isSelected(status)).map(([id]) => id)
       : []
   )
-  return { profile, key, configuration, wanted, selected, notes, status: configurationStatus(resolution) }
+  return {
+    profile,
+    key,
+    configuration,
+    wanted,
+    selected,
+    notes,
+    status: configurationStatus(resolution)
+  }
 }
 
 const configurations = allProfiles.map(buildConfiguration)
@@ -483,12 +550,20 @@ function printTable(): void {
       : status.complete
         ? 'completa'
         : `incompleta (${status.undecidedCount} indecisas, ${status.missingValueCount} sem valor)`
-    console.log(`${index + 1}. ${built.configuration.name} (${built.key}.xml, perfil "${built.profile}"): ${state}`)
+    console.log(
+      `${index + 1}. ${built.configuration.name} (${built.key}.xml, perfil "${built.profile}"): ${state}`
+    )
     for (const note of built.notes) console.log(`   - ${note}`)
-    for (const value of built.configuration.values) console.log(`   · ${value.featureId}.${value.attributeId} = ${value.value}`)
+    for (const value of built.configuration.values)
+      console.log(`   · ${value.featureId}.${value.attributeId} = ${value.value}`)
   })
-  const hidden = sources.reduce((total, source) => total + source.root.getElementsByTagName('*').length, 0)
-  console.log(`\n${sources.length} fragmentos, ${hidden} elementos, ${assets.length} assets, ${allProfiles.length} perfis.`)
+  const hidden = sources.reduce(
+    (total, source) => total + source.root.getElementsByTagName('*').length,
+    0
+  )
+  console.log(
+    `\n${sources.length} fragmentos, ${hidden} elementos, ${assets.length} assets, ${allProfiles.length} perfis.`
+  )
 }
 
 function copyTree(from: string, to: string): number {
@@ -514,17 +589,26 @@ function write(): void {
     writeFileSync(full, content, 'utf8')
   }
   // A moldura e o CSS são escritos à mão: sobrevivem a uma nova conversão.
-  for (const generated of ['model.xml', 'assets.xml', 'configurations', FRAGMENTS_DIRECTORY, 'Slides por Feature']) {
+  for (const generated of [
+    'model.xml',
+    'assets.xml',
+    'configurations',
+    FRAGMENTS_DIRECTORY,
+    'Slides por Feature'
+  ]) {
     rmSync(`${TARGET}/${generated}`, { recursive: true, force: true })
   }
   write('model.xml', encodeFeatureModel(model))
   write('assets.xml', encodeAssetCatalog({ assets }))
   const written = mode === 'gravar' ? configurations : []
-  for (const built of written) write(`configurations/${built.key}.xml`, encodeConfiguration(built.configuration))
+  for (const built of written)
+    write(`configurations/${built.key}.xml`, encodeConfiguration(built.configuration))
   for (const source of sources) write(`${FRAGMENTS_DIRECTORY}/${source.base}.html`, toHtml(source))
   const images = copyTree(`${ORIGINAL_FRAGMENTS}/img`, `${TARGET}/${FRAGMENTS_DIRECTORY}/img`)
   const slides = copyTree(`${ORIGINAL}/Slides por Feature`, `${TARGET}/Slides por Feature`)
-  console.log(`gravado: ${sources.length} fragmentos, ${written.length} configurações, ${images} imagens, ${slides} arquivos de slides`)
+  console.log(
+    `gravado: ${sources.length} fragmentos, ${written.length} configurações, ${images} imagens, ${slides} arquivos de slides`
+  )
   for (const handWritten of ['moldura.html', 'css/herby.css']) {
     if (!existsSync(`${TARGET}/${handWritten}`)) console.log(`falta escrever à mão: ${handWritten}`)
   }

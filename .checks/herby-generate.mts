@@ -1,7 +1,7 @@
 // Gera uma configuração do exemplo herby numa cópia em .checks/geracao/herby, pelo mesmo
 // caminho do app (GenerateProduct com o product.xml e a página), e mostra o resultado.
 //   npx tsx --tsconfig tsconfig.web.json .checks/herby-generate.mts [configuração]
-import { cpSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { CombinedProductDeriver } from '@/application/generation/combined-product-deriver'
 import { GenerateProduct } from '@/application/use-cases/generate-product'
@@ -49,7 +49,9 @@ const result = await generate.execute(
 console.log(`${key}: ${result.kind}`)
 if (result.kind === 'problems' || result.kind === 'write-failed') {
   for (const problem of result.problems) {
-    console.log(`  ${problem.file}${problem.line ? `:${problem.line}` : ''} [${problem.subject ?? ''}] ${problem.message}`)
+    console.log(
+      `  ${problem.file}${problem.line ? `:${problem.line}` : ''} [${problem.subject ?? ''}] ${problem.message}`
+    )
   }
 }
 if (result.kind === 'generated') {
@@ -60,5 +62,14 @@ if (result.kind === 'generated') {
         : [`${prefix}${entry.name}`]
     )
   const files = list(join(folder, 'saida', key))
-  console.log(`  ${files.length} arquivos: ${files.filter((file) => !file.includes('/img/')).join(', ')} e ${files.filter((file) => file.includes('/img/')).length} imagens`)
+  console.log(
+    `  ${files.length} arquivos: ${files.filter((file) => !file.includes('/img/')).join(', ')} e ${files.filter((file) => file.includes('/img/')).length} imagens`
+  )
+  const expected = `docs/examples/produto-esperado/herby-${key}/index.html`
+  if (existsSync(expected)) {
+    const same = readFileSync(join(folder, 'saida', key, 'index.html')).equals(
+      readFileSync(expected)
+    )
+    console.log(`  index.html: ${same ? 'idêntico ao esperado' : 'DIFERENTE do esperado'}`)
+  }
 }

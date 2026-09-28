@@ -25,7 +25,8 @@ if (!model.ok) throw new Error('o exemplo não abriu')
 const folder = memoryFolder({
   'model.xml': example('model.xml'),
   'docs/pagamento/pix.xml': example('docs/pagamento/pix.xml'),
-  'docs/loja.html': '<h2>Loja {{loja.versao}}</h2>\n<p>{{mobile.plataforma}} {{carrinho.total}}</p>\n'
+  'docs/loja.html':
+    '<h2>Loja {{loja.versao}}</h2>\n<p>{{mobile.plataforma}} {{carrinho.total}}</p>\n'
 })
 const session = (): ProjectSession => ({
   folder: { rootPath: 'C:\\loja', name: 'loja' },

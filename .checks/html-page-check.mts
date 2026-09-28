@@ -53,7 +53,12 @@ const configuration: Configuration = {
 async function derive(files: Record<string, string>, extraAssets = '', config = configuration) {
   const assets = decodeAssetCatalog(parseXmlRoot(assetsXml(extraAssets)))
   if (!assets.ok || !model.ok) throw new Error('assets')
-  const plan = planGeneration(model.value, assets.value, config, resolver.execute(model.value, config))
+  const plan = planGeneration(
+    model.value,
+    assets.value,
+    config,
+    resolver.execute(model.value, config)
+  )
   if (!plan.ok) throw new Error(plan.error)
   const { storage } = memoryFolder(files)
   const deriver = new CombinedProductDeriver([
@@ -79,8 +84,10 @@ const base: Record<string, string> = {
 </body>
 </html>
 `,
-  'docs/loja.html': '\n\n<h2>Bem-vindo à {{ produto }}</h2>\n<p title="v{{loja.versao}}">Versão {{loja.versao}} &amp; mais.</p>\n<pre>\n  recuo\n</pre>\n\n',
-  'docs/busca/busca.html': '<h3>Busca</h3>\n<img src="../../img/lupa.svg" alt="lupa">\n<style>.busca { color: {{tema_escuro.cor}} }</style>\n',
+  'docs/loja.html':
+    '\n\n<h2>Bem-vindo à {{ produto }}</h2>\n<p title="v{{loja.versao}}">Versão {{loja.versao}} &amp; mais.</p>\n<pre>\n  recuo\n</pre>\n\n',
+  'docs/busca/busca.html':
+    '<h3>Busca</h3>\n<img src="../../img/lupa.svg" alt="lupa">\n<style>.busca { color: {{tema_escuro.cor}} }</style>\n',
   'docs/mobile.html': '<p>{{mobile.plataforma}}</p>\n',
   'docs/topico.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<topic><title>XML</title></topic>\n',
   'css/site.css': 'body {}',
@@ -96,13 +103,18 @@ const show = (name: string, result: Awaited<ReturnType<typeof derive>>): void =>
   console.log(`=== ${name}`)
   if (!result.ok) {
     for (const problem of result.error) {
-      console.log(`  ${problem.file}${problem.line ? `:${problem.line}` : ''} [${problem.subject ?? ''}] ${problem.message}`)
+      console.log(
+        `  ${problem.file}${problem.line ? `:${problem.line}` : ''} [${problem.subject ?? ''}] ${problem.message}`
+      )
     }
     return
   }
   for (const file of result.value) {
     console.log(`  ${file.kind} ${file.path}`)
-    if (file.kind === 'text' && file.path === 'index.html') console.log(file.content.replace(/^/gm, '    | '))
+    if (file.kind === 'text' && file.path === 'index.html') {
+      const lines = file.content.split('\n')
+      console.log(lines.map((line) => (line === '' ? '    |' : `    | ${line}`)).join('\n'))
+    }
   }
 }
 
@@ -118,13 +130,20 @@ show(
   await derive(
     {
       ...base,
-      'moldura.html': base['moldura.html'].replace('<footer>', '<footer>{{mobile.plataforma}} <a href="/sobre.html">sobre</a>'),
-      'docs/loja.html': '<div>\n<p>{{loja.nome}}</p>\n<img src="img/falta.png">\n<a href="../../fora.html">fora</a>\n<a href="../index.html">início</a>\n',
+      'moldura.html': base['moldura.html'].replace(
+        '<footer>',
+        '<footer>{{mobile.plataforma}} <a href="/sobre.html">sobre</a>'
+      ),
+      'docs/loja.html':
+        '<div>\n<p>{{loja.nome}}</p>\n<img src="img/falta.png">\n<a href="../../fora.html">fora</a>\n<a href="../index.html">início</a>\n',
       'docs/busca/busca.html': '<style>.busca { color: {{tema_escuro.cor}} }</style>\n',
       'index.html': '<p>index do projeto</p>'
     },
     '',
-    { ...configuration, values: [{ featureId: 'tema_escuro', attributeId: 'cor', value: 'a</style><script>' }] }
+    {
+      ...configuration,
+      values: [{ featureId: 'tema_escuro', attributeId: 'cor', value: 'a</style><script>' }]
+    }
   )
 )
 
@@ -135,4 +154,7 @@ show(
     '\n  <asset id="index" kind="resource" path="index.html" anchor="loja"/>'
   )
 )
-show('fragmento ausente', await derive({ ...base, 'docs/busca/busca.html': undefined as unknown as string }))
+show(
+  'fragmento ausente',
+  await derive({ ...base, 'docs/busca/busca.html': undefined as unknown as string })
+)

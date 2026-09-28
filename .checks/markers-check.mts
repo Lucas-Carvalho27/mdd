@@ -11,9 +11,13 @@ import {
 
 const show = (text: string): void => {
   const found = findMarkers(text)
-  const markers = found.markers.map((marker) => `${markerLabel(marker.target)}@${marker.start}-${marker.end}`)
+  const markers = found.markers.map(
+    (marker) => `${markerLabel(marker.target)}@${marker.start}-${marker.end}`
+  )
   const problems = found.problems.map((problem) => `${problem.offset}: ${problem.message}`)
-  console.log(`${JSON.stringify(text)} → [${markers.join(', ')}]${problems.length ? ` problemas: ${problems.join(' | ')}` : ''}`)
+  console.log(
+    `${JSON.stringify(text)} → [${markers.join(', ')}]${problems.length ? ` problemas: ${problems.join(' | ')}` : ''}`
+  )
 }
 
 console.log('--- sintaxe')
@@ -31,15 +35,27 @@ const modelAttributes = new Map([
   ['mobile', ['plataforma']]
 ])
 console.log('--- IDs')
-for (const text of ['{{loja.versao}}', '{{loja.nome}}', '{{carrinho.total}}', '{{conteudo}}', '{{produto}}']) {
+for (const text of [
+  '{{loja.versao}}',
+  '{{loja.nome}}',
+  '{{carrinho.total}}',
+  '{{conteudo}}',
+  '{{produto}}'
+]) {
   const target = findMarkers(text).markers[0].target
   console.log(`${text}: ${markerIdProblem(target, modelAttributes) ?? 'ok'}`)
 }
 
 console.log('--- contagem na moldura')
-for (const text of ['<body>{{conteudo}}</body>', '<body></body>', '{{conteudo}}{{conteudo}}{{sumario}}{{sumario}}']) {
+for (const text of [
+  '<body>{{conteudo}}</body>',
+  '<body></body>',
+  '{{conteudo}}{{conteudo}}{{sumario}}{{sumario}}'
+]) {
   const problems = frameCountProblems(findMarkers(text).markers)
-  console.log(`${text} → ${problems.map((problem) => `${problem.offset}: ${problem.message}`).join(' | ') || 'ok'}`)
+  console.log(
+    `${text} → ${problems.map((problem) => `${problem.offset}: ${problem.message}`).join(' | ') || 'ok'}`
+  )
 }
 
 console.log('--- valores')
@@ -52,7 +68,14 @@ const plan = {
   hasPage: true,
   modelAttributes
 } satisfies GenerationPlan
-for (const text of ['{{loja.versao}}', '{{produto}}', '\\{{', '{{mobile.plataforma}}', '{{loja.nome}}', '{{sumario}}']) {
+for (const text of [
+  '{{loja.versao}}',
+  '{{produto}}',
+  '\\{{',
+  '{{mobile.plataforma}}',
+  '{{loja.nome}}',
+  '{{sumario}}'
+]) {
   const value = markerValue(findMarkers(text).markers[0].target, plan)
   console.log(`${text} → ${value.ok ? JSON.stringify(value.value) : `problema: ${value.error}`}`)
 }

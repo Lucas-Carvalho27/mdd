@@ -24,17 +24,30 @@ const file = (path) => join(projectDir, ...path.split('/'))
 
 const VIEW = `document.querySelector('.cm-content').cmTile.root.view`
 const editorLine = (line) => js(`${VIEW}.state.doc.line(${line}).text`)
-const paths = () => js(`[...document.querySelectorAll('[data-fragment-path]')].map((b) => b.dataset.fragmentPath)`)
+const paths = () =>
+  js(`[...document.querySelectorAll('[data-fragment-path]')].map((b) => b.dataset.fragmentPath)`)
 const problems = () => text('[data-fragment-problems]')
-const bar = () => js(`document.querySelector('[data-fragment-bar]')?.parentElement.innerText.replace(/\\s+/g, ' ').trim()`)
+const bar = () =>
+  js(
+    `document.querySelector('[data-fragment-bar]')?.parentElement.innerText.replace(/\\s+/g, ' ').trim()`
+  )
 const dialog = () =>
-  js(`document.querySelector('[role=dialog]')?.innerText.replace(/\\s+/g, ' ').trim() ?? '(sem diálogo)'`)
+  js(
+    `document.querySelector('[role=dialog]')?.innerText.replace(/\\s+/g, ' ').trim() ?? '(sem diálogo)'`
+  )
 const banner = () =>
   js(
     `document.querySelector('[data-banner=generated]')?.innerText.replace(/\\s+/g, ' ').replace(/\\d{2}:\\d{2}/, 'HH:MM').trim() ?? '(sem faixa)'`
   )
 const mouse = (type, x, y, clickCount) =>
-  send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mouseReleased' ? 0 : 1, clickCount })
+  send('Input.dispatchMouseEvent', {
+    type,
+    x,
+    y,
+    button: 'left',
+    buttons: type === 'mouseReleased' ? 0 : 1,
+    clickCount
+  })
 /** Clica no editor logo depois do texto `needle`. */
 const clickAfter = async (needle) => {
   const box = await js(`(() => {
@@ -84,7 +97,10 @@ await waitFor(`document.querySelectorAll('[data-feature-id]').length > 0`)
 await click({ text: 'Fragmentos' })
 await waitFor(`document.querySelectorAll('[data-fragment-path]').length > 0`)
 const listed = await paths()
-log('1. árvore', `${listed.length} arquivos, ${listed.filter((path) => path.endsWith('.html')).length} .html, moldura: ${listed.includes('moldura.html') ? 'sim' : 'não'}`)
+log(
+  '1. árvore',
+  `${listed.length} arquivos, ${listed.filter((path) => path.endsWith('.html')).length} .html, moldura: ${listed.includes('moldura.html') ? 'sim' : 'não'}`
+)
 
 // 2. Um fragmento HTML: realce, marcador e conferência
 await click('[data-fragment-path="fragmentos/plataforma.html"]')
@@ -92,14 +108,22 @@ await waitFor(`document.querySelector('.cm-content')?.innerText.includes('Como f
 await settle()
 log('2. barra', await bar())
 log('   cor da tag h2', await colorOf('h2', '--xml-tag'))
-log('   marcadores com cor', await js(`[...document.querySelectorAll('.cm-marker')].map((m) => m.innerText).join(' ')`))
+log(
+  '   marcadores com cor',
+  await js(`[...document.querySelectorAll('.cm-marker')].map((m) => m.innerText).join(' ')`)
+)
 log('   problemas', await problems())
 
 // 3. A sugestão depois de {{
 await clickAfter('</h2>')
 await type(' {{herby.contato_w')
 await waitFor(`document.querySelector('.cm-tooltip-autocomplete') !== null`)
-log('3. sugestões', await js(`[...document.querySelectorAll('.cm-tooltip-autocomplete li')].map((li) => li.innerText).join(' | ')`))
+log(
+  '3. sugestões',
+  await js(
+    `[...document.querySelectorAll('.cm-tooltip-autocomplete li')].map((li) => li.innerText).join(' | ')`
+  )
+)
 await key('Enter', 'Enter', 13)
 log('   linha 1', await editorLine(1))
 
@@ -149,9 +173,19 @@ await waitFor(`document.querySelector('[data-banner=generated]') !== null`, 6000
 log('8. faixa', await banner())
 const page = file('saida/completa-atibaia/index.html')
 const expected = 'docs/examples/produto-esperado/herby-completa-atibaia/index.html'
-log('   index.html', existsSync(page) ? (readFileSync(page).equals(readFileSync(expected)) ? 'idêntico ao esperado' : 'DIFERENTE do esperado') : '(não existe)')
+log(
+  '   index.html',
+  existsSync(page)
+    ? readFileSync(page).equals(readFileSync(expected))
+      ? 'idêntico ao esperado'
+      : 'DIFERENTE do esperado'
+    : '(não existe)'
+)
 const count = (dir) =>
-  readdirSync(dir, { withFileTypes: true }).reduce((total, entry) => total + (entry.isDirectory() ? count(join(dir, entry.name)) : 1), 0)
+  readdirSync(dir, { withFileTypes: true }).reduce(
+    (total, entry) => total + (entry.isDirectory() ? count(join(dir, entry.name)) : 1),
+    0
+  )
 log('   arquivos na saída', count(file('saida/completa-atibaia')))
 log('   título', await js('document.title'))
 log('erros no console', errors.length === 0 ? 'nenhum' : errors.join(' | '))
