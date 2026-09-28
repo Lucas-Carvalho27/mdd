@@ -2,6 +2,7 @@ import type { Expression } from '../expression/ast'
 import { isValidFeatureId } from '../expression/identifier'
 import type { FeatureModel } from '../feature-model/feature-model'
 import { featuresInPreOrder } from '../feature-model/traversal'
+import { fragmentFormat } from '../fragments/fragment-format'
 import { generateId } from '../shared/identifier-generator'
 import { err, ok, type Result } from '../shared/result'
 import { fileNameOf, type Asset, type AssetCatalog, type AssetKind } from './asset-catalog'
@@ -27,9 +28,9 @@ export interface AssetDraft {
   readonly name: string
 }
 
-/** `.xml` vira fragmento; as demais extensões, recurso (SPEC §7). */
+/** `.xml` e `.html` viram fragmento; as demais extensões, recurso (SPEC §7). */
 export function suggestAssetKind(path: string): AssetKind {
-  return path.toLowerCase().endsWith('.xml') ? 'fragment' : 'resource'
+  return fragmentFormat(path) !== null ? 'fragment' : 'resource'
 }
 
 /** ID a partir do nome do arquivo sem a extensão: "pix-fluxo.svg" → "pix_fluxo". */
