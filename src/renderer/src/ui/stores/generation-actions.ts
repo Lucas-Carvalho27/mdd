@@ -1,9 +1,11 @@
 import type { StoreApi } from 'zustand/vanilla'
+import type { AssetOpener } from '@/application/ports/asset-opener'
 import type { OutputFolderOpener } from '@/application/ports/output-folder-opener'
 import type {
   GenerateOptions,
   GenerateProductResult
 } from '@/application/use-cases/generate-product'
+import { PAGE_PATH } from '@/domain/pages/page-layout'
 import type { Project } from '@/domain/project/project'
 import type { ProjectState } from './project-store'
 
@@ -17,6 +19,8 @@ export interface GenerationServices {
     ): Promise<GenerateProductResult>
   }
   readonly outputFolderOpener: OutputFolderOpener
+  /** Abre a página gerada no navegador padrão, como qualquer arquivo do projeto (Fase 8). */
+  readonly assetOpener: AssetOpener
 }
 
 /** A última geração que deu certo, mostrada na faixa verde do configurador. */
@@ -46,6 +50,8 @@ export interface GenerationState {
    */
   generateProduct(key: string, options?: GenerateOptions): Promise<GenerateProductResult | null>
   openGeneratedFolder(): Promise<void>
+  /** Abre o `index.html` da última geração no programa padrão do sistema (Fase 8). */
+  openGeneratedPage(): Promise<void>
   dismissLastGeneration(): void
 }
 
@@ -97,6 +103,14 @@ export function createGenerationActions(
       if (!opened.ok) {
         set({ notice: `Não foi possível abrir ${last.folder}/: ${opened.error.message}` })
       }
+    },
+
+    async openGeneratedPage() {
+      const last = get().lastGeneration
+      if (last === null) return
+      const page = `${last.folder}/${PAGE_PATH}`
+      const opened = await services.assetOpener.open(page)
+      if (!opened.ok) set({ notice: `Não foi possível abrir ${page}: ${opened.error.message}` })
     },
 
     dismissLastGeneration() {

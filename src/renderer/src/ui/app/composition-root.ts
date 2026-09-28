@@ -6,12 +6,14 @@ import { FragmentFiles } from '@/application/use-cases/fragment-files'
 import { GenerateProduct } from '@/application/use-cases/generate-product'
 import { OpenFragment } from '@/application/use-cases/open-fragment'
 import { OpenProject } from '@/application/use-cases/open-project'
+import { PreviewPage } from '@/application/use-cases/preview-page'
 import { ResolveConfiguration } from '@/application/use-cases/resolve-configuration'
 import { SaveFragments } from '@/application/use-cases/save-fragments'
 import { SaveProject } from '@/application/use-cases/save-project'
 import { WriteProductFolder } from '@/application/use-cases/write-product-folder'
 import { ElectronAssetOpener } from '@/infrastructure/electron/electron-asset-opener'
 import { ElectronOutputFolderOpener } from '@/infrastructure/electron/electron-output-folder-opener'
+import { ElectronPagePreviewHost } from '@/infrastructure/electron/electron-page-preview-host'
 import { ElectronProjectFilePicker } from '@/infrastructure/electron/electron-project-file-picker'
 import { ElectronProjectFolderPicker } from '@/infrastructure/electron/electron-project-folder-picker'
 import { ElectronProjectStorage } from '@/infrastructure/electron/electron-project-storage'
@@ -30,7 +32,7 @@ import {
 import { XmlFragmentChecker } from '@/infrastructure/xml/xml-fragment-checker'
 import { XmlProductDeriver } from '@/infrastructure/xml/xml-product-deriver'
 import { createProjectStore, type ProjectStore } from '@/ui/stores/project-store'
-import { OUTPUT_DIRECTORY } from '../../../../shared/ipc'
+import { OUTPUT_DIRECTORY, PREVIEW_ADDRESS } from '../../../../shared/ipc'
 
 /**
  * Único lugar que conhece as implementações concretas (Dependency Inversion):
@@ -54,6 +56,8 @@ export function createAppStore(): ProjectStore {
     xml: new XmlFragmentChecker(validator),
     html: new HtmlFragmentChecker()
   })
+  // A mesma página da geração serve a visualização da aba Páginas.
+  const pageDeriver = new HtmlPageDeriver(storage)
   return createProjectStore({
     openProject: new OpenProject({ picker, recents, ...repositories }),
     createProject: new CreateProject({ picker, models }),
@@ -66,10 +70,7 @@ export function createAppStore(): ProjectStore {
     assetOpener: new ElectronAssetOpener(),
     generateProduct: new GenerateProduct({
       resolveConfiguration,
-      deriver: new CombinedProductDeriver([
-        new XmlProductDeriver(storage, validator),
-        new HtmlPageDeriver(storage)
-      ]),
+      deriver: new CombinedProductDeriver([new XmlProductDeriver(storage, validator), pageDeriver]),
       writer: new WriteProductFolder(storage, OUTPUT_DIRECTORY),
       clock: new SystemClock()
     }),
@@ -77,6 +78,11 @@ export function createAppStore(): ProjectStore {
     fragmentFiles: new FragmentFiles(storage, OUTPUT_DIRECTORY),
     openFragment: new OpenFragment(storage),
     saveFragments: new SaveFragments({ storage, checker: fragmentChecker }),
-    fragmentChecker
+    fragmentChecker,
+    previewPage: new PreviewPage({
+      resolveConfiguration,
+      previewer: pageDeriver,
+      host: new ElectronPagePreviewHost(PREVIEW_ADDRESS)
+    })
   })
 }

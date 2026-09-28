@@ -8,6 +8,10 @@ import { confirmCloseWithUnsavedChanges, registerUnsavedChangesHandler } from '.
 import { registerFileHandlers } from './ipc/file-handlers'
 import { registerProjectHandlers } from './ipc/project-handlers'
 import { registerXmlHandlers } from './ipc/xml-handlers'
+import { isExternalAddress, registerPagePreview, registerPreviewScheme } from './page-preview'
+
+// O esquema da visualização precisa ser registrado antes de o app ficar pronto.
+registerPreviewScheme()
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -30,8 +34,10 @@ function createWindow(): void {
   })
   confirmCloseWithUnsavedChanges(mainWindow)
 
+  // Um link com target="_blank" (na página da visualização, por exemplo) abre no sistema, e
+  // só se for de fora do app.
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    if (isExternalAddress(details.url)) void shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
@@ -54,6 +60,7 @@ app.whenReady().then(() => {
   registerProjectHandlers(projectRoot, recents)
   registerFileHandlers(projectRoot)
   registerXmlHandlers()
+  registerPagePreview(projectRoot)
   registerUnsavedChangesHandler()
 
   createWindow()
