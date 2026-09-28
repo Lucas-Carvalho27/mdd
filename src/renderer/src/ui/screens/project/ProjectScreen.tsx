@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { X } from 'lucide-react'
 import type { ProjectSession } from '@/application/project-session'
+import { FRAME_PATH } from '@/domain/pages/page-layout'
 import { Button } from '@/ui/components/ui/button'
 import { ProblemList } from '@/ui/components/ProblemList'
 import type { FeatureActions } from '@/ui/diagram/diagram-context'
@@ -14,6 +15,7 @@ import { FragmentDialogs } from '@/ui/screens/fragments/FragmentDialogs'
 import type { FragmentEditorStates } from '@/ui/screens/fragments/fragment-editor-states'
 import { FragmentStatusBar } from '@/ui/screens/fragments/FragmentStatusBar'
 import { FragmentsWorkspace } from '@/ui/screens/fragments/FragmentsWorkspace'
+import { PagesWorkspace } from '@/ui/screens/pages/PagesWorkspace'
 import { hasUnsavedChanges } from '@/ui/stores/project-store'
 import { useProjectStore } from '@/ui/stores/project-store-context'
 import { CloseProjectDialog } from './dialogs/CloseProjectDialog'
@@ -43,6 +45,8 @@ export function ProjectScreen({
   const checkAssetFiles = useProjectStore((state) => state.checkAssetFiles)
   const refreshFragments = useProjectStore((state) => state.refreshFragments)
   const showFragment = useProjectStore((state) => state.showFragment)
+  const showFragmentAt = useProjectStore((state) => state.showFragmentAt)
+  const createFragment = useProjectStore((state) => state.createFragment)
   const [view, setView] = useState<ProjectView>('model')
   const [dialog, setDialog] = useState<EditorDialog>(null)
   // O desfazer do texto de cada fragmento dura enquanto o projeto está aberto.
@@ -68,6 +72,25 @@ export function ProjectScreen({
     },
     [showFragment]
   )
+  // Da aba Páginas: um problema, "Novo fragmento" e "Criar moldura" levam à aba Fragmentos.
+  const showFragmentAtLine = useCallback(
+    (path: string, line: number) => {
+      setView('fragments')
+      void showFragmentAt(path, line)
+    },
+    [showFragmentAt]
+  )
+  const newFragmentFromPages = useCallback(() => {
+    setView('fragments')
+    openDialog({ kind: 'new-fragment' })
+  }, [openDialog])
+  // As pastas são relidas antes: a lista pode ter uma moldura apagada por fora. Se ela existir
+  // de fato, é aberta.
+  const createFrame = useCallback(async () => {
+    await refreshFragments()
+    if (createFragment(FRAME_PATH) !== null) void showFragment(FRAME_PATH)
+    setView('fragments')
+  }, [refreshFragments, createFragment, showFragment])
   const allWarnings = useMemo(
     () => [...warnings, ...fragmentWarnings.values()],
     [warnings, fragmentWarnings]
@@ -128,10 +151,19 @@ export function ProjectScreen({
             editorStates={editorStates}
           />
         )}
+        {view === 'pages' && (
+          <PagesWorkspace
+            project={project}
+            onOpenDialog={openDialog}
+            onShowFragmentAt={showFragmentAtLine}
+            onNewFragment={newFragmentFromPages}
+            onCreateFrame={createFrame}
+          />
+        )}
       </div>
 
       <footer className="border-t px-4 py-1 text-xs text-muted-foreground">
-        {view === 'configurations' ? (
+        {view === 'configurations' || view === 'pages' ? (
           <ConfigurationStatusBar />
         ) : view === 'fragments' ? (
           <FragmentStatusBar />

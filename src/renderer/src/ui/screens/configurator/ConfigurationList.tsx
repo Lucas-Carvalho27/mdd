@@ -7,10 +7,14 @@ import type { EditorDialog } from '@/ui/screens/project/editor-dialog'
 
 interface ConfigurationListProps {
   readonly configurations: readonly ConfigurationEntry[]
-  readonly onOpenDialog: (dialog: EditorDialog) => void
+  /** Sem ele, a lista só serve para escolher, sem "Nova" (a aba Páginas). */
+  readonly onOpenDialog?: (dialog: EditorDialog) => void
 }
 
-/** A lista de configurações do projeto; um clique abre a configuração no diagrama. */
+/**
+ * A lista de configurações do projeto; um clique abre a configuração, a mesma nas abas
+ * Configurações e Páginas.
+ */
 export function ConfigurationList({
   configurations,
   onOpenDialog
@@ -24,13 +28,15 @@ export function ConfigurationList({
         <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
           Configurações
         </h2>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => onOpenDialog({ kind: 'new-configuration' })}
-        >
-          <Plus /> Nova
-        </Button>
+        {onOpenDialog !== undefined && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onOpenDialog({ kind: 'new-configuration' })}
+          >
+            <Plus /> Nova
+          </Button>
+        )}
       </div>
       {configurations.length === 0 && (
         <p className="text-sm text-muted-foreground">

@@ -1,18 +1,22 @@
-import { CircleCheck, FolderOpen, X } from 'lucide-react'
+import { CircleCheck, FolderOpen, Globe, X } from 'lucide-react'
 import { Button } from '@/ui/components/ui/button'
 import { useProjectStore } from '@/ui/stores/project-store-context'
 
 /**
- * A faixa verde da última geração (SPEC §7). Só aparece com a configuração gerada aberta:
- * some ao trocar de configuração e volta ao voltar para ela.
+ * A faixa verde da última geração (SPEC §7), nas abas Configurações e Páginas. Só aparece com
+ * a configuração gerada aberta: some ao trocar de configuração e volta ao voltar para ela.
+ * Com página no projeto, abre também o `index.html` no navegador (Fase 8).
  */
 export function GenerationBanner({
-  configurationKey
+  configurationKey,
+  hasPage
 }: {
   readonly configurationKey: string
+  readonly hasPage: boolean
 }): React.JSX.Element | null {
   const last = useProjectStore((state) => state.lastGeneration)
   const openFolder = useProjectStore((state) => state.openGeneratedFolder)
+  const openPage = useProjectStore((state) => state.openGeneratedPage)
   const dismiss = useProjectStore((state) => state.dismissLastGeneration)
   if (last === null || last.key !== configurationKey) return null
   const time = last.generatedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
@@ -29,6 +33,11 @@ export function GenerationBanner({
       <Button size="sm" variant="outline" onClick={() => void openFolder()}>
         <FolderOpen /> Abrir pasta
       </Button>
+      {hasPage && (
+        <Button size="sm" variant="outline" onClick={() => void openPage()}>
+          <Globe /> Abrir no navegador
+        </Button>
+      )}
       <Button size="icon-sm" variant="ghost" title="Dispensar" onClick={dismiss}>
         <X />
       </Button>

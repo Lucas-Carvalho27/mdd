@@ -130,6 +130,10 @@ _Avoid_: modelo (é o Feature Model), template, layout
 Trecho `{{…}}` de um fragmento HTML ou da moldura que a geração troca: pelo valor de um atributo (`{{feature.atributo}}`), pelo nome da configuração (`{{produto}}`), pelas seções (`{{conteudo}}`) ou pelo sumário (`{{sumario}}`).
 _Avoid_: variável, placeholder, tag
 
+**Visualização**:
+A página da configuração aberta, montada ao vivo na aba Páginas a partir do projeto como está na tela, sem gravar nada.
+_Avoid_: preview, prévia, página gerada (é a da pasta de saída)
+
 **Sumário**:
 Lista aninhada de links para as seções da página, com as features selecionadas que têm conteúdo.
 _Avoid_: índice, agenda, menu

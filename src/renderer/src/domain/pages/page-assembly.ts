@@ -1,4 +1,4 @@
-import type { Asset } from '../assets/asset-catalog'
+import type { Asset, AssetCatalog } from '../assets/asset-catalog'
 import { fragmentFormat } from '../fragments/fragment-format'
 import type { GenerationPlan, PlannedSection } from '../generation/generation-plan'
 
@@ -14,6 +14,13 @@ export function escapeHtmlText(text: string): string {
 
 export function escapeHtmlAttribute(text: string): string {
   return escapeHtmlText(text).replaceAll('"', '&quot;')
+}
+
+/** O projeto tem página: algum asset fragmento `.html`, incluído ou não na configuração. */
+export function projectHasPage(catalog: AssetCatalog): boolean {
+  return catalog.assets.some(
+    (asset) => asset.kind === 'fragment' && fragmentFormat(asset.path) === 'html'
+  )
 }
 
 /** Os fragmentos HTML da seção, na ordem do assets.xml. */
