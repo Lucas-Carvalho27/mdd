@@ -1,13 +1,14 @@
 import { ASSETS_PATH, CONFIGURATIONS_DIRECTORY, MODEL_PATH } from '../project/project-layout'
 import { err, ok, type Result } from '../shared/result'
+import { fragmentFormat } from './fragment-format'
 
 /*
- * Os fragmentos que o editor mostra e cria (Fase 6): os `.xml` do projeto, fora os arquivos
- * do app (model.xml, assets.xml e configurations/), a pasta de saída da geração e o que
- * começa com ponto (.git, .vscode…). Os nomes são comparados sem caixa, como no Windows.
+ * Os fragmentos que o editor mostra e cria (Fases 6 e 7): os `.xml` e os `.html` do projeto,
+ * fora os arquivos do app (model.xml, assets.xml e configurations/), a pasta de saída da
+ * geração e o que começa com ponto (.git, .vscode…). Os nomes são comparados sem caixa, como
+ * no Windows.
  */
 
-const EXTENSION = '.xml'
 /** Os caracteres que o Windows não aceita em nomes de arquivo. */
 const FORBIDDEN_CHARACTERS = /[<>:"|?*]/
 const ENDS_WITH_DOT_OR_SPACE = /[. ]$/
@@ -20,7 +21,7 @@ export function isFragmentFolder(path: string, outputDirectory: string): boolean
 
 /** O arquivo é um fragmento que o editor mostra. */
 export function isFragmentFile(path: string, outputDirectory: string): boolean {
-  return path.toLowerCase().endsWith(EXTENSION) && isFragmentFolder(path, outputDirectory)
+  return fragmentFormat(path) !== null && isFragmentFolder(path, outputDirectory)
 }
 
 /** A pasta do arquivo, com a barra no fim: "docs/pagamento/pix.xml" → "docs/pagamento/". */
@@ -52,7 +53,7 @@ export function checkNewFragmentPath(
   if (segments.some((segment) => ENDS_WITH_DOT_OR_SPACE.test(segment))) {
     return err('Um nome de pasta ou de arquivo não pode terminar em ponto ou espaço.')
   }
-  if (!path.toLowerCase().endsWith(EXTENSION)) return err('O arquivo precisa terminar em .xml.')
+  if (fragmentFormat(path) === null) return err('O arquivo precisa terminar em .xml ou .html.')
   if (segments.some(isHidden)) {
     return err('Nomes começando com ponto ficam fora da árvore de fragmentos.')
   }

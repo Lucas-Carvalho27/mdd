@@ -9,7 +9,12 @@ import type { FragmentChecker } from '@/application/ports/fragment-checker'
 import type { StorageError } from '@/application/ports/project-storage'
 import type { SaveFragmentsResult } from '@/application/use-cases/save-fragments'
 import type { SaveOptions } from '@/application/use-cases/save-project'
+import type { FeatureModel } from '@/domain/feature-model/feature-model'
+import { attributeIdsByFeature } from '@/domain/feature-model/traversal'
+import { fragmentFormat } from '@/domain/fragments/fragment-format'
+import { modelMarkerProblems } from '@/domain/pages/markers'
 import type { Result } from '@/domain/shared/result'
+import { lineAt } from '@/domain/shared/text-lines'
 import type { ProjectState } from './project-store'
 
 /** Os serviços da aba Fragmentos; a composition root entrega as implementações. */
@@ -109,8 +114,34 @@ export function createFragmentsActions(
   // Cada leitura das pastas e cada conferência recebem um número; só a última é usada.
   let lastListing = 0
   const lastCheck = new Map<string, number>()
-  /** O texto da última conferência de cada fragmento, para não conferir o mesmo texto de novo. */
-  const checkedText = new Map<string, string>()
+  /**
+   * O texto e o modelo da última conferência de cada fragmento, para não conferir de novo o
+   * mesmo texto com o mesmo modelo (os IDs dos marcadores dependem do modelo).
+   */
+  const checked = new Map<string, { readonly text: string; readonly model?: FeatureModel }>()
+  const currentModel = (): FeatureModel | undefined => get().session?.project.model
+  const isChecked = (path: string, text: string): boolean => {
+    const last = checked.get(path)
+    return last !== undefined && last.text === text && last.model === currentModel()
+  }
+  /** Os problemas do checker e, num fragmento HTML, os dos IDs dos marcadores contra o modelo. */
+  const withModelProblems = (
+    path: string,
+    text: string,
+    problems: readonly FileProblem[]
+  ): FileProblem[] => {
+    const model = currentModel()
+    if (model === undefined || fragmentFormat(path) !== 'html') return [...problems]
+    const markers = modelMarkerProblems(text, attributeIdsByFeature(model.root)).map(
+      (problem): FileProblem => ({
+        file: path,
+        line: lineAt(text, problem.offset),
+        severity: 'error',
+        message: problem.message
+      })
+    )
+    return [...problems, ...markers].sort((a, b) => (a.line ?? 0) - (b.line ?? 0))
+  }
 
   const setDocument = (document: FragmentDocument): void => {
     const documents = new Map(get().fragmentDocuments)
@@ -188,15 +219,15 @@ export function createFragmentsActions(
       const session = get().session
       const document = get().fragmentDocuments.get(path)
       if (session === null || document === undefined) return
-      if (get().fragmentProblems.has(path) && checkedText.get(path) === document.text) return
+      if (get().fragmentProblems.has(path) && isChecked(path, document.text)) return
       const check = (lastCheck.get(path) ?? 0) + 1
       lastCheck.set(path, check)
       const problems = await services.fragmentChecker.check(path, document.text)
       if (lastCheck.get(path) !== check || get().session?.folder !== session.folder) return
       if (!get().fragmentDocuments.has(path)) return
       const all = new Map(get().fragmentProblems)
-      all.set(path, problems)
-      checkedText.set(path, document.text)
+      all.set(path, withModelProblems(path, document.text, problems))
+      checked.set(path, { text: document.text, model: currentModel() })
       set({ fragmentProblems: all })
     },
 
@@ -271,15 +302,15 @@ export function createFragmentsActions(
         saved.set(path, { ...current, saved: written })
         const found = result.checked.get(path) ?? []
         if (current.text === written.text) {
-          problems.set(path, found)
-          checkedText.set(path, written.text)
+          problems.set(path, withModelProblems(path, written.text, found))
+          checked.set(path, { text: written.text, model: currentModel() })
         }
         if (found.length === 0) warnings.delete(path)
         else {
           warnings.set(path, {
             ...found[0],
             severity: 'warning',
-            message: `Salvo com erro de XML: ${found[0].message}`
+            message: `Salvo com erro de ${fragmentFormat(path) === 'html' ? 'HTML' : 'XML'}: ${found[0].message}`
           })
         }
       }

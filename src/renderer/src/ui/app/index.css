@@ -23,7 +23,7 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  /* Cores do editor de fragmentos (xml-editor-setup.ts). */
+  /* Cores do editor de fragmentos (fragment-editor-setup.ts), no XML e no HTML. */
   --xml-tag: oklch(0.46 0.16 262);
   --xml-attribute: oklch(0.52 0.13 55);
   --xml-string: oklch(0.5 0.13 150);

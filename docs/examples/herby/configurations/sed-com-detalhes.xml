@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="urn:mdd:configuration" schemaVersion="1" name="SED com detalhes">
+  <decision feature="preparacao" state="selected"/>
+  <decision feature="acesso_a_plataforma" state="selected"/>
+  <decision feature="informacoes_gerais" state="deselected"/>
+  <decision feature="gestao_da_base_de_dados" state="selected"/>
+  <decision feature="lixeira" state="deselected"/>
+  <decision feature="sincronizacao_rede_estadual" state="selected"/>
+  <decision feature="template_de_dados" state="deselected"/>
+  <decision feature="impressao_dos_cartoes" state="selected"/>
+  <decision feature="impressao_na_herby" state="selected"/>
+  <decision feature="aplicacao_e_correcao" state="selected"/>
+  <decision feature="processamento_por_foto" state="selected"/>
+  <decision feature="educacao_especial" state="selected"/>
+  <decision feature="avaliacao_de_fluencia_audio" state="deselected"/>
+  <decision feature="monitoramento_e_resultados" state="selected"/>
+  <decision feature="progresso" state="selected"/>
+  <decision feature="resultados" state="selected"/>
+  <decision feature="resultados_detalhados" state="selected"/>
+  <decision feature="relatorios" state="selected"/>
+  <decision feature="graficos" state="selected"/>
+  <decision feature="qr_code_de_resultados" state="selected"/>
+</configuration>

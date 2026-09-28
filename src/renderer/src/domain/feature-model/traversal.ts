@@ -11,3 +11,13 @@ export function childFeatures(feature: Feature): Feature[] {
 export function featuresInPreOrder(root: Feature): Feature[] {
   return [root, ...childFeatures(root).flatMap(featuresInPreOrder)]
 }
+
+/** Os IDs dos atributos de cada feature do modelo, em pré-ordem. */
+export function attributeIdsByFeature(root: Feature): Map<string, readonly string[]> {
+  return new Map(
+    featuresInPreOrder(root).map((feature) => [
+      feature.id,
+      feature.attributes.map((attribute) => attribute.id)
+    ])
+  )
+}

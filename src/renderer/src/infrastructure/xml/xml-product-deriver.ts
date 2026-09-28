@@ -3,6 +3,7 @@ import type { ProductDeriver, ProductFile } from '@/application/ports/product-de
 import type { ProjectStorage } from '@/application/ports/project-storage'
 import type { XmlSchemaValidator } from '@/application/ports/xml-schema-validator'
 import { firstPerPath, type Asset } from '@/domain/assets/asset-catalog'
+import { fragmentFormat } from '@/domain/fragments/fragment-format'
 import type { GenerationPlan, PlannedSection } from '@/domain/generation/generation-plan'
 import { err, ok, type Result } from '@/domain/shared/result'
 import { XmlFragmentChecker } from './xml-fragment-checker'
@@ -14,8 +15,9 @@ const NAMESPACE = 'urn:mdd:product'
 const FRAGMENTS_AT_ONCE = 4
 
 /**
- * O produto em XML (SPEC §4.4, ADR 0006): o product.xml com cada fragmento embutido e os
+ * O produto em XML (SPEC §4.4, ADR 0006): o product.xml com cada fragmento XML embutido e os
  * recursos copiados. Confere todas as fontes antes e devolve todos os problemas de uma vez.
+ * Os fragmentos HTML ficam com a página (`HtmlPageDeriver`).
  */
 export class XmlProductDeriver implements ProductDeriver {
   private readonly storage: ProjectStorage
@@ -77,8 +79,12 @@ function problem(asset: Asset, issue: DecodeProblem): FileProblem {
   }
 }
 
+function xmlFragments(section: PlannedSection): Asset[] {
+  return section.fragments.filter((asset) => fragmentFormat(asset.path) === 'xml')
+}
+
 function fragmentsOf(section: PlannedSection): Asset[] {
-  return [...section.fragments, ...section.children.flatMap(fragmentsOf)]
+  return [...xmlFragments(section), ...section.children.flatMap(fragmentsOf)]
 }
 
 /** Como `Promise.all` sobre `items.map(run)`, com no máximo `limit` chamadas ao mesmo tempo. */
@@ -110,7 +116,7 @@ function writeProduct(
       'section',
       [['feature', section.featureId]],
       [
-        ...section.fragments.map((asset) =>
+        ...xmlFragments(section).map((asset) =>
           element(
             'fragment',
             [

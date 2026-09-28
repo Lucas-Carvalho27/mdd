@@ -12,6 +12,7 @@ Aplicação desktop (Electron + React + TypeScript), de uso pessoal e com arquiv
 3. **Vincular assets** (arquivos do projeto) às features.
 4. **Gerar** o `product.xml` de documentação de cada produto, que ferramentas externas convertem depois para as mídias finais.
 5. **Editar os fragmentos** dentro do app, num editor de XML (Fase 6).
+6. **Gerar a página** `index.html` de cada produto, a partir de fragmentos em HTML (Fase 7, ADR 0010).
 
 A arquitetura é em camadas, com SOLID e Clean Code. Não há testes automatizados na primeira versão (ADR 0008); a aceitação de cada fase é manual, com o projeto de exemplo (§9).
 
@@ -27,7 +28,9 @@ A arquitetura é em camadas, com SOLID e Clean Code. Não há testes automatizad
 
 **Depois da primeira versão:**
 
-- Fase 6: editor de fragmentos, para criar e editar os fragmentos do projeto dentro do app, com realce de XML e a conferência da geração (ADR 0009). Ele não edita `model.xml`, `assets.xml` nem as configurações como texto, não renomeia nem exclui arquivos e só abre `.xml`.
+- Fase 6: editor de fragmentos, para criar e editar os fragmentos do projeto dentro do app, com realce de XML e a conferência da geração (ADR 0009). Ele não edita `model.xml`, `assets.xml` nem as configurações como texto, não renomeia nem exclui arquivos e só abre `.xml` e, desde a Fase 7, `.html`.
+- Fase 7: páginas HTML (ADR 0010). Fragmentos em HTML, a moldura, os marcadores de atributo e o sumário; a geração passa a montar também o `index.html`. O desenho está em [docs/superpowers/specs/2026-09-28-fase-7-paginas-html-design.md](superpowers/specs/2026-09-28-fase-7-paginas-html-design.md).
+- Fase 8: a aba Páginas, com a página ao vivo. As decisões já tomadas estão no fim do desenho da Fase 7.
 
 **Fora da primeira versão (fase "Depois"):** clones, restrições com atributos, análises do modelo (`ModelAnalyzer`: features mortas etc.), variabilidade anotativa, renderers por mídia, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes automatizados.
 
@@ -38,8 +41,9 @@ meu-projeto/
   model.xml                  obrigatório — o Feature Model
   assets.xml                 opcional — ausente = nenhum asset (criado ao salvar)
   configurations/*.xml       opcional — uma configuração por arquivo
-  saida/<configuração>/      criado pela geração
-  …                          fragmentos e recursos, em qualquer subpasta
+  moldura.html               opcional — a moldura da página (Fase 7)
+  saida/<configuração>/      criado pela geração: product.xml e, com fragmentos HTML, index.html
+  …                          fragmentos (.xml e .html) e recursos, em qualquer subpasta
 ```
 
 - Todo caminho gravado nos arquivos é **relativo à pasta do projeto**, usa `/` como separador e não pode sair da pasta (`..` que escape da raiz é inválido).
@@ -115,7 +119,7 @@ Uma configuração guarda só as **decisões manuais** (`selected` ou `deselecte
 
 ### 4.3 Assets
 
-Um asset tem `id` único (no mesmo formato de ID de feature), `kind` (`fragment` ou `resource`), `path`, `anchor` (ID de feature) e, opcionalmente, `name` e `condition`. O `id` é sugerido pelo nome do arquivo ao vincular (`pix-fluxo.svg` → `pix_fluxo`) e pode ser ajustado só nesse momento; depois não muda, nem ao trocar o arquivo (ADR 0004).
+Um asset tem `id` único (no mesmo formato de ID de feature), `kind` (`fragment` ou `resource`), `path`, `anchor` (ID de feature) e, opcionalmente, `name` e `condition`. Um fragmento é XML (`.xml`) ou HTML (`.html`), pela extensão (Fase 7). O `id` é sugerido pelo nome do arquivo ao vincular (`pix-fluxo.svg` → `pix_fluxo`) e pode ser ajustado só nesse momento; depois não muda, nem ao trocar o arquivo (ADR 0004).
 
 **Invariantes:** A1 — `path` é relativo e fica dentro do projeto. A2 — `anchor` existe no modelo. A3 — `condition`, se existir, é uma expressão válida que só referencia features existentes.
 
@@ -139,6 +143,15 @@ Entrada: uma configuração **completa**. Saída: `saida/<nome-do-arquivo-da-con
 A geração usa o projeto como está na tela, com as alterações não salvas; os fragmentos e os recursos vêm do disco. Gerar não entra no histórico de desfazer.
 
 Referência de resultado: [docs/examples/produto-esperado/loja-basica/](examples/produto-esperado/loja-basica/). A comparação ignora espaços em branco e `generatedAt`.
+
+**A página** (Fase 7, ADR 0010). Quando o projeto tem pelo menos um asset fragmento `.html`, incluído ou não, a geração grava também `index.html` na pasta do produto. Os fragmentos HTML ficam fora do `product.xml`. As regras completas estão no desenho da Fase 7; em resumo:
+
+- A página é a moldura (`moldura.html` na raiz, ou a moldura padrão) com `{{conteudo}}` trocado pelas seções: um `<section id="<feature>">` por feature selecionada, aninhado como no `product.xml`, com os fragmentos HTML na ordem do `assets.xml`. O texto de cada fragmento entra como está, sem recuo, com as quebras em LF; o `index.html` sai em UTF-8, sem BOM e sem a hora da geração.
+- `{{feature.atributo}}` vira o valor final do atributo, escapado; `{{produto}}`, o nome da configuração; `{{sumario}}`, na moldura, uma lista aninhada de links para as features com conteúdo. `\{{` escreve `{{`. Um marcador de feature ou atributo que não existe é erro; de uma feature não selecionada, problema na geração.
+- Os caminhos de `src`, `href`, `srcset` e `poster` são relativos à pasta do arquivo e são reescritos para a página. Todo arquivo do projeto citado assim é copiado, sem precisar de asset. Os `.css` e `.js` incluídos entram sozinhos antes do `</head>` e do `</body>`, sem repetir o que a moldura cita.
+- A conferência de um fragmento HTML (a mesma do editor): UTF-8, erros de sintaxe do parser, tag aberta e não fechada no arquivo, as tags que o navegador descartaria (como um `</section>` a mais) e `<!doctype>`, `<html>`, `<head>` e `<body>` num fragmento.
+
+Referência da página: [docs/examples/produto-esperado/herby-completa-atibaia/index.html](examples/produto-esperado/herby-completa-atibaia/index.html), comparada byte a byte.
 
 ### 4.5 Edição e evolução do modelo
 
@@ -206,15 +219,18 @@ src/
       configuration/       Configuration, Resolution, estados
       assets/              Asset, AssetCatalog, inclusão
       generation/          GenerationPlan (§4.4 passo 1)
-      fragments/           caminho de um fragmento novo, formato do texto (BOM e quebra de linha), codificação
+      fragments/           formato (XML ou HTML), caminho de um fragmento novo, formato do texto (BOM e quebra de linha), codificação
+      pages/               a página: moldura, marcadores, caminhos citados, seções e sumário (Fase 7)
     application/           Importa só domain/.
       ports/               interfaces (§6.2)
-      fragments/           FragmentDocument, o fragmento aberto no editor
+      fragments/           FragmentDocument, o fragmento aberto no editor, e o checker por formato
+      generation/          CombinedProductDeriver, que junta os formatos do produto
       commands/            EditorCommand, CommandHistory, comandos concretos
       use-cases/           abrir/salvar projeto, resolver configuração, gerar produto…
     infrastructure/        Implementa os ports. Importa application/ e domain/.
       electron/            adapters sobre window.mdd
       xml/                 codecs por arquivo, escritor determinístico, leitura com @xmldom/xmldom
+      html/                leitura do HTML com o parse5, a conferência e a página (Fase 7)
       solver/              LogicSolverConstraintSolver + logic-solver.d.ts
     ui/                    React. Importa application/ e domain/; infrastructure/ só em ui/app/.
       app/                 composition root: instancia adapters e injeta via Context
@@ -251,19 +267,19 @@ A pasta de telas se chama `screens/`, e não `features/`, para não colidir com 
 
 ### 6.2 Ports (em `application/ports`)
 
-| Port                                                                          | Responsabilidade                                                                                                                                                                                                                                        | Adapter v1                                                  |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `ProjectStorage`                                                              | Ler, escrever, listar, conferir (`stat`), copiar, renomear e remover arquivos e pastas dentro do projeto; renomear e apagar pastas só dentro de `saida/`. A escrita recebe o hash esperado para detectar alteração externa (§8).                        | `ElectronProjectStorage`                                    |
-| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                                                                                                                  | `Xml*Repository` (codecs + `ProjectStorage`)                |
-| `ConstraintSolver`                                                            | Carregar uma `Formula` e responder a satisfatibilidade sob uma suposição (um literal), devolvendo uma solução. Cada resolução carrega a fórmula num solver novo (ADR 0002).                                                                             | `LogicSolverConstraintSolver`                               |
-| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a hora da geração, conferir as fontes e devolver os arquivos do produto (textos e cópias), ou todos os problemas. A pasta temporária e a troca ficam com o caso de uso `WriteProductFolder`, igual para qualquer formato. | `XmlProductDeriver`                                         |
-| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                                                                                                                         | `ElectronAssetOpener`                                       |
-| `OutputFolderOpener`                                                          | Abrir uma pasta gerada (`saida/<nome>`) no gerenciador de arquivos.                                                                                                                                                                                     | `ElectronOutputFolderOpener`                                |
-| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto.                                                                                                                                                                                                                            | `ElectronProjectFolderPicker`                               |
-| `ProjectFilePicker`                                                           | Escolher um arquivo dentro do projeto, num diálogo que começa na raiz. Devolve o caminho relativo e recusa um arquivo de fora.                                                                                                                          | `ElectronProjectFilePicker`                                 |
-| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD. Sem schema, só XML bem-formado (fragmentos).                                                                                                                                            | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main) |
-| `FragmentChecker`                                                             | Conferir o texto de um fragmento como a geração confere (§4.4): a codificação, o XML bem-formado e a leitura com `@xmldom/xmldom`. Devolve os problemas, com a linha; lista vazia quando o fragmento pode entrar num produto.                           | `XmlFragmentChecker` (o `XmlProductDeriver` usa o mesmo)    |
-| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                                                                                                                | `SystemClock`                                               |
+| Port                                                                          | Responsabilidade                                                                                                                                                                                                                                                        | Adapter v1                                                                                     |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ProjectStorage`                                                              | Ler, escrever, listar, conferir (`stat`), copiar, renomear e remover arquivos e pastas dentro do projeto; renomear e apagar pastas só dentro de `saida/`. A escrita recebe o hash esperado para detectar alteração externa (§8).                                        | `ElectronProjectStorage`                                                                       |
+| `FeatureModelRepository`, `AssetCatalogRepository`, `ConfigurationRepository` | Carregar e salvar cada tipo de arquivo, devolvendo erros de leitura estruturados (§5).                                                                                                                                                                                  | `Xml*Repository` (codecs + `ProjectStorage`)                                                   |
+| `ConstraintSolver`                                                            | Carregar uma `Formula` e responder a satisfatibilidade sob uma suposição (um literal), devolvendo uma solução. Cada resolução carrega a fórmula num solver novo (ADR 0002).                                                                                             | `LogicSolverConstraintSolver`                                                                  |
+| `ProductDeriver`                                                              | Receber um `GenerationPlan` e a hora da geração, conferir as fontes e devolver os arquivos do produto (textos e cópias), ou todos os problemas. A pasta temporária e a troca ficam com o caso de uso `WriteProductFolder`, igual para qualquer formato.                 | `CombinedProductDeriver` (`XmlProductDeriver` e `HtmlPageDeriver`)                             |
+| `AssetOpener`                                                                 | Abrir um arquivo no programa padrão do sistema.                                                                                                                                                                                                                         | `ElectronAssetOpener`                                                                          |
+| `OutputFolderOpener`                                                          | Abrir uma pasta gerada (`saida/<nome>`) no gerenciador de arquivos.                                                                                                                                                                                                     | `ElectronOutputFolderOpener`                                                                   |
+| `ProjectFolderPicker`                                                         | Escolher a pasta do projeto.                                                                                                                                                                                                                                            | `ElectronProjectFolderPicker`                                                                  |
+| `ProjectFilePicker`                                                           | Escolher um arquivo dentro do projeto, num diálogo que começa na raiz. Devolve o caminho relativo e recusa um arquivo de fora.                                                                                                                                          | `ElectronProjectFilePicker`                                                                    |
+| `XmlSchemaValidator`                                                          | Etapas 1 e 2 da leitura (§5): XML bem-formado e conforme o XSD. Sem schema, só XML bem-formado (fragmentos).                                                                                                                                                            | `ElectronXmlSchemaValidator` (IPC → `xmllint-wasm` no main)                                    |
+| `FragmentChecker`                                                             | Conferir o texto de um fragmento como a geração confere (§4.4): no XML, a codificação, o XML bem-formado e a leitura com `@xmldom/xmldom`; no HTML, a conferência da página. Devolve os problemas, com a linha; lista vazia quando o fragmento pode entrar num produto. | `FragmentCheckerByFormat` (`XmlFragmentChecker` e `HtmlFragmentChecker`, os mesmos da geração) |
+| `Clock`                                                                       | Data e hora atuais (para `generatedAt`).                                                                                                                                                                                                                                | `SystemClock`                                                                                  |
 
 ### 6.3 Processo main e IPC
 
@@ -350,7 +366,7 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 - Na aba Assets, a lista fica no centro, agrupada por âncora na ordem do modelo, e as propriedades do asset selecionado ficam à direita.
 - Cada linha mostra o tipo, o nome (ou o nome do arquivo), o caminho, a condição e o estado do arquivo (ok / ausente), com as ações abrir (desligada quando ausente), mover para cima ou para baixo dentro da âncora e desvincular (sem confirmação: tem desfazer, e o arquivo fica no disco).
 - O painel edita nome, tipo, âncora e condição, e tem "Trocar arquivo…", que muda só o caminho. Trocar a âncora leva o asset para o fim da nova âncora.
-- Para vincular, o arquivo é escolhido em um diálogo que começa na pasta do projeto. Um arquivo fora do projeto é recusado com a orientação de copiá-lo para dentro. Depois vem o diálogo com o tipo (sugerido pela extensão: `.xml` → fragmento, demais → recurso), o nome (opcional), o ID (sugerido pelo nome do arquivo e ajustável só ali) e a âncora.
+- Para vincular, o arquivo é escolhido em um diálogo que começa na pasta do projeto. Um arquivo fora do projeto é recusado com a orientação de copiá-lo para dentro. Depois vem o diálogo com o tipo (sugerido pela extensão: `.xml` e `.html` → fragmento, demais → recurso), o nome (opcional), o ID (sugerido pelo nome do arquivo e ajustável só ali) e a âncora.
 - A condição usa o mesmo editor das restrições; vazio = sem condição. Uma expressão inválida não é gravada.
 - O estado dos arquivos é conferido ao abrir o projeto, ao entrar na aba, quando a janela volta ao foco, depois de qualquer mudança nos assets (inclusive desfazer) e no botão "Atualizar".
 - Todas as edições de assets são comandos do histórico: desfazer e refazer valem nas abas Modelo e Assets (também com o foco numa lista de opções). Tab, Enter, F2, Delete e Alt+↑/↓ valem só na aba Modelo.
@@ -359,21 +375,22 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 
 **Fragmentos** (Fase 6, ADR 0009):
 
-- À esquerda, a árvore dos `.xml` do projeto, com as pastas todas abertas, as pastas antes dos arquivos e cada grupo em ordem alfabética. Ficam de fora `model.xml`, `assets.xml`, `configurations/` e `saida/`, os nomes começando com ponto (como `.git`) e as pastas sem nenhum `.xml`. Cada arquivo mostra `•` quando tem alteração não salva, "novo" quando ainda não existe no disco e um clipe quando é o arquivo de algum asset. No topo, **Novo fragmento** e **Atualizar**.
-- No centro, o editor: realce de XML, números de linha, linha atual destacada, fechamento automático de tags, Tab para indentar (Esc e depois Tab tira o foco do editor) e Ctrl+F para buscar, com os textos em português. As cores vêm de variáveis do tema.
+- À esquerda, a árvore dos `.xml` e dos `.html` do projeto (inclusive a `moldura.html`), com as pastas todas abertas, as pastas antes dos arquivos e cada grupo em ordem alfabética. Ficam de fora `model.xml`, `assets.xml`, `configurations/` e `saida/`, os nomes começando com ponto (como `.git`) e as pastas sem nenhum `.xml`. Cada arquivo mostra `•` quando tem alteração não salva, "novo" quando ainda não existe no disco e um clipe quando é o arquivo de algum asset. No topo, **Novo fragmento** e **Atualizar**.
+- No centro, o editor: realce de XML ou de HTML, pela extensão, números de linha, linha atual destacada, fechamento automático de tags, Tab para indentar (Esc e depois Tab tira o foco do editor) e Ctrl+F para buscar, com os textos em português. As cores vêm de variáveis do tema.
 - Acima do editor, a barra do arquivo:
   - o caminho;
   - o vínculo ("Guia do PIX · `pag_pix`", com "+N" quando o arquivo é de mais de um asset) ou **Vincular a uma feature…**, ligado só quando o arquivo existe no disco, que abre o diálogo de vínculo da aba Assets com o caminho preenchido;
   - **Descartar alterações**, com confirmação: volta ao texto do disco, e um arquivo novo sai da lista.
+- Num `.html`, os marcadores aparecem com cor própria, e depois de `{{` o editor sugere os `feature.atributo` do modelo, `produto` e, na moldura, `conteudo` e `sumario`. Um ID de marcador que não existe no modelo aparece entre os problemas, e é conferido de novo quando o modelo muda. Na moldura, a barra do arquivo mostra "Moldura da página" no lugar do vínculo (Fase 7).
 - Abaixo do editor, os problemas do arquivo, cada um com a linha e a mensagem; clicar leva o cursor até a linha. As mesmas linhas ficam sublinhadas no editor, com a marca na margem. A conferência é a da geração (§4.4): roda ao abrir o arquivo e meio segundo depois da última tecla, e uma conferência que termina depois de outra mais nova é descartada.
 - Um arquivo que não está em UTF-8 (pela declaração ou por bytes inválidos) abre só para leitura, com uma faixa que pede para salvá-lo em UTF-8 em outro editor. O app lê os arquivos como UTF-8, e os acentos já chegam trocados: gravar de volta os perderia.
 - **Novo fragmento** pede o caminho, sugerindo a pasta do arquivo aberto. O caminho aceita `/` ou `\`, é gravado com `/` e adota a grafia das pastas que já existem (`Docs/Pagamento/cartao.xml` vira `docs/pagamento/cartao.xml`). É recusado, com o motivo, quando:
-  - está vazio, é absoluto, tem `..` ou não termina em `.xml`;
+  - está vazio, é absoluto, tem `..` ou não termina em `.xml` nem em `.html`;
   - tem um trecho vazio (`docs//a.xml`), um caractere que o Windows não aceita (`< > : " | ? *`), um trecho terminado em ponto ou espaço, ou um trecho começando com ponto;
   - é `model.xml` ou `assets.xml`, ou fica em `configurations/` ou `saida/`;
   - já existe no disco ou entre os arquivos novos, sem diferenciar maiúsculas de minúsculas.
 
-  O arquivo começa só com a declaração `<?xml version="1.0" encoding="UTF-8"?>` e uma linha em branco. O app não inventa um elemento raiz, porque a geração não impõe vocabulário (ADR 0006). Como as configurações novas, o arquivo só chega ao disco no Ctrl+S, com as pastas que faltarem.
+  Um `.xml` começa só com a declaração `<?xml version="1.0" encoding="UTF-8"?>` e uma linha em branco. O app não inventa um elemento raiz, porque a geração não impõe vocabulário (ADR 0006). Um `.html` começa vazio, e a `moldura.html` na raiz, com a moldura padrão (Fase 7). Como as configurações novas, o arquivo só chega ao disco no Ctrl+S, com as pastas que faltarem.
 
 - Ctrl+Z e Ctrl+Y desfazem e refazem o texto. O histórico de cada arquivo dura enquanto o projeto está aberto, também ao trocar de arquivo ou de aba, e recomeça quando o texto é relido do disco (descartar, atualizar, recarregar). Os botões de desfazer e refazer do cabeçalho ficam desligados, e os atalhos de edição do modelo não valem.
 - Sem arquivo aberto, o centro explica o que é um fragmento e mostra o botão "Novo fragmento".
@@ -385,7 +402,7 @@ As stores do Zustand guardam o estado de tela (projeto aberto, seleção, config
 - **Alteração externa:** o app guarda o hash de cada arquivo ao ler. Ao salvar, se o arquivo no disco mudou (por exemplo, depois de um `git pull`), ele pergunta se deve **sobrescrever**, **recarregar** (descartando as alterações locais daquele arquivo) ou **cancelar**. Nunca sobrescreve em silêncio.
 - **Fragmentos** (Fase 6):
   - Só os fragmentos com alteração são gravados: abrir um arquivo e não mexer nunca o regrava. Cada um só é gravado se o disco ainda estiver como na última leitura, e um arquivo novo, se ainda não existir. Um fragmento alterado fora do app entra no mesmo diálogo de conflito; "Recarregar" relê o projeto, os fragmentos abertos saem da lista, e o exibido continua, relido do disco, se ainda existir.
-  - **Erro de XML não impede salvar.** Um fragmento gravado com problema gera o aviso "Salvo com erro de XML: …", com o arquivo, a linha e o primeiro problema. O aviso some quando o arquivo é salvo sem problema e ao fechar o projeto; descartar não o tira, porque o disco continua com o erro. A geração continua recusando o fragmento.
+  - **Erro de XML ou de HTML não impede salvar.** Um fragmento gravado com problema gera o aviso "Salvo com erro de XML: …" (ou "de HTML"), com o arquivo, a linha e o primeiro problema. O aviso some quando o arquivo é salvo sem problema e ao fechar o projeto; descartar não o tira, porque o disco continua com o erro. A geração continua recusando o fragmento.
   - O BOM e a quebra de linha ficam como estavam: CRLF quando o arquivo tem algum `\r\n`, senão LF. Um arquivo com quebras misturadas, ou com `\r` sozinho, só muda se for editado, e aí sai todo com a quebra dele.
   - Quando a janela volta ao foco (se a aba Fragmentos já foi aberta com o projeto) e no botão Atualizar, a árvore é relida. Um fragmento aberto sem alteração no app é relido do disco; com alteração, fica como está, e o conflito aparece ao salvar. Um arquivo apagado por fora sai da lista se não tinha alteração, e passa a contar como novo se tinha.
 - **Erros** de leitura seguem §5. Erros de disco e de geração aparecem em diálogo com todos os itens.
@@ -405,10 +422,13 @@ A aceitação de cada fase é manual e usa `docs/examples/loja-online`.
 | **4. Assets**                 | Aba de assets, vínculo com âncora e condição, estado do arquivo, abrir no programa padrão                                                                                                                                      | A aba mostra os 6 assets do exemplo. Renomear `boleto.xml` fora do app faz o asset aparecer como ausente.                                                                                                                                                                                                                                                                                                                                         |
 | **5. Geração**                | Plano, verificação, `XmlProductDeriver`, pasta temporária e troca                                                                                                                                                              | Gerar `loja-basica` produz o equivalente a `produto-esperado/loja-basica/` (mais `docs/img/pix-fluxo.svg`). Com `pag_boleto` selecionado e `boleto.xml` ausente, a geração falha e não grava nada.                                                                                                                                                                                                                                                |
 | **6. Editor de fragmentos**   | Aba Fragmentos com o CodeMirror 6 (ADR 0009): árvore dos `.xml`, editor com realce e a conferência da geração, novo fragmento, vínculo pelo editor, "Editar" na aba Assets, salvar junto com o projeto                         | A árvore mostra os 5 `.xml` de `docs/`, sem o `model.xml`, o `assets.xml` e `configurations/`. Trocar o título do `pix.xml` e salvar muda só esse arquivo, com a quebra de linha e o BOM de antes. Apagar o `>` de uma tag mostra o problema com a linha, e a geração de `loja-basica` passa a recusar o arquivo. Criar `docs/pagamento/cartao.xml`, salvar e vinculá-lo a `pag_cartao` pelo editor faz o arquivo aparecer na aba Assets como ok. |
+| **7. Páginas HTML**           | Fragmentos HTML, moldura, marcadores, sumário, a página `index.html` na geração, o editor de HTML e o exemplo `herby` (ADR 0010)                                                                                               | Sobre o exemplo `herby`: gerar `completa-atibaia` produz um `index.html` idêntico ao de `produto-esperado/herby-completa-atibaia/`. Uma tag aberta num fragmento e um marcador de feature não selecionada fazem a geração recusar, com o arquivo e a linha. Gerar `loja-basica` do `loja-online` continua sem `index.html`.                                                                                                                       |
+| **8. Aba Páginas**            | A página ao vivo dentro do app (decisões no desenho da Fase 7)                                                                                                                                                                 | A definir no desenho da Fase 8.                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | **Depois**                    | `ModelAnalyzer`, variabilidade anotativa, renderers por mídia, restrições com atributos, clones, import de FeatureIDE ou UVL, adapters DITA ou DocBook, undo no configurador, testes                                           | —                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## 10. Em aberto
 
-- **Mídias prioritárias** para os renderers (fase "Depois"): a definir.
+- **Mídias prioritárias** para os renderers (fase "Depois"): a primeira é a página HTML (Fase 7, ADR 0010); as demais, a definir.
+- **Variabilidade anotativa** (os `perfis` do herby, guardados em `<template data-perfis>`): prevista para depois da aba Páginas, começando por decidir o que cada perfil significa em features.
 - **Vocabulário de documentação padrão** (DITA, DocBook ou nenhum): adiado de propósito (ADR 0006).
 - **Tamanho alvo de modelo** para desempenho do solver: sem requisito; a referência informal é algumas centenas de features.
