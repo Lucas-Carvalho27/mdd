@@ -4,6 +4,8 @@ Aprovado em 28/09/2026, numa sessão de perguntas e respostas com o usuário (42
 
 O exemplo das duas fases é o projeto real do usuário, o **herby** (tutoriais da plataforma Herby), convertido de XML para HTML. O repositório ficou privado em 28/09/2026 para recebê-lo.
 
+> O protótipo (branch local `prototipo-fase-7`, no clone descartável) refinou alguns pontos, já corrigidos abaixo: os marcadores nos comentários, a detecção das tags que o parse5 descarta, os módulos da arquitetura e a colisão de um arquivo citado. Veja "O que o protótipo respondeu".
+
 ## Objetivo
 
 Escrever fragmentos em **HTML** e gerar, para cada configuração completa, uma **página** `saida/<nome>/index.html`: a moldura do projeto com as seções das features selecionadas, os valores dos atributos no texto, o sumário e os arquivos que a página cita. O XML continua como está.
@@ -116,6 +118,7 @@ Entram as features selecionadas, menos a raiz, aninhadas como na árvore, com o 
 - Valem no texto e nos valores de atributos (`href="tel:{{herby.contato_whatsapp}}"`), com `& < > "` escapados, e dentro de `<style>`, onde o valor entra sem escape, mas um valor com `<` é problema (senão poderia fechar o `<style>`). Dentro de `<script>`, um marcador é problema.
 - Espaços dentro das chaves valem: `{{ loja.versao }}`.
 - `\{{` escreve `{{` literal.
+- Nos comentários HTML, os marcadores também são trocados e conferidos, como no texto. Assim a conferência dos IDs contra o modelo não precisa ler o HTML.
 - Os marcadores só existem nos fragmentos HTML e na moldura. O fragmento XML continua entrando intacto no `product.xml` (ADR 0006).
 
 Um marcador que não resolve:
@@ -135,7 +138,7 @@ Ficam como estão, sem cópia: `http:`, `https:`, `//…`, `mailto:`, `tel:`, `d
 - um arquivo citado que não existe, ou que é uma pasta;
 - um caminho que sai do projeto (`..` demais);
 - um caminho começando com `/`, porque na pasta gerada ele apontaria para a raiz do disco;
-- um arquivo copiado (citado ou recurso) com o caminho `index.html` ou `product.xml` na raiz, porque colidiria com o que a geração escreve.
+- um arquivo copiado (citado ou recurso) com o caminho `index.html` ou `product.xml` na raiz, porque colidiria com o que a geração escreve. Um arquivo citado aparece com a linha, junto com os demais problemas; um recurso, quando os dois formatos já foram montados.
 
 Os caminhos de dentro de um `.css` não precisam de correção: os recursos são copiados com a mesma estrutura de pastas.
 
@@ -241,38 +244,42 @@ As camadas são as de sempre (ADR 0008), com o lint de fronteiras.
 
 **Domínio** (funções puras):
 
-- `domain/fragments/fragment-format.ts`: o formato pela extensão (`xml` ou `html`). O `fragment-path.ts` passa a aceitar as duas extensões, e o `suggestedKind` do `asset-edits.ts` sugere fragmento para as duas.
+- `domain/fragments/fragment-format.ts`: o formato pela extensão (`xml` ou `html`) e o texto de um fragmento novo (a declaração XML, vazio, ou a moldura padrão). O `fragment-path.ts` passa a aceitar as duas extensões, e o `suggestAssetKind` do `asset-edits.ts` sugere fragmento para as duas.
 - `domain/pages/`:
-  - `markers.ts`: acha os marcadores num texto (com `\{{` e espaços), confere os IDs contra o modelo e os resolve contra o plano;
-  - `page-paths.ts`: resolve um caminho citado a partir da pasta do arquivo, diz se sai do projeto e escreve o caminho relativo ao `index.html`;
-  - `table-of-contents.ts`: o sumário, a partir das seções do plano;
-  - `page-layout.ts`: o nome `moldura.html`, a moldura padrão e os marcadores reservados.
-- `domain/generation/generation-plan.ts`: o plano passa a dizer se a página é gerada (algum asset fragmento `.html` no catálogo) e a levar o necessário para as mensagens dos marcadores (as features e os atributos do modelo, e não só os selecionados).
+  - `page-layout.ts`: os nomes `moldura.html`, `index.html` e `product.xml` e a moldura padrão;
+  - `markers.ts`: acha os marcadores num texto (com `\{{` e espaços), confere os IDs de atributo contra o modelo, conta os marcadores da moldura e dá o valor de cada um numa configuração;
+  - `page-paths.ts`: resolve um caminho citado a partir da pasta do arquivo, diz se sai do projeto e escreve o endereço na página; lê e escreve o `srcset`;
+  - `page-assembly.ts`: o escape do HTML, as seções aninhadas e o sumário.
+- `domain/shared/text-lines.ts`: a linha de uma posição no texto. `domain/feature-model/traversal.ts` ganha `attributeIdsByFeature`.
+- `domain/generation/generation-plan.ts`: o plano passa a dizer se a página é gerada (`hasPage`: algum asset fragmento `.html` no catálogo) e a levar os IDs dos atributos de todas as features do modelo (`modelAttributes`), para as mensagens dos marcadores.
 
 **Aplicação:**
 
-- A porta `ProductDeriver` não muda. O `GenerateProduct` passa a receber um deriver composto, que junta os arquivos e os problemas dos dois formatos e não repete a cópia de um mesmo caminho.
-- A porta `FragmentChecker` não muda. O checker passa a ser escolhido pela extensão. A conferência dos IDs dos marcadores, que precisa do modelo, fica numa função do domínio, chamada pela store junto com o checker.
+- A porta `ProductDeriver` não muda. O `CombinedProductDeriver` (`application/generation/`) junta os dois formatos: confere todos, devolve todos os problemas de uma vez, não repete a cópia de um mesmo caminho e recusa uma cópia com o nome de um arquivo gerado.
+- A porta `FragmentChecker` não muda. O `FragmentCheckerByFormat` (`application/fragments/`) escolhe o checker pela extensão. A conferência dos IDs dos marcadores, que precisa do modelo, é uma função do domínio (`modelMarkerProblems`), chamada pela store junto com o checker.
 
-**Infraestrutura:**
+**Infraestrutura** (`infrastructure/html/`, novo):
 
-- `infrastructure/html/` (novo):
-  - `HtmlFragmentChecker`: as conferências de um fragmento HTML e da moldura, com o **parse5** (o parser de HTML do padrão, com as posições no texto);
-  - `HtmlPageDeriver`: lê a moldura e os fragmentos, confere, troca os marcadores e os caminhos pelas posições que o parser dá (o resto do texto fica como está) e monta o `index.html` e as cópias. Ele é feito para ser reaproveitado na visualização da Fase 8, que monta a mesma página na memória.
-- `infrastructure/xml/XmlProductDeriver`: passa a ignorar os fragmentos `.html`.
-- `infrastructure/fragments/`: o checker composto, por extensão.
+- `html-source.ts`: lê o fragmento (dentro de um `<section>`, como ele fica na página) ou a moldura (um documento inteiro) com o **parse5**, o parser de HTML do padrão, com as posições no texto. Dá os problemas, o lugar de cada marcador, os atributos com caminho ou com marcador e, na moldura, as posições do `</head>` e do `</body>`.
+- `HtmlFragmentChecker` e `inspectHtml`: as conferências de um fragmento HTML e da moldura, na ordem, para o editor e para a geração.
+- `HtmlPageDeriver`: lê a moldura e os fragmentos, confere, troca os marcadores e os caminhos só nos trechos que mudam (o resto do texto fica como o autor escreveu) e monta o `index.html` e as cópias. Ele é feito para ser reaproveitado na visualização da Fase 8, que monta a mesma página na memória.
+- `XmlProductDeriver`: passa a ignorar os fragmentos `.html`.
 
 **Interface:**
 
-- `xml-editor-setup.ts` vira a montagem do editor por formato, com o `lang-html`, a cor e a sugestão dos marcadores (`@codemirror/autocomplete`).
-- `fragments-actions.ts`: o texto inicial do arquivo novo por formato, e os problemas dos marcadores junto com os do checker.
-- `FragmentBar`: a moldura.
+- `xml-editor-setup.ts` vira `fragment-editor-setup.ts`: a linguagem pela extensão (`lang-xml` ou `lang-html`) e, no HTML, a cor e a sugestão dos marcadores (`@codemirror/autocomplete`). As cores continuam nas variáveis `--xml-*`.
+- `FragmentEditor` e `FragmentsWorkspace`: os marcadores do modelo para a sugestão, e o texto da tela sem arquivo aberto.
+- `fragments-actions.ts`: os problemas dos IDs dos marcadores junto com os do checker, conferidos de novo quando o modelo muda, e "Salvo com erro de HTML".
+- `FragmentBar`: "Moldura da página". `FragmentDialogs`: a dica "terminando em .xml ou .html".
 - Pacotes novos: `parse5`, `@codemirror/lang-html` e `@codemirror/autocomplete`.
 
-**A confirmar no protótipo:**
+**O que o protótipo respondeu:**
 
-- se o parse5 dá o que a conferência de tags abertas precisa;
-- se o `lang-html` funciona com a CSP;
+- **O parse5 não acusa as tags que descarta.** Um `</section>` a mais, um `<td>` fora da tabela e o `<body>` de um fragmento somem da árvore sem erro. Elas são achadas pelo que a árvore não cobre: os trechos fora de todo nó e, dentro de um texto, um `<` seguido de letra, `/` ou `!`, que só aparece ali quando a tag foi descartada (o parse5 junta dois textos vizinhos num só). O começo de uma tag da árvore não conta, porque o texto depois do `</body>` de uma moldura vai para dentro do `body` e passa por cima dele. Um marcador no **nome** de um atributo (`<p {{a.b}}>`) é problema: só vale no valor, depois do `=`.
+- **O `lang-html` funciona com a CSP**, no modo de desenvolvimento e no `mdd.exe`.
+- **A fonte de sugestões precisa ser a mesma função durante todo o estado do editor.** O CodeMirror reconhece a fonte pela identidade, e uma função nova a cada consulta faz ele descartar a resposta. Com o Ctrl+Espaço, a lista também traz as tags do próprio HTML.
+- **Os arquivos citados são conferidos também num fragmento que já tem outro problema**, para a geração listar tudo de uma vez.
+- As 13 configurações do herby geram sem problema, e a página não tem rolagem lateral nem em 375 px.
 
 ## Verificação
 
@@ -281,11 +288,12 @@ Sem testes automatizados (ADR 0008). Roteiros em `.checks/`:
 - `markers-check.mts`: sintaxe, escape, `\{{`, espaços, IDs desconhecidos, feature não selecionada, `<style>` e `<script>`;
 - `page-paths-check.mts`: caminhos relativos, com `?` e `#`, com espaço, saindo do projeto, começando com `/`, e os que ficam como estão;
 - `html-checker-check.mts`: tags abertas, tags opcionais e vazias, tags proibidas, erros do parser, UTF-8, a moldura;
-- `html-page-check.mts`: a página montada de um projeto pequeno em memória, com o sumário, o CSS e o JS automáticos sem repetição, as cópias e as colisões;
-- `herby-convert.mts`: a conversão do herby, que imprime a tabela de perfis antes de gravar;
-- `generate-product-check.mts` (Fase 5): igual ao de antes;
-- `paginas-ui.mjs`, pelo protocolo de depuração do Chromium, no modo de desenvolvimento e no `mdd.exe`: realce e sugestão de marcadores, erro de tag aberta, "Novo fragmento" com `.html` e com a moldura, gerar o herby;
-- regressão: `fragmentos-ui.mjs` (Fase 6), `geracao-ui.mjs` (Fase 5), `assets-ui.mjs` (Fase 4) e `ui-check.mjs` (2A).
+- `html-page-check.mts`: a página montada de um projeto pequeno em memória, com o sumário, o CSS e o JS automáticos sem repetição, as cópias e todos os problemas de uma vez;
+- `html-store-check.mts`: a aba Fragmentos com HTML, os IDs dos marcadores conferidos de novo quando o modelo muda, o texto inicial e o aviso ao salvar;
+- `herby-convert.mts` (a conversão, com a tabela de perfis), `herby-open-check.mts` (o exemplo abre como no app) e `herby-generate.mts` (gera uma configuração do herby pelo `GenerateProduct`);
+- `fragment-path-check.mts` (Fase 6), com os casos `.html`, `.htm` e `moldura.html`;
+- `paginas-ui.mjs`, pelo protocolo de depuração do Chromium, no modo de desenvolvimento e no `mdd.exe` (`EXAMPLE=herby bash .checks/run-ui.sh …`): realce, marcador colorido, sugestão, ID inexistente, tag aberta, a moldura, "Novo fragmento" com `.htm` e `.html`, e gerar `completa-atibaia` pelo botão, comparando com a saída esperada;
+- regressão, iguais às saídas das fases anteriores: `generate-product-check`, `fragment-checker-check`, `save-fragments-check`, `text-format-check`, as stores (`fragments`, `generation`, `assets`, `configurator`), `configurations-check`, `save-safety-check`, e os roteiros de interface `fragmentos-ui` (só com a dica nova do diálogo), `geracao-ui`, `assets-ui`, `configurador-ui` e `ui-check`.
 
 ## Documentos
 

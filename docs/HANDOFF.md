@@ -191,7 +191,11 @@ O branch `fase-6-editor-fragmentos` foi mesclado na `main` em 25/09/2026 e envia
 
 As fases 0 a 6 estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo).
 
-**Em andamento: Fase 7, Páginas HTML.** O desenho foi aprovado em 28/09/2026 e está em [docs/superpowers/specs/2026-09-28-fase-7-paginas-html-design.md](superpowers/specs/2026-09-28-fase-7-paginas-html-design.md). A spec também registra as decisões da Fase 8 (aba Páginas), tomadas na mesma sessão. O próximo passo é o protótipo num clone descartável, começando pela conversão do herby: o roteiro mostra ao usuário a tabela perfil × features antes de gravar as configurações. Depois vêm o plano e o branch `fase-7-paginas-html`.
+**Em andamento: Fase 7, Páginas HTML.** O desenho foi aprovado em 28/09/2026 e está em [docs/superpowers/specs/2026-09-28-fase-7-paginas-html-design.md](superpowers/specs/2026-09-28-fase-7-paginas-html-design.md). A spec também registra as decisões da Fase 8 (aba Páginas), tomadas na mesma sessão.
+
+O **protótipo** está pronto e verificado (28/09/2026): num clone descartável no scratchpad da sessão, commit `e62fa22` do branch local `prototipo-fase-7`, ainda não enviado ao GitHub. Ele tem o código, o exemplo `docs/examples/herby/`, a saída esperada `produto-esperado/herby-completa-atibaia/index.html` e os roteiros, com as saídas em `.checks/out/`. O usuário conferiu a tabela perfil × features antes da gravação das configurações. Os roteiros novos, a regressão das Fases 2A a 6 e o `paginas-ui.mjs` no `mdd.exe` deram o esperado; o que o protótipo mudou no desenho está na spec, em "O que o protótipo respondeu". Se o scratchpad sumir, o protótipo se perde: envie o branch ao GitHub antes (como o `prototipo-fase-6`), com a autorização do usuário.
+
+O próximo passo é o plano, montado por script a partir do protótipo, uma tarefa por vez, e o branch `fase-7-paginas-html`.
 
 - **O exemplo é o herby**, o projeto real do usuário, em `C:\Users\lucas\Desktop\herby`. Ele está fora do git: **nunca o altere**. A conversão grava só em `docs/examples/herby/`.
 - **O repositório ficou privado** em 28/09/2026 para receber o herby, que é material da empresa. Não o torne público de novo sem falar com o usuário.
