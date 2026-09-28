@@ -1,19 +1,20 @@
 # Handoff — onde paramos e como continuar
 
-Atualizado em 25/09/2026. Leia este arquivo primeiro ao retomar o projeto.
+Atualizado em 28/09/2026. Leia este arquivo primeiro ao retomar o projeto.
 
 ## Estado atual
 
-| Fase                      | Situação  | Onde está                                                                                                                                                                                                                                                                          |
-| ------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0. Fundação               | Concluída | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 1. Domínio e persistência | Concluída | `main` (GitHub)                                                                                                                                                                                                                                                                    |
-| 2A. Edição do modelo      | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
-| 2B. Diagrama visual       | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
-| 3. Configurador           | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
-| 4. Assets                 | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
-| 5. Geração                | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)           |
-| 6. Editor de fragmentos   | Concluída | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md)                                                                                                                                |
+| Fase                      | Situação         | Onde está                                                                                                                                                                                                                                                                          |
+| ------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Fundação               | Concluída        | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 1. Domínio e persistência | Concluída        | `main` (GitHub)                                                                                                                                                                                                                                                                    |
+| 2A. Edição do modelo      | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md](superpowers/plans/2026-09-23-fase-2a-edicao-do-modelo.md)                                                                                                                                |
+| 2B. Diagrama visual       | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-2b-diagrama.md](superpowers/plans/2026-09-23-fase-2b-diagrama.md)                                                                                                                                                |
+| 3. Configurador           | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-23-fase-3-configurador.md](superpowers/plans/2026-09-23-fase-3-configurador.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-3-correcoes.md](superpowers/plans/2026-09-24-fase-3-correcoes.md) |
+| 4. Assets                 | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-4-assets.md](superpowers/plans/2026-09-24-fase-4-assets.md)                                                                                                                                                      |
+| 5. Geração                | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-5-geracao.md](superpowers/plans/2026-09-24-fase-5-geracao.md); correções da revisão final em [docs/superpowers/plans/2026-09-24-fase-5-correcoes.md](superpowers/plans/2026-09-24-fase-5-correcoes.md)           |
+| 6. Editor de fragmentos   | Concluída        | `main` (GitHub). Plano em [docs/superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md](superpowers/plans/2026-09-24-fase-6-editor-fragmentos.md)                                                                                                                                |
+| 7. Páginas HTML           | Desenho aprovado | Spec em [docs/superpowers/specs/2026-09-28-fase-7-paginas-html-design.md](superpowers/specs/2026-09-28-fase-7-paginas-html-design.md), com as decisões da Fase 8 (aba Páginas)                                                                                                     |
 
 O app abre uma pasta de projeto, valida os XMLs em três etapas (XML bem-formado, XSD e regras do domínio), mostra o modelo e salva tudo de volta sem mudar um byte. Com as fases seguintes, também:
 
@@ -188,7 +189,14 @@ O branch `fase-6-editor-fragmentos` foi mesclado na `main` em 25/09/2026 e envia
 
 ## Próximo passo
 
-As fases 0 a 6 estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo). O que resta, para o usuário escolher:
+As fases 0 a 6 estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo).
+
+**Em andamento: Fase 7, Páginas HTML.** O desenho foi aprovado em 28/09/2026 e está em [docs/superpowers/specs/2026-09-28-fase-7-paginas-html-design.md](superpowers/specs/2026-09-28-fase-7-paginas-html-design.md). A spec também registra as decisões da Fase 8 (aba Páginas), tomadas na mesma sessão. O próximo passo é o protótipo num clone descartável, começando pela conversão do herby: o roteiro mostra ao usuário a tabela perfil × features antes de gravar as configurações. Depois vêm o plano e o branch `fase-7-paginas-html`.
+
+- **O exemplo é o herby**, o projeto real do usuário, em `C:\Users\lucas\Desktop\herby`. Ele está fora do git: **nunca o altere**. A conversão grava só em `docs/examples/herby/`.
+- **O repositório ficou privado** em 28/09/2026 para receber o herby, que é material da empresa. Não o torne público de novo sem falar com o usuário.
+
+O que resta, para o usuário escolher:
 
 - a correção do Ctrl+S segurado (veja "Aceitação da Fase 6");
 - os itens da fase "Depois" da SPEC §9.
