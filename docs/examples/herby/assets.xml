@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assets xmlns="urn:mdd:assets" schemaVersion="1">
+  <asset id="plataforma" kind="fragment" path="fragmentos/plataforma.html" anchor="herby" name="Herby"/>
+  <asset id="css_herby" kind="resource" path="css/herby.css" anchor="herby" name="Estilo da página"/>
+  <asset id="preparacao" kind="fragment" path="fragmentos/preparacao.html" anchor="preparacao" name="Preparação"/>
+  <asset id="acesso_plataforma" kind="fragment" path="fragmentos/acesso-plataforma.html" anchor="acesso_a_plataforma" name="Acesso à Plataforma"/>
+  <asset id="slide_acesso_a_plataforma" kind="resource" path="Slides por Feature/06 - Acesso à Plataforma.pptx" anchor="acesso_a_plataforma" name="Slide Acesso à Plataforma"/>
+  <asset id="informacoes_gerais" kind="fragment" path="fragmentos/informacoes-gerais.html" anchor="informacoes_gerais" name="Informações Gerais da Avaliação"/>
+  <asset id="f_01_informacoes_gerais_da_avaliacao_e_cronograma" kind="resource" path="Slides por Feature/01 - Informações Gerais da Avaliação e Cronograma.pptx" anchor="informacoes_gerais"/>
+  <asset id="gestao_base_dados" kind="fragment" path="fragmentos/gestao-base-dados.html" anchor="gestao_da_base_de_dados" name="Gestão da Base de Dados"/>
+  <asset id="f_07_gestao_da_base_de_dados" kind="resource" path="Slides por Feature/07 - Gestão da Base de Dados.pptx" anchor="gestao_da_base_de_dados"/>
+  <asset id="lixeira" kind="fragment" path="fragmentos/lixeira.html" anchor="lixeira" name="Lixeira"/>
+  <asset id="f_08_lixeira_recuperacao_de_dados" kind="resource" path="Slides por Feature/08 - Lixeira (Recuperação de Dados).pptx" anchor="lixeira"/>
+  <asset id="sincronizacao_dados" kind="fragment" path="fragmentos/sincronizacao-dados.html" anchor="sincronizacao_rede_estadual" name="Sincronização de Dados"/>
+  <asset id="f_09_sincronizacao_de_dados_rede_estadual" kind="resource" path="Slides por Feature/09 - Sincronização de Dados (Rede Estadual).pptx" anchor="sincronizacao_rede_estadual"/>
+  <asset id="template_dados" kind="fragment" path="fragmentos/template-dados.html" anchor="template_de_dados" name="Template de Dados"/>
+  <asset id="f_18_template_de_dados_preenchimento_e_envio" kind="resource" path="Slides por Feature/18 - Template de Dados (Preenchimento e Envio).pptx" anchor="template_de_dados"/>
+  <asset id="impressao" kind="fragment" path="fragmentos/impressao.html" anchor="impressao_dos_cartoes" name="Impressão dos Cartões"/>
+  <asset id="impressao_herby" kind="fragment" path="fragmentos/impressao-herby.html" anchor="impressao_na_herby" name="Impressão dos Cartões de Respostas"/>
+  <asset id="impressao_sistema_externo" kind="fragment" path="fragmentos/impressao-sistema-externo.html" anchor="impressao_no_saev" name="Impressão pelo Sistema da Rede"/>
+  <asset id="aplicacao_correcao" kind="fragment" path="fragmentos/aplicacao-correcao.html" anchor="aplicacao_e_correcao" name="Aplicação e Correção"/>
+  <asset id="processamento_foto" kind="fragment" path="fragmentos/processamento-foto.html" anchor="processamento_por_foto" name="Processamento por Foto dos Cartões de Respostas"/>
+  <asset id="educacao_especial" kind="fragment" path="fragmentos/educacao-especial.html" anchor="educacao_especial" name="Educação Especial"/>
+  <asset id="avaliacao_fluencia" kind="fragment" path="fragmentos/avaliacao-fluencia.html" anchor="avaliacao_de_fluencia_audio" name="Avaliação de Fluência"/>
+  <asset id="correcao_ia_fluencia" kind="fragment" path="fragmentos/correcao-ia-fluencia.html" anchor="correcao_por_ia" name="Correção por IA de Fluência"/>
+  <asset id="monitoramento_resultados" kind="fragment" path="fragmentos/monitoramento-resultados.html" anchor="monitoramento_e_resultados" name="Monitoramento e Resultados"/>
+  <asset id="progresso" kind="fragment" path="fragmentos/progresso.html" anchor="progresso" name="Progresso"/>
+  <asset id="resultados" kind="fragment" path="fragmentos/resultados.html" anchor="resultados" name="Resultados"/>
+  <asset id="resultados_detalhados" kind="fragment" path="fragmentos/resultados-detalhados.html" anchor="resultados_detalhados" name="Resultados Detalhados"/>
+  <asset id="relatorios" kind="fragment" path="fragmentos/relatorios.html" anchor="relatorios" name="Relatórios"/>
+  <asset id="graficos" kind="fragment" path="fragmentos/graficos.html" anchor="graficos" name="Gráficos"/>
+  <asset id="qrcode_resultados" kind="fragment" path="fragmentos/qrcode-resultados.html" anchor="qr_code_de_resultados" name="QR Code de Resultados"/>
+</assets>

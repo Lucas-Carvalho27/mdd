@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="urn:mdd:configuration" schemaVersion="1" name="Rondônia PAIC PROALFA">
+  <decision feature="preparacao" state="selected"/>
+  <decision feature="acesso_a_plataforma" state="deselected"/>
+  <decision feature="informacoes_gerais" state="selected"/>
+  <decision feature="gestao_da_base_de_dados" state="deselected"/>
+  <decision feature="template_de_dados" state="selected"/>
+  <decision feature="impressao_dos_cartoes" state="deselected"/>
+  <decision feature="aplicacao_e_correcao" state="deselected"/>
+  <decision feature="monitoramento_e_resultados" state="deselected"/>
+  <value feature="herby" attribute="titulo_tutorial">Preenchimento do template de dados (Rede Municipal)</value>
+  <value feature="herby" attribute="rede">Rondônia · PAIC/PROALFA</value>
+  <value feature="informacoes_gerais" attribute="avaliacao">Avaliação Diagnóstica PAIC/PROALFA 2026</value>
+</configuration>
