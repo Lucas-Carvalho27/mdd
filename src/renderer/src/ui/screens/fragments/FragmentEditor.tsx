@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { setDiagnostics } from '@codemirror/lint'
 import { EditorSelection } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
@@ -17,6 +17,9 @@ interface FragmentEditorProps {
   readonly onChange: (path: string, text: string) => void
   /** Os marcadores de atributo do modelo (`feature.atributo`), sugeridos nos fragmentos HTML. */
   readonly attributeMarkers: readonly string[]
+  /** Uma linha a mostrar quando este arquivo estiver no editor (um problema da aba Páginas). */
+  readonly reveal: { readonly path: string; readonly line: number } | null
+  readonly onRevealed: () => void
 }
 
 /**
@@ -29,7 +32,9 @@ export function FragmentEditor({
   problems,
   states,
   onChange,
-  attributeMarkers
+  attributeMarkers,
+  reveal,
+  onRevealed
 }: FragmentEditorProps): React.JSX.Element {
   const host = useRef<HTMLDivElement>(null)
   // O estado de cada arquivo dura mais que uma renderização: a sugestão lê o modelo da vez.
@@ -80,7 +85,7 @@ export function FragmentEditor({
     )
   }, [states, path, text, readOnly, problems])
 
-  const goToLine = (line: number): void => {
+  const goToLine = useCallback((line: number): void => {
     const current = view.current
     if (current === null) return
     const { doc } = current.state
@@ -90,7 +95,14 @@ export function FragmentEditor({
       effects: EditorView.scrollIntoView(target.from, { y: 'center' })
     })
     current.focus()
-  }
+  }, [])
+
+  // A linha pedida pela aba Páginas, quando o arquivo dela já está no editor.
+  useEffect(() => {
+    if (reveal === null || reveal.path !== path) return
+    goToLine(reveal.line)
+    onRevealed()
+  }, [reveal, path, text, goToLine, onRevealed])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">

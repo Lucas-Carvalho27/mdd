@@ -45,6 +45,8 @@ export function FragmentsWorkspace({
   const changeText = useProjectStore((state) => state.changeFragmentText)
   const checkFragment = useProjectStore((state) => state.checkFragment)
   const refresh = useProjectStore((state) => state.refreshFragments)
+  const reveal = useProjectStore((state) => state.fragmentReveal)
+  const clearReveal = useProjectStore((state) => state.clearFragmentReveal)
 
   // Entrar na aba lê as pastas; nas outras vezes, também relê os fragmentos sem alteração.
   useEffect(() => {
@@ -150,6 +152,8 @@ export function FragmentsWorkspace({
               states={editorStates}
               onChange={changeText}
               attributeMarkers={attributeMarkers}
+              reveal={reveal}
+              onRevealed={clearReveal}
             />
           </>
         )}
