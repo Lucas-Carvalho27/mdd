@@ -212,7 +212,7 @@ As fases 0 a 7 estão concluídas, e as checagens manuais das Fases 0 e 1 també
 
 **A Fase 7 (páginas HTML) está concluída** e mesclada na `main` local em 28/09/2026, com a checagem à mão adiada (veja "Aceitação da Fase 7"). Nada desta sessão foi enviado ao GitHub: a `main`, o `fase-7-paginas-html` e o `prototipo-fase-7` estão só no repositório local, e o usuário os envia ("depois a gente sobe pro git").
 
-O próximo passo é a **Fase 8** (aba Páginas): o desenho próprio parte das decisões registradas no fim do desenho da Fase 7. A variabilidade anotativa (os `perfis` do herby) vem depois, começando por decidir o que cada perfil significa em features.
+**Em andamento: Fase 8, aba Páginas.** O desenho foi aprovado em 28/09/2026 e está em [docs/superpowers/specs/2026-09-28-fase-8-aba-paginas-design.md](superpowers/specs/2026-09-28-fase-8-aba-paginas-design.md), com as cinco decisões técnicas (a página num `<iframe>` com sandbox, servido pelo protocolo `mdd-page:`; a página mesmo com problemas; o script da visualização; o texto do editor para os fragmentos abertos; os links para fora no navegador do sistema). O próximo passo é o protótipo num clone descartável, começando pelo isolamento. A variabilidade anotativa (os `perfis` do herby) vem depois, começando por decidir o que cada perfil significa em features.
 
 - **O exemplo é o herby**, o projeto real do usuário, em `C:\Users\lucas\Desktop\herby`. Ele está fora do git: **nunca o altere**. A conversão grava só em `docs/examples/herby/`.
 - **O repositório ficou privado** em 28/09/2026 para receber o herby, que é material da empresa. Não o torne público de novo sem falar com o usuário.
