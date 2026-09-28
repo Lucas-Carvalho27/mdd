@@ -1,0 +1,31 @@
+produto                          → Loja Básica | modelo Loja Online
+  feature loja                   → Loja Online | versao=1.0
+  feature catalogo               → Catálogo
+  feature busca                  → Busca | max_resultados=100
+  feature mobile                 → App mobile | plataforma=android
+  feature pagamento              → Pagamento
+  feature pag_cartao             → Cartão
+  feature pag_pix                → PIX
+  seção loja [doc_loja]
+  seção   catalogo
+  seção   busca [doc_busca] [doc_busca_app]
+  seção   mobile
+  seção   pagamento
+  seção     pag_cartao
+  seção     pag_pix [doc_pix]
+recursos                         → img_pix docs/img/pix-fluxo.svg
+sem mobile: seções               → loja [doc_loja] | catalogo | busca [doc_busca] | pagamento | pag_cartao | pag_boleto [doc_boleto]
+sem mobile: recursos             → 0
+sem mobile: atributos da busca   → [ { id: 'max_resultados', value: '100' } ]
+incompleta                       → A configuração precisa estar completa para gerar o produto.
+recurso repetido                 → img_pix
+  a and b                        → true
+  a and c                        → false
+  a or c                         → true
+  not c                          → true
+  c implies a                    → true
+  a implies c                    → false
+  a iff b                        → true
+  a iff c                        → false
+  true and not false             → true
+  not (a and c) and (c or b)     → true

@@ -1,0 +1,16 @@
+árvore                               → docs/loja.html docs/pagamento/pix.xml
+problemas do .html                   → ok
+problemas do .xml                    → ok
+— o modelo muda: loja perde o atributo versao
+comando                              → feito
+problemas do .html                   → ok
+depois de desfazer                   → ok
+— arquivos novos
+novo .html                           → criado
+texto                                → ""
+nova moldura                         → criada
+texto                                → "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>{{produto}}</title>\n</head>\n<body>\n{{conteudo}}\n</body>\n</html>\n"
+.htm                                 → O arquivo precisa terminar em .xml ou .html.
+— salvar com erro
+aviso                                → Salvo com erro de XML: A tag <div> é aberta aqui e não é fechada neste arquivo.
+no disco                             → "<div>\n<p>sem fechar\n"

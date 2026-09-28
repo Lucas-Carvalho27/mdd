@@ -1,0 +1,35 @@
+1. sem projeto aberto                → null
+   chamadas                          → 0
+2. durante: gerando                  → true
+   segundo clique                    → null
+   resultado                         → generated
+   depois: gerando                   → false
+   última geração                    → loja-basica → saida/loja-basica
+   alterações não salvas             → false
+   chamadas                          → loja-basica
+3. de novo                           → needs-confirmation
+   substituir                        → generated
+   chamadas                          → loja-basica, loja-basica (substituir)
+4. problemas                         → problems
+   última geração                    → loja-basica → saida/loja-basica
+5. abriu                             → saida/loja-basica
+   aviso                             → Não foi possível abrir saida/sumiu/: não existe
+6. depois do ×                       → (nenhuma)
+7. recarregado no meio               → null
+   gerando                           → false
+   última geração                    → (nenhuma)
+8. depois de fechar                  → (nenhuma)
+9. configuração aberta               → loja-outra
+   substituir loja-basica            → generated
+   chamada                           → loja-basica (substituir)
+   última geração                    → loja-basica → saida/loja-basica
+10. renomear outra                   → loja-basica → saida/loja-basica
+    renomear a gerada                → (nenhuma)
+    nome de volta                    → loja-basica, loja-outra-2 | (nenhuma)
+11. excluir outra                    → loja-basica → saida/loja-basica
+    excluir a gerada                 → (nenhuma)
+    nova com a mesma chave           → loja-basica | (nenhuma)
+12. falha na escrita de outra        → write-failed | loja-basica → saida/loja-basica
+    falha na escrita da gerada       → write-failed | (nenhuma)
+13. o caso de uso lança              → rejeitou: falha inesperada
+    gerando                          → false

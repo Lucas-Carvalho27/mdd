@@ -43,6 +43,12 @@ import {
   type FragmentsState
 } from './fragments-actions'
 import {
+  createPagesActions,
+  PAGES_CLOSED,
+  type PagesServices,
+  type PagesState
+} from './pages-actions'
+import {
   createGenerationActions,
   GENERATION_CLOSED,
   withoutGenerationOf,
@@ -52,7 +58,7 @@ import {
 
 /** Casos de uso e serviços de que a store precisa; a composition root entrega as implementações. */
 export interface ProjectStoreServices
-  extends AssetsServices, GenerationServices, FragmentsServices {
+  extends AssetsServices, GenerationServices, FragmentsServices, PagesServices {
   readonly openProject: {
     execute(): Promise<OpenProjectResult>
     reopen(rootPath: string): Promise<OpenProjectResult>
@@ -70,7 +76,7 @@ export interface ProjectStoreServices
   readonly unsavedChanges: UnsavedChangesIndicator
 }
 
-export interface ProjectState extends AssetsState, GenerationState, FragmentsState {
+export interface ProjectState extends AssetsState, GenerationState, FragmentsState, PagesState {
   readonly session: ProjectSession | null
   /** O projeto como está no disco; comparar com a sessão diz se há alterações. */
   readonly saved: Project | null
@@ -171,7 +177,8 @@ const CLOSED = {
   lastSavedAt: null,
   ...ASSETS_CLOSED,
   ...GENERATION_CLOSED,
-  ...FRAGMENTS_CLOSED
+  ...FRAGMENTS_CLOSED,
+  ...PAGES_CLOSED
 } satisfies Partial<ProjectState>
 
 /** Estado de tela do editor. As regras ficam no domínio e nos casos de uso, não aqui. */
@@ -256,6 +263,7 @@ export function createProjectStore(services: ProjectStoreServices): ProjectStore
       ...createAssetsActions(set, get, services),
       ...createGenerationActions(set, get, services),
       ...createFragmentsActions(set, get, services),
+      ...createPagesActions(set, get, services),
 
       async loadRecents() {
         set({ recents: await services.recentProjects.list() })

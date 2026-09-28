@@ -47,6 +47,14 @@ export type XmlSchemaName = 'feature-model' | 'assets' | 'configuration'
  */
 export const OUTPUT_DIRECTORY = 'saida'
 
+/**
+ * O esquema próprio da visualização da página (Fase 8, ADR 0011): o main serve nele a página
+ * montada pelo renderer (`index.html`) e os arquivos do projeto aberto, só para leitura.
+ */
+export const PREVIEW_SCHEME = 'mdd-page'
+export const PREVIEW_HOST = 'pagina'
+export const PREVIEW_ADDRESS = `${PREVIEW_SCHEME}://${PREVIEW_HOST}/index.html`
+
 export interface XmlSchemaIssue {
   line?: number
   message: string
@@ -101,6 +109,8 @@ export interface MddApi {
     fileName: string,
     content: string
   ): Promise<IpcResult<XmlSchemaIssue[]>>
+  /** Entrega a página da visualização, que o main passa a servir em `PREVIEW_ADDRESS`. */
+  setPreviewPage(html: string): Promise<void>
 }
 
 export const IpcChannel = {
@@ -118,5 +128,6 @@ export const IpcChannel = {
   removeDirectory: 'mdd:remove-directory',
   pickFileInProject: 'mdd:pick-file-in-project',
   openPath: 'mdd:open-path',
-  validateXml: 'mdd:validate-xml'
+  validateXml: 'mdd:validate-xml',
+  setPreviewPage: 'mdd:set-preview-page'
 } as const

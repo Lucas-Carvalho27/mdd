@@ -1,0 +1,92 @@
+=== página com moldura
+  text product.xml
+  text index.html
+    | <!doctype html>
+    | <html lang="pt-BR">
+    | <head>
+    | <meta charset="utf-8">
+    | <title>Loja &lt;Escura&gt; — v1.0</title>
+    | <link rel="stylesheet" href="css/site.css">
+    | <link rel="stylesheet" href="css/escuro.css">
+    | </head>
+    | <body>
+    | <header><a href="docs/guia.pdf?v=2#p3">Guia</a> <img src="img/logo.png" srcset="img/logo.png 1x, img/logo@2x.png 2x" alt=""></header>
+    | <nav class="sumario">
+    | <ol>
+    | <li><a href="#busca">Busca</a></li>
+    | </ol>
+    | </nav>
+    | <section id="loja">
+    | <h2>Bem-vindo à Loja &lt;Escura&gt;</h2>
+    | <p title="v1.0">Versão 1.0 &amp; mais.</p>
+    | <pre>
+    |   recuo
+    | </pre>
+    | <section id="busca">
+    | <h3>Busca</h3>
+    | <img src="img/lupa.svg" alt="lupa">
+    | <style>.busca { color: #000 }</style>
+    | </section>
+    | <section id="tema_escuro">
+    | </section>
+    | </section>
+    | <footer>{{ literal }} · <a href="https://exemplo.com">site</a> · <a href="#busca">busca</a></footer>
+    | <script src="js/app.js"></script>
+    | </body>
+    | </html>
+    |
+  copy css/site.css
+  copy js/app.js
+  copy css/escuro.css
+  copy docs/guia.pdf
+  copy img/logo.png
+  copy img/logo@2x.png
+  copy img/lupa.svg
+=== sem moldura (a padrão)
+  text product.xml
+  text index.html
+    | <!doctype html>
+    | <html lang="pt-BR">
+    | <head>
+    | <meta charset="utf-8">
+    | <meta name="viewport" content="width=device-width, initial-scale=1">
+    | <title>Loja &lt;Escura&gt;</title>
+    | <link rel="stylesheet" href="css/site.css">
+    | <link rel="stylesheet" href="css/escuro.css">
+    | </head>
+    | <body>
+    | <section id="loja">
+    | <h2>Bem-vindo à Loja &lt;Escura&gt;</h2>
+    | <p title="v1.0">Versão 1.0 &amp; mais.</p>
+    | <pre>
+    |   recuo
+    | </pre>
+    | <section id="busca">
+    | <h3>Busca</h3>
+    | <img src="img/lupa.svg" alt="lupa">
+    | <style>.busca { color: #000 }</style>
+    | </section>
+    | <section id="tema_escuro">
+    | </section>
+    | </section>
+    | <script src="js/app.js"></script>
+    | </body>
+    | </html>
+    |
+  copy css/site.css
+  copy js/app.js
+  copy css/escuro.css
+  copy img/lupa.svg
+=== problemas
+  moldura.html:12 [] {{mobile.plataforma}}: a feature mobile não está selecionada nesta configuração. Use uma condição de presença no fragmento.
+  moldura.html:12 [] Use um caminho relativo em vez de /sobre.html: na pasta gerada, "/" é a raiz do disco.
+  docs/loja.html:1 [doc_loja] A tag <div> é aberta aqui e não é fechada neste arquivo.
+  docs/loja.html:2 [doc_loja] A feature loja não tem o atributo nome.
+  docs/loja.html:4 [doc_loja] O caminho ../../fora.html sai da pasta do projeto.
+  docs/busca/busca.html:1 [doc_busca] O valor de {{tema_escuro.cor}} tem <, que não pode entrar num <style>.
+  docs/loja.html:3 [doc_loja] O arquivo citado não existe: docs/img/falta.png.
+  docs/loja.html:5 [doc_loja] O arquivo index.html do projeto substituiria o index.html gerado: mude o nome dele.
+=== recurso chamado index.html
+  index.html [] O arquivo index.html do projeto substituiria o index.html gerado: mude o nome dele.
+=== fragmento ausente
+  docs/busca/busca.html [doc_busca] Arquivo ausente.

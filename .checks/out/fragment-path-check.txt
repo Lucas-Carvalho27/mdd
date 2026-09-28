@@ -1,0 +1,44 @@
+— na árvore
+docs/pagamento/pix.xml               → arquivo
+docs/LEIAME.XML                      → arquivo
+docs/img/pix-fluxo.svg               → —
+model.xml                            → —
+Assets.xml                           → —
+docs/model.xml                       → arquivo
+configurations/loja-basica.xml       → —
+Saida/loja-basica/product.xml        → —
+docs/saida/x.xml                     → arquivo
+.git/config.xml                      → —
+docs/.rascunho/a.xml                 → —
+docs/                                → pasta
+configurations/                      → —
+saida/                               → —
+.git/                                → —
+docs/.cache/                         → —
+docs/configurations/                 → pasta
+— caminho novo
+"docs/pagamento/cartao.xml"          → ok docs/pagamento/cartao.xml
+"  docs\\pagamento\\boleto2.xml  "   → ok docs/pagamento/boleto2.xml
+"Docs/Pagamento/cartao.xml"          → ok docs/pagamento/cartao.xml
+"DOCS/novo/a.xml"                    → ok docs/novo/a.xml
+"docs/pagamento/PIX.xml"             → "docs/pagamento/PIX.xml" já existe.
+""                                   → Informe o caminho do arquivo, como docs/novo.xml.
+"/docs/a.xml"                        → Use um caminho relativo à pasta do projeto, como docs/novo.xml.
+"C:/docs/a.xml"                      → Use um caminho relativo à pasta do projeto, como docs/novo.xml.
+"../fora.xml"                        → O caminho não pode sair da pasta do projeto.
+"docs/../a.xml"                      → O caminho não pode sair da pasta do projeto.
+"docs//a.xml"                        → O caminho tem um trecho vazio.
+"docs/a?.xml"                        → O Windows não aceita os caracteres < > : " | ? * em nomes de arquivo.
+"docs/pasta./a.xml"                  → Um nome de pasta ou de arquivo não pode terminar em ponto ou espaço.
+"docs/pasta /a.xml"                  → Um nome de pasta ou de arquivo não pode terminar em ponto ou espaço.
+"docs/a.txt"                         → O arquivo precisa terminar em .xml.
+"docs/pagamento/"                    → O caminho tem um trecho vazio.
+"docs/.rascunho/a.xml"               → Nomes começando com ponto ficam fora da árvore de fragmentos.
+".xml"                               → Nomes começando com ponto ficam fora da árvore de fragmentos.
+"model.xml"                          → "model.xml" é um arquivo do app, editado pelas outras abas.
+"ASSETS.XML"                         → "ASSETS.XML" é um arquivo do app, editado pelas outras abas.
+"configurations/nova.xml"            → A pasta configurations/ é das configurações.
+"saida/loja/extra.xml"               → A pasta saida/ é da geração.
+— pasta do arquivo
+docs/pagamento/pix.xml               → "docs/pagamento/"
+raiz.xml                             → ""

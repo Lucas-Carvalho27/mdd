@@ -1,0 +1,50 @@
+1. grupos                            → loja(doc_loja:ok) busca(doc_busca:ok doc_busca_app:ok) pag_pix(doc_pix:ok img_pix:ok) pag_boleto(doc_boleto:ok)
+   resumo                            → 6 assets
+   painel sem seleção                → Escolha um asset na lista.
+2. antes de voltar o foco            → ok
+   depois de voltar o foco           → missing
+   resumo                            → 6 assets · 1 ausente
+   abrir desligado                   → true
+   Atualizar                         → doc_loja missing | 6 assets · 2 ausentes
+   de volta                          → doc_loja ok | 6 assets · 1 ausente
+3. trocar arquivo                    → docs/pagamento/boleto-renomeado.xml | ok
+   diálogo                           → Trocar o arquivo do asset | começa no projeto: true | openFile
+   desfazer                          → Desfazer: Trocar arquivo por "boleto-renomeado.xml" (Ctrl+Z)
+   Ctrl+Z na aba Assets              → docs/pagamento/boleto.xml | missing
+   Ctrl+Y                            → docs/pagamento/boleto-renomeado.xml | ok
+4. condição                          → busca and mobile
+   erro ao sair                      → Coluna 10: A expressão terminou antes da hora: falta um operando.
+   na lista                          → Busca no app docs/busca/busca-app.xml se busca and mobile ok
+   Enter grava                       → Busca no app docs/busca/busca-app.xml se busca and not mobile ok
+   Esc descarta                      → busca and not mobile | Desfazer: Editar condição (Ctrl+Z)
+   sugestão                          → "busca and mobile " | foco no campo: true
+   de volta ao exemplo               → Busca no app docs/busca/busca-app.xml se busca and mobile ok
+5. sem nome                          → busca-app.xml docs/busca/busca-app.xml se busca and mobile ok
+   recurso                           → Recurso
+   âncora mobile                     → loja(doc_loja:ok) busca(doc_busca:ok) mobile(doc_busca_app:ok) pag_pix(doc_pix:ok img_pix:ok) pag_boleto(doc_boleto:ok)
+   subir                             → loja(doc_loja:ok) busca(doc_busca_app:ok doc_busca:ok) pag_pix(doc_pix:ok img_pix:ok) pag_boleto(doc_boleto:ok)
+   o primeiro não sobe               → true
+   depois de desfazer                → loja(doc_loja:ok) busca(doc_busca:ok doc_busca_app:ok) pag_pix(doc_pix:ok img_pix:ok) pag_boleto(doc_boleto:ok)
+6. desvincular                       → loja(doc_loja:ok) busca(doc_busca:ok doc_busca_app:ok) pag_pix(doc_pix:ok) pag_boleto(doc_boleto:ok) | painel: Escolha um asset na lista.
+   desfazer                          → Desfazer: Desvincular "Fluxo do PIX" (Ctrl+Z)
+   depois de desfazer                → loja(doc_loja:ok) busca(doc_busca:ok doc_busca_app:ok) pag_pix(doc_pix:ok img_pix:ok) pag_boleto(doc_boleto:ok)
+7. arquivo de fora                   → Arquivo recusado: O arquivo precisa estar dentro da pasta do projeto. Copie-o para dentro e vincule de novo. | diálogo: false
+   cancelado                         → diálogo: false | aviso: (sem aviso)
+   diálogo de vincular               → docs/img/pix-fluxo.svg | resource | pix_fluxo | pag_pix
+   ID repetido                       → Já existe um asset com o ID "img_pix". | botão desligado: true
+   vinculado                         → loja(doc_loja:ok) busca(doc_busca:ok doc_busca_app:ok) pag_pix(doc_pix:ok img_pix:ok img_pix_capa:ok) pag_boleto(doc_boleto:ok) | selecionado: img_pix_capa
+8. abrir                             → <projeto>\docs\pagamento\pix.xml
+   falha ao abrir                    → Não foi possível abrir "pix-fluxo.svg": Nenhum programa associado (simulado).
+9. Tab e Delete na aba Assets        → diálogo: false
+10. assets ancorados                 → Assets ancorados (3) Vincular arquivo… Guia do PIX ok Fluxo do PIX ok Capa do PIX ok
+   vincular cancelado                → diálogo: false
+10b. restrição com erro              → Coluna 15: A expressão terminou antes da hora: falta um operando. | botão desligado: true
+   sugestão                          → "pag_boleto implies busca "
+   feature inexistente               → Features inexistentes: fantasma | botão desligado: true
+   adicionada                        → RESTRIÇÕES (2)
+   Ctrl+Z                            → RESTRIÇÕES (1)
+11. desfazer no configurador         → Desfazer vale só nas abas Modelo e Assets
+12. salvo                            → Loja Online — mdd
+   no disco                          → true | true
+erros no console                     → nenhum
+app fechado

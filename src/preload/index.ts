@@ -19,7 +19,8 @@ const api: MddApi = {
   pickFileInProject: (title) => ipcRenderer.invoke(IpcChannel.pickFileInProject, title),
   openPath: (relativePath) => ipcRenderer.invoke(IpcChannel.openPath, relativePath),
   validateXml: (schema, fileName, content) =>
-    ipcRenderer.invoke(IpcChannel.validateXml, schema, fileName, content)
+    ipcRenderer.invoke(IpcChannel.validateXml, schema, fileName, content),
+  setPreviewPage: (html) => ipcRenderer.invoke(IpcChannel.setPreviewPage, html)
 }
 
 contextBridge.exposeInMainWorld('mdd', api)

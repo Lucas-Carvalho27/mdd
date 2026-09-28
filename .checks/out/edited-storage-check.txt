@@ -1,0 +1,9 @@
+docs/a.html (editado)        → "<p>editor</p>"
+DOCS/A.HTML (sem caixa)      → "<p>editor</p>"
+docs/b.html (só no disco)    → "<p>b no disco</p>"
+docs/novo.html (novo)        → "<p>novo, só no editor</p>"
+docs/falta.html              → erro not-found
+stat docs/novo.html          → file
+stat img/x.png               → file
+stat img/falta.png           → erro not-found
+disco de a.html, intacto     → "<p>disco</p>"

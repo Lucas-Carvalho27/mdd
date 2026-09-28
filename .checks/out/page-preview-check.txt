@@ -1,0 +1,21 @@
+— a configuração da aceitação
+completa-atibaia                     → página em mdd-page://pagina/index.html, moldura padrão: não, 0 problema(s)
+igual à página gerada                → sim
+— o texto do editor, sem salvar
+resultado                            → página em mdd-page://pagina/index.html, moldura padrão: não, 0 problema(s)
+a página tem o texto editado         → sim
+o disco continua igual               → sim
+— com problemas, a página sai assim mesmo
+resultado                            → página em mdd-page://pagina/index.html, moldura padrão: não, 2 problema(s)
+   fragmentos/plataforma.html:1      → A feature herby não tem o atributo nada.
+   fragmentos/plataforma.html:2      → A tag <div> é aberta aqui e não é fechada neste arquivo.
+o marcador fica como está escrito    → sim
+o resto da página continua           → sim
+— sem página
+configuração incompleta              → blocked
+nenhuma configuração aberta          → no-configuration
+loja-online (sem fragmento HTML)     → no-page
+— a moldura padrão
+sem moldura.html                     → página em mdd-page://pagina/index.html, moldura padrão: sim, 0 problema(s)
+a página começa com                  → "<!doctype html> <html lang=\"pt-BR\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <title>Completa Atibaia</title>"
+moldura.html nova, só no editor      → página em mdd-page://pagina/index.html, moldura padrão: não, 0 problema(s)

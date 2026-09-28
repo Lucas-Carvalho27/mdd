@@ -50,11 +50,17 @@ export interface FragmentsState {
   readonly fragmentProblems: ReadonlyMap<string, readonly FileProblem[]>
   /** Os fragmentos salvos com erro de XML, com o primeiro problema, para a faixa de avisos. */
   readonly fragmentWarnings: ReadonlyMap<string, FileProblem>
+  /** Uma linha a mostrar no editor quando o arquivo aparecer (um problema da aba Páginas). */
+  readonly fragmentReveal: { readonly path: string; readonly line: number } | null
 
   /** Lê as pastas do projeto (ao entrar na aba). */
   loadFragmentFiles(): Promise<void>
   /** Mostra o fragmento no editor, lendo-o do disco se ainda não estiver aberto. */
   showFragment(path: string): Promise<void>
+  /** Mostra o fragmento com o cursor na linha (Fase 8). */
+  showFragmentAt(path: string, line: number): Promise<void>
+  /** O editor já levou o cursor até a linha pedida. */
+  clearFragmentReveal(): void
   changeFragmentText(path: string, text: string): void
   /** Confere o texto atual. Se outra conferência do mesmo arquivo começou depois, esta é descartada. */
   checkFragment(path: string): Promise<void>
@@ -75,7 +81,8 @@ export const FRAGMENTS_CLOSED = {
   fragmentDocuments: new Map<string, FragmentDocument>(),
   shownFragmentPath: null,
   fragmentProblems: new Map<string, readonly FileProblem[]>(),
-  fragmentWarnings: new Map<string, FileProblem>()
+  fragmentWarnings: new Map<string, FileProblem>(),
+  fragmentReveal: null
 } satisfies Partial<FragmentsState>
 
 /** O fragmento no editor, se houver. */
@@ -205,6 +212,15 @@ export function createFragmentsActions(
       }
       set({ shownFragmentPath: path })
       await get().checkFragment(path)
+    },
+
+    async showFragmentAt(path, line) {
+      set({ fragmentReveal: { path, line } })
+      await get().showFragment(path)
+    },
+
+    clearFragmentReveal() {
+      set({ fragmentReveal: null })
     },
 
     changeFragmentText(path, text) {

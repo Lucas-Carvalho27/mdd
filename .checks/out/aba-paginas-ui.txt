@@ -1,0 +1,28 @@
+1. sem configuração                  → Escolha uma configuração à esquerda.
+2. barra                             → Completa Atibaia configurations/completa-atibaia.xml Celular Tablet Largura toda Recarregar Gerar produto
+   título da página                  → Avaliação Formativa - SAEMA 2026 — Completa Atibaia
+   window.mdd na página              → undefined
+   ler o parent                      → SecurityError
+   imagens visíveis, quebradas       → 23, 0
+   problemas                         → (nenhum)
+3. Celular                           → 375 px, celular no CSS: true
+3. Tablet                            → 768 px, celular no CSS: false
+3. Largura toda                      → 874 px, celular no CSS: false
+4. navegador do sistema              → https://example.com/ajuda
+   o quadro continua em              → mdd-page://pagina/index.html
+5. título da seção                   → Como funciona (editado no app)
+   rolagem                           → 900
+   janela                            → • Herby — mdd
+6. Ctrl+S na página                  → Herby — mdd | no disco: editado
+7. subtítulo                         → Atibaia (SP)2026
+8. incompleta                        → A página aparece quando a configuração estiver completa. Complete a configuração para gerar: 1 indecisa.
+9. problemas                         → fragmentos/plataforma.html:2 A tag <div> é aberta aqui e não é fechada neste arquivo.
+   a página continua                 → Avaliação Formativa - SAEMA 2026
+   cursor na linha                   → 2
+10. barra                            → Completa Atibaia configurations/completa-atibaia.xml Celular Tablet Largura toda Recarregar Gerar produto Sem moldura.html: a página usa a moldura padrão. Criar moldura
+    título da página                 → Completa Atibaia
+    aba Fragmentos                   → moldura.html •
+11. faixa                            → Produto gerado em saida/completa-atibaia/ às HH:MM Abrir pasta Abrir no navegador
+    aberto no sistema                → <projeto>\saida\completa-atibaia\index.html
+erros no console                     → nenhum
+app fechado

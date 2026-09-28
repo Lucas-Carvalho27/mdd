@@ -1,0 +1,11 @@
+antes de montar                      → idle
+sem configuração aberta              → no-configuration | chamadas: null (sem editados)
+configuração a                       → página, versão 1 | chamadas: a (sem editados)
+— três pedidos seguidos
+montagens                            → 2: a (sem editados) ; a (sem editados)
+fica a mais nova                     → página, versão 3
+a rolagem continua                   → 900
+— outra configuração
+configuração b                       → página, versão 4 | rolagem: 0
+— fechar durante a montagem
+depois de fechar                     → idle | largura: full | rolagem: 0
