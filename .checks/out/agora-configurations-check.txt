@@ -1,0 +1,24 @@
+ciclo do clique                    → indecisa → selected → deselected → indecisa
+pag_pix depois de 1 clique         → deselected
+pag_pix depois de 2 cliques        → indecisa
+3º clique: arquivo idêntico        → true
+decisão igual, mesmo objeto        → true
+valores na ordem do modelo         → true
+valor fora da faixa                → o mínimo é 10
+atributo fixo                      → "loja" não tem o atributo configurável "versao".
+vazio remove o valor               → mobile
+sem as órfãs                       → busca pag_cartao pag_boleto
+chave de "Loja Básica"             → loja-basica
+chave com colisão                  → loja-basica-2
+chave de "  ***  "                 → configuracao
+criar e duplicar                   → loja-basica:4 loja-basica-2:4 loja-completa:0
+renomear troca a chave             → loja-economica Loja Econômica
+mesmo nome devolve a mesma lista   → true
+nome vazio                         → false
+arquivos depois de salvar          → configurations/loja-velha.xml configurations/loja-economica.xml
+conflitos                          → configurations/loja-velha.xml
+hashes das configurações           → loja-velha loja-economica
+sobrescrever exclui o alterado     → configurations/loja-economica.xml
+hashes depois                      → loja-economica
+nome gravado                       → Loja Econômica
+removeConfiguration                → 0

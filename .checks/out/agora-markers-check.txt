@@ -1,0 +1,26 @@
+--- sintaxe
+"Olá {{loja.versao}}!" → [{{loja.versao}}@4-19]
+"{{ loja.versao }} e {{produto}}" → [{{loja.versao}}@0-17, {{produto}}@20-31]
+"\\{{loja.versao}} fica literal" → [\{{@0-3]
+"{{loja.versao" → [] problemas: 0: Falta o }} que fecha o marcador.
+"{{ a {{loja.versao}}" → [{{loja.versao}}@5-20] problemas: 0: Falta o }} que fecha o marcador.
+"{{Loja.Versao}} {{loja-versao}} {{a.b.c}}" → [] problemas: 0: Marcador inválido: {{Loja.Versao}}. Use {{feature.atributo}}, e \{{ para escrever {{. | 16: Marcador inválido: {{loja-versao}}. Use {{feature.atributo}}, e \{{ para escrever {{. | 32: Marcador inválido: {{a.b.c}}. Use {{feature.atributo}}, e \{{ para escrever {{.
+"{{contuedo}} {{conteudo}} {{sumario}}" → [{{conteudo}}@13-25, {{sumario}}@26-37] problemas: 0: Marcador desconhecido: {{contuedo}}. Use {{feature.atributo}} ou {{produto}}.
+"sem marcador { } }} {" → []
+--- IDs
+{{loja.versao}}: ok
+{{loja.nome}}: A feature loja não tem o atributo nome.
+{{carrinho.total}}: A feature carrinho não existe no modelo.
+{{conteudo}}: ok
+{{produto}}: ok
+--- contagem na moldura
+<body>{{conteudo}}</body> → ok
+<body></body> → 0: A moldura precisa de {{conteudo}}, onde entram as seções.
+{{conteudo}}{{conteudo}}{{sumario}}{{sumario}} → 12: {{conteudo}} só pode aparecer uma vez. | 35: {{sumario}} só pode aparecer uma vez.
+--- valores
+{{loja.versao}} → "1.0 & \"beta\""
+{{produto}} → "Loja <Básica>"
+\{{ → "{{"
+{{mobile.plataforma}} → problema: {{mobile.plataforma}}: a feature mobile não está selecionada nesta configuração. Use uma condição de presença no fragmento.
+{{loja.nome}} → problema: A feature loja não tem o atributo nome.
+{{sumario}} → problema: {{sumario}} só vale na moldura.

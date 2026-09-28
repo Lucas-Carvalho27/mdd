@@ -1,0 +1,22 @@
+1. árvore                            → 24 arquivos, 24 .html, moldura: sim
+2. barra                             → fragmentos/plataforma.html Herby · herby Descartar alterações
+   cor da tag h2                     → --xml-tag
+   marcadores com cor                → {{herby.produto}}
+   problemas                         → Nenhum problema: o fragmento pode entrar num produto.
+3. sugestões                         → herby.contato_whatsapp
+   linha 1                           → <h2>{{herby.produto}}</h2> {{herby.contato_whatsapp}}
+4. problemas                         → linha 1 A feature herby não tem o atributo nada.
+   depois de descartar               → <h2>{{herby.produto}}</h2>
+5. problemas                         → linha 4 A tag <section> é aberta aqui e não é fechada neste arquivo.
+   depois de descartar               → Nenhum problema: o fragmento pode entrar num produto.
+6. barra                             → moldura.html Moldura da página Descartar alterações
+   problemas                         → Nenhum problema: o fragmento pode entrar num produto.
+7. .htm                              → Novo fragmento O arquivo é criado ao salvar, com as pastas que faltarem. Caminho Relativo à pasta do projeto, terminando em .xml ou .html. O arquivo precisa terminar em .xml ou .html. Cancelar Criar Fechar
+   editor                            → ""
+   problemas                         → Nenhum problema: o fragmento pode entrar num produto.
+8. faixa                             → Produto gerado em saida/completa-atibaia/ às HH:MM Abrir pasta Abrir no navegador
+   index.html                        → idêntico ao esperado
+   arquivos na saída                 → 60
+   título                            → Herby — mdd
+erros no console                     → nenhum
+app fechado

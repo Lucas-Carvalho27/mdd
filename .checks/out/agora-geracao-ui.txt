@@ -1,0 +1,20 @@
+1. botão                             → ligado
+   saida/ existe?                    → false
+2. pag_pix desselecionada            → desligado | dica: Complete a configuração para gerar: 1 indecisa.
+   pag_pix de volta                  → ligado
+3. faixa                             → Produto gerado em saida/loja-basica/ às HH:MM Abrir pasta
+   arquivos                          → product.xml sim, pix-fluxo.svg sim
+   título igual ao de antes          → true
+4. abriu                             → <projeto>\saida\loja-basica
+5. em "Outra": faixa                 → (sem faixa)
+   botão                             → desligado | dica: Complete a configuração para gerar: 5 indecisas.
+   de volta: faixa                   → Produto gerado em saida/loja-basica/ às HH:MM Abrir pasta
+6. diálogo                           → Substituir saida/loja-basica/? A pasta já existe e será trocada pelo produto novo. O que você tiver colocado nela à mão será perdido. Cancelar Substituir Fechar
+   Cancelar: generatedAt igual       → true
+   Substituir: generatedAt mudou     → true
+   faixa                             → Produto gerado em saida/loja-basica/ às HH:MM Abrir pasta
+7. diálogo                           → Não foi possível gerar Nada foi gravado. Problemas docs/pagamento/pix.xml [doc_pix] Arquivo ausente. Fechar Fechar
+   generatedAt igual                 → true
+8. depois do ×                       → (sem faixa)
+erros no console                     → nenhum
+app fechado

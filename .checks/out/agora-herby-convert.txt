@@ -1,0 +1,53 @@
+| Feature | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+| --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| Herby | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+|   Preparação | ✓ | ✓ | ✓ | ✓ | · | · | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|     Acesso à Plataforma | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|     Informações Gerais | · | ✓ | · | ✓ | · | · | · | · | · | · | · | · | · |
+|     Gestão da Base de Dados | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | · | ✓ | · |
+|       Lixeira | ✓ | · | ✓ | · | · | · | · | · | · | · | · | ✓ | · |
+|       Sincronização (rede estadual) | ✓ | ✓ | · | · | · | · | · | · | ✓ | ✓ | · | · | · |
+|     Template de Dados | · | · | · | ✓ | · | · | · | · | · | · | · | · | · |
+|   Impressão dos Cartões | ✓ | ✓ | ✓ | · | ✓ | · | ✓ | · | ✓ | ✓ | ✓ | ✓ | · |
+|     Impressão na Herby | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|     Impressão no SAEV | · | · | · | · | ✓ | · | ✓ | · | · | · | · | · | · |
+|   Aplicação e Correção | ✓ | ✓ | ✓ | · | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+|     Processamento por Foto | ✓ | ✓ | ✓ | · | ✓ | ✓ | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|       Educação Especial | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | ✓ | · | · |
+|     Avaliação de Fluência (áudio) | · | · | · | · | · | · | ✓ | ✓ | · | · | · | · | ✓ |
+|       Correção por IA | · | · | · | · | · | · | · | · | · | · | · | · | ✓ |
+|   Monitoramento e Resultados | ✓ | ✓ | ✓ | · | ✓ | ✓ | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|     Progresso | ✓ | ✓ | ✓ | · | ✓ | ✓ | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|     Resultados | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|       Resultados Detalhados | ✓ | ✓ | · | · | · | · | · | · | ✓ | · | ✓ | · | · |
+|       Relatórios | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|       Gráficos | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ | · |
+|       QR Code de Resultados | ✓ | ✓ | ✓ | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ | · |
+
+1. Completa (completa.xml, perfil "completa"): completa
+2. Completa Atibaia (completa-atibaia.xml, perfil "completa-atibaia"): completa
+   · herby.titulo_tutorial = Avaliação Formativa - SAEMA 2026
+   · herby.rede = Atibaia
+   · informacoes_gerais.avaliacao = SAEMA 2026
+3. Rondônia Primeiros Passos (rondonia-primeiros-passos.xml, perfil "rondonia-primeiros-passos"): completa
+   · herby.titulo_tutorial = Primeiros Passos
+   · herby.rede = Rondônia
+4. Rondônia PAIC PROALFA (rondonia-paic-proalfa.xml, perfil "rondonia-paic-proalfa"): completa
+   · herby.titulo_tutorial = Preenchimento do template de dados (Rede Municipal)
+   · herby.rede = Rondônia · PAIC/PROALFA
+   · informacoes_gerais.avaliacao = Avaliação Diagnóstica PAIC/PROALFA 2026
+5. EPV (epv.xml, perfil "epv"): completa
+   · herby.titulo_tutorial = Ferramenta Herby
+6. FGV Formulários (fgv-formularios.xml, perfil "fgv-formularios"): completa
+   · herby.titulo_tutorial = Processamento dos formulários
+7. Fluência SAEV (fluencia-saev.xml, perfil "fluencia-saev"): completa
+   · herby.titulo_tutorial = Avaliação de Fluência - EPV
+8. Fluência Legado (fluencia-legado.xml, perfil "fluencia-legado"): completa
+   · herby.titulo_tutorial = Avaliação de Fluência
+9. SED com detalhes (sed-com-detalhes.xml, perfil "sed-com-detalhes"): completa
+10. SED sem detalhes (sed-sem-detalhes.xml, perfil "sed-sem-detalhes"): completa
+11. Sem gestão da base (sem-gestao-da-base.xml, perfil "sem-gestao-base"): completa
+12. Sem resultados detalhados (sem-resultados-detalhados.xml, perfil "sem-resultados-detalhados"): completa
+13. Resultados da IA de Fluência (resultados-da-ia-de-fluencia.xml, perfil "resultados-ia-fluencia"): completa
+
+23 fragmentos, 680 elementos, 30 assets, 13 perfis.

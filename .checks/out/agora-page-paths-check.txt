@@ -1,0 +1,22 @@
+docs/pagamento/pix.html + "../img/pix-fluxo.svg" → file docs/img/pix-fluxo.svg → docs/img/pix-fluxo.svg
+docs/pagamento/pix.html + "img/a.png?v=2#topo" → file docs/pagamento/img/a.png → docs/pagamento/img/a.png?v=2#topo
+docs/pagamento/pix.html + "./guia.pdf" → file docs/pagamento/guia.pdf → docs/pagamento/guia.pdf
+docs/pagamento/pix.html + "Slides%20por%20Feature/06.pptx" → file docs/pagamento/Slides por Feature/06.pptx → docs/pagamento/Slides%20por%20Feature/06.pptx
+docs/pagamento/pix.html + "..\\img\\b.png" → file docs/img/b.png → docs/img/b.png
+moldura.html + "css/site.css" → file css/site.css → css/site.css
+moldura.html + "  css/site.css  " → file css/site.css → css/site.css
+docs/pix.html + "../../fora.png" → outside
+docs/pix.html + "/img/a.png" → absolute
+docs/pix.html + "https://exemplo.com/a.png" → kept
+docs/pix.html + "//cdn.exemplo.com/a.js" → kept
+docs/pix.html + "mailto:a@b.com" → kept
+docs/pix.html + "tel:+5532999" → kept
+docs/pix.html + "data:image/png;base64,AAAA" → kept
+docs/pix.html + "javascript:void(0)" → kept
+docs/pix.html + "#pagamento" → kept
+docs/pix.html + "?aba=2" → kept
+docs/pix.html + "" → kept
+docs/pix.html + ".." → kept
+pageUrl: Slides%20por%20Feature/06%20-%20Acesso%20à%20Plataforma.pptx
+pageUrl: docs/100%25/a%23b%3F.png#x
+srcset: [{"url":"img/a.png","descriptor":" 1x"},{"url":"img/b.png","descriptor":"   2x"},{"url":"img/c.png","descriptor":""}] → img/a.png 1x, img/b.png   2x, img/c.png
