@@ -11,7 +11,7 @@ Escrever fragmentos em **HTML** e gerar, para cada configuração completa, uma 
 **Aceitação**, sobre o exemplo `herby`:
 
 1. A aba Fragmentos mostra os 23 `.html` de `fragmentos/` e a `moldura.html`, com realce de HTML. A aba Assets mostra os assets do exemplo, todos ok.
-2. Gerar a configuração escolhida na conferência da tabela de perfis (a sugestão é `completa-atibaia`) produz um `index.html` idêntico, byte a byte, ao de `produto-esperado/herby-completa-atibaia/`. A pasta também tem o `herby.css` e as imagens citadas, com a mesma estrutura de pastas.
+2. Gerar `completa-atibaia` produz um `index.html` idêntico, byte a byte, ao de `produto-esperado/herby-completa-atibaia/`. A pasta também tem o `herby.css` e as imagens citadas, com a mesma estrutura de pastas.
 3. Trocar no configurador o valor de `contato_whatsapp` e gerar de novo muda o número no rodapé da página.
 4. Apagar o `</section>` de uma seção de um fragmento: o editor mostra o problema com a linha da tag aberta, e a geração recusa o arquivo.
 5. Um marcador de uma feature que não está selecionada na configuração (por exemplo, `{{template_de_dados.url_template}}` num fragmento de outra feature) faz a geração recusar, com o arquivo, a linha e o marcador.
@@ -29,7 +29,7 @@ Escrever fragmentos em **HTML** e gerar, para cada configuração completa, uma 
 **Fora desta fase:**
 
 - a aba Páginas (Fase 8);
-- a variabilidade anotativa (os `perfis` do herby): fase própria, depois, desenhada com os casos reais;
+- a variabilidade anotativa (os `perfis` do herby): Fase 9, depois da aba Páginas, começando por uma rodada de modelagem do que cada perfil significa em features;
 - editar `.css` e `.js` dentro do app;
 - marcadores nos fragmentos XML;
 - várias páginas por configuração;
@@ -183,7 +183,7 @@ Fica em `docs/examples/herby/`, convertido do original em `C:\Users\lucas\Deskto
 ```
 docs/examples/herby/
   model.xml, assets.xml
-  configurations/          uma por perfil
+  configurations/          13, uma por perfil
   moldura.html             capa, sumário ("Funcionalidades") e encerramento
   css/herby.css            recurso ancorado na raiz
   fragmentos/*.html        os 23 fragmentos
@@ -196,10 +196,13 @@ Os XML do original não entram: o HTML passa a ser a fonte.
 **O modelo:**
 
 - o mesmo do original, com "Educação Especia" corrigida para **Educação Especial**, com o ID `educacao_especial` (o exemplo é um projeto novo, e nada referencia o ID antigo);
+- Preparação, Acesso à Plataforma e Impressão dos Cartões passam de obrigatórias a **opcionais** (Q43): seis decks reais (fluência, FGV, PAIC/PROALFA e os resultados da IA) não as têm;
 - as 15 variáveis do `_variaveis.xml` viram atributos `string` configuráveis, com o `padrao` como `default`:
   - na raiz `herby`: `produto`, `titulo_tutorial`, `rede`, `ano`, `site`, `contato_whatsapp`, `contato_email`, `url_scan` e `sistema_externo`;
   - em `informacoes_gerais`: `avaliacao`, `data_treinamento`, `prazo_envio_template` e `data_liberacao_cartoes`;
   - em `template_de_dados`: `url_template` e `contato_operacoes`.
+
+  A `rede` tem `default=""`: o XSD aceita (`xs:string`), e a configuração fica completa (conferido na conversão).
 
 **A conversão dos fragmentos:**
 
@@ -218,13 +221,15 @@ Os XML do original não entram: o HTML passa a ser a fonte.
 | `<tabela>` / `<cabecalho>` / `<linha>` / `<celula>` | `<table>` / `<thead>` / `<tr>` / `<td>` (`<th>` no cabeçalho)                   |
 | `<var nome="x"/>`                                   | `{{<feature do atributo>.x}}`, conforme a lista acima                           |
 | `<origem>`, `codigo`, `pai`, `abstrata`             | removidos                                                                       |
-| seção com `perfis="…"` (27 das 62)                  | dentro de `<template data-perfis="…">`: fica no arquivo e não aparece na página |
+| bloco ou imagem com `perfis="…"`                    | dentro de `<template data-perfis="…">`: fica no arquivo e não aparece na página |
 | capa e encerramento do `_estrutura.xml`             | `<header>` e `<footer>` da `moldura.html`                                       |
 | agenda                                              | `{{sumario}}`                                                                   |
 
 Efeito conhecido: as imagens citadas dentro de um `<template>` também são copiadas.
 
-**As configurações:** uma por perfil. A feature entra no perfil quando alguma seção do fragmento dela cita o perfil no `<origem slides="…">`. Os valores vêm do `_variaveis.xml` (o valor do perfil, quando existe). **Antes de gravá-las, o roteiro mostra ao usuário a tabela perfil × features**, com os perfis que dão conflito com o modelo (por exemplo, nenhuma ou as duas impressões do grupo alternative) ou que ficam incompletos. O usuário decide cada caso.
+**O que fica escondido** (Q45): 46 dos 96 blocos (seções, passos e avisos) têm `perfis`. Cinco features ficam só com o título e o resumo em qualquer configuração: Gestão da Base de Dados, Progresso, Lixeira, Informações Gerais e Sincronização. A Fase 7 aceita isso: o mecanismo da página é o mesmo, e o conteúdo volta com a Fase 9.
+
+**As configurações:** 13, uma por perfil, inclusive `resultados-ia-fluencia`, que só aparece no `<origem>` da Correção por IA e vira "Resultados da IA de Fluência" (Q44). A feature entra no perfil quando algum bloco do fragmento dela cita o perfil no `<origem slides="…">`, e os ancestrais dela entram junto. Os valores vêm do `_variaveis.xml` (o valor do perfil, quando existe). O roteiro grava só as decisões mínimas, em pré-ordem: decide cada feature que continua indecisa. O usuário conferiu a tabela perfil × features antes da gravação, em 28/09/2026: as 13 saem completas, sem conflito e sem nenhuma feature forçada pelo modelo.
 
 **O visual** (`css/herby.css`): sóbrio, com o azul-marinho do cabeçalho da plataforma, texto escuro, avisos com uma faixa lateral, a fonte do sistema e as imagens na largura do texto. Funciona no celular.
 
@@ -268,7 +273,6 @@ As camadas são as de sempre (ADR 0008), com o lint de fronteiras.
 
 - se o parse5 dá o que a conferência de tags abertas precisa;
 - se o `lang-html` funciona com a CSP;
-- se um atributo `string` com `default=""` (a variável `rede`) passa pelo codec e deixa a configuração completa.
 
 ## Verificação
 
