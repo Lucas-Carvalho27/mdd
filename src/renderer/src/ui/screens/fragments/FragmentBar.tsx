@@ -1,6 +1,7 @@
-import { Link2, Paperclip, Undo2 } from 'lucide-react'
+import { LayoutTemplate, Link2, Paperclip, Undo2 } from 'lucide-react'
 import { isModified, type FragmentDocument } from '@/application/fragments/fragment-document'
 import { assetLabel, type Asset } from '@/domain/assets/asset-catalog'
+import { isFramePath } from '@/domain/pages/page-layout'
 import { Button } from '@/ui/components/ui/button'
 
 interface FragmentBarProps {
@@ -11,7 +12,10 @@ interface FragmentBarProps {
   readonly onDiscard: () => void
 }
 
-/** A barra acima do editor: o caminho, o vínculo (ou "Vincular…") e "Descartar alterações". */
+/**
+ * A barra acima do editor: o caminho, o vínculo (ou "Vincular…"; na moldura, "Moldura da
+ * página", que não é asset) e "Descartar alterações".
+ */
 export function FragmentBar({
   document,
   assets,
@@ -26,7 +30,15 @@ export function FragmentBar({
           {document.path}
           {isModified(document) && <span title="Alterações não salvas"> •</span>}
         </code>
-        {first !== undefined ? (
+        {isFramePath(document.path) ? (
+          <span
+            data-fragment-frame
+            className="flex items-center gap-1 text-xs text-muted-foreground"
+          >
+            <LayoutTemplate className="size-3.5" />
+            Moldura da página
+          </span>
+        ) : first !== undefined ? (
           <span
             data-fragment-link
             className="flex items-center gap-1 text-xs text-muted-foreground"

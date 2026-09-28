@@ -70,7 +70,7 @@ function NewFragmentDialog({ onClose }: { readonly onClose: () => void }): React
               onChange={(event) => setPath(event.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Relativo à pasta do projeto, terminando em .xml.
+              Relativo à pasta do projeto, terminando em .xml ou .html.
             </p>
             {problem !== null && !typing && <p className="text-xs text-destructive">{problem}</p>}
           </div>

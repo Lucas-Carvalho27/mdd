@@ -18,7 +18,9 @@
     "build:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-html": "^6.4.12",
     "@codemirror/lang-xml": "^6.1.0",
     "@codemirror/language": "^6.12.4",
     "@codemirror/lint": "^6.9.7",

@@ -6,7 +6,7 @@ import type { FileProblem } from '@/application/file-problem'
 import type { FragmentDocument } from '@/application/fragments/fragment-document'
 import type { FragmentEditorStates } from './fragment-editor-states'
 import { FragmentProblems } from './FragmentProblems'
-import { createXmlEditorState, diagnosticsFor } from './xml-editor-setup'
+import { createFragmentEditorState, diagnosticsFor } from './fragment-editor-setup'
 
 interface FragmentEditorProps {
   readonly document: FragmentDocument
@@ -15,6 +15,8 @@ interface FragmentEditorProps {
   /** Onde fica o estado de cada arquivo quando ele não está no editor. */
   readonly states: FragmentEditorStates
   readonly onChange: (path: string, text: string) => void
+  /** Os marcadores de atributo do modelo (`feature.atributo`), sugeridos nos fragmentos HTML. */
+  readonly attributeMarkers: readonly string[]
 }
 
 /**
@@ -26,9 +28,15 @@ export function FragmentEditor({
   document,
   problems,
   states,
-  onChange
+  onChange,
+  attributeMarkers
 }: FragmentEditorProps): React.JSX.Element {
   const host = useRef<HTMLDivElement>(null)
+  // O estado de cada arquivo dura mais que uma renderização: a sugestão lê o modelo da vez.
+  const markers = useRef(attributeMarkers)
+  useEffect(() => {
+    markers.current = attributeMarkers
+  }, [attributeMarkers])
   const view = useRef<EditorView | null>(null)
   const shownPath = useRef<string | null>(null)
   const { path, text } = document
@@ -52,9 +60,10 @@ export function FragmentEditor({
     if (shownPath.current !== null) states.set(shownPath.current, current.state)
     let next = states.get(path)
     if (next === undefined || next.doc.toString() !== text || next.readOnly !== readOnly) {
-      next = createXmlEditorState(text, {
+      next = createFragmentEditorState(path, text, {
         readOnly,
-        onChange: (changed) => onChange(path, changed)
+        onChange: (changed) => onChange(path, changed),
+        attributeMarkers: () => markers.current
       })
     }
     if (next !== current.state) current.setState(next)

@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { FilePlus2, RefreshCw } from 'lucide-react'
+import { featuresInPreOrder } from '@/domain/feature-model/traversal'
 import type { Project } from '@/domain/project/project'
 import { Button } from '@/ui/components/ui/button'
 import type { EditorDialog } from '@/ui/screens/project/editor-dialog'
@@ -68,6 +69,13 @@ export function FragmentsWorkspace({
     () => new Set(project.assets.assets.map((asset) => asset.path)),
     [project.assets]
   )
+  const attributeMarkers = useMemo(
+    () =>
+      featuresInPreOrder(project.model.root).flatMap((feature) =>
+        feature.attributes.map((attribute) => `${feature.id}.${attribute.id}`)
+      ),
+    [project.model]
+  )
   const hasFiles = tree.folders.length > 0 || tree.files.length > 0
   const newFragment = (): void => onOpenDialog({ kind: 'new-fragment' })
 
@@ -108,8 +116,14 @@ export function FragmentsWorkspace({
         {shown === null ? (
           <div className="max-w-prose space-y-3 p-6 text-sm text-muted-foreground">
             <p>
-              Um fragmento é um arquivo XML de documentação. Vinculado a uma feature como asset, ele
-              entra no produto gerado das configurações que selecionam a feature.
+              Um fragmento é um arquivo XML ou HTML. Vinculado a uma feature como asset, ele entra
+              no produto gerado das configurações que selecionam a feature: o XML no product.xml, e
+              o HTML na página index.html.
+            </p>
+            <p>
+              A página usa a moldura.html da raiz do projeto, se houver, com {'{{conteudo}}'} onde
+              entram as seções. Nos fragmentos HTML e na moldura, {'{{feature.atributo}}'} vira o
+              valor do atributo na configuração.
             </p>
             <p>Escolha um arquivo à esquerda ou crie um novo.</p>
             <Button size="sm" onClick={newFragment}>
@@ -135,6 +149,7 @@ export function FragmentsWorkspace({
               problems={problems}
               states={editorStates}
               onChange={changeText}
+              attributeMarkers={attributeMarkers}
             />
           </>
         )}
