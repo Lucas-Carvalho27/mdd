@@ -2,6 +2,8 @@
 
 Aprovado em 28/09/2026. As decisões de produto foram tomadas na sessão de perguntas da Fase 7 e estão no fim do [desenho da Fase 7](2026-09-28-fase-7-paginas-html-design.md) ("Fase 8, decidida junto"). Este desenho acrescenta o como: o isolamento da página, de onde vem cada arquivo e quando a página se atualiza. As escolhas técnicas, aprovadas pelo usuário, estão em "Decisões técnicas".
 
+> O protótipo (branch local `prototipo-fase-8`) refinou alguns pontos, já corrigidos abaixo: os links para fora, a montagem ao entrar na aba, "Criar moldura", a largura exata e a ordem dos problemas. Veja "O que o protótipo respondeu".
+
 ## Objetivo
 
 Ver, dentro do app, a página da configuração aberta, montada ao vivo a partir do projeto como está na tela, sem gravar nada em `saida/`. A janela ganha a aba **Páginas**, depois de Fragmentos.
@@ -28,7 +30,7 @@ Ver, dentro do app, a página da configuração aberta, montada ao vivo a partir
 2. **A visualização mostra a página mesmo com problemas**, no melhor esforço: um marcador que não resolve fica como está escrito, uma imagem que falta aparece quebrada, e um fragmento fora do UTF-8 fica de fora. A geração continua recusando tudo isso.
 3. **Um script pequeno entra só na visualização**, antes do `</body>`: ele guarda e devolve a posição da rolagem e repassa o Ctrl+S ao app. O `index.html` gerado não o leva.
 4. **Os fragmentos abertos na aba Fragmentos entram com o texto do editor**, inclusive a moldura; o resto (os outros fragmentos, as imagens e o CSS) vem do disco. É a decisão da Q4 ("ao vivo, com as alterações não salvas").
-5. **Links para fora da página** (`https:`, `http:` e `mailto:`) abrem no programa padrão do sistema; a navegação dentro da página (`#ancora`) fica nela; outro esquema é ignorado.
+5. **Links para fora da página** (`https:`, `http:` e `mailto:`) abrem no programa padrão do sistema; a navegação dentro da página (`#ancora`) fica nela; outra navegação para fora é barrada.
 
 ## O isolamento
 
@@ -41,7 +43,7 @@ A página do usuário pode ter scripts e carregar recursos da internet (Q14), e 
 
 A resposta não tem CSP própria, então os scripts e a internet funcionam dentro da página. O `<iframe>` tem `sandbox="allow-scripts allow-popups allow-forms allow-modals"`, **sem** `allow-same-origin` nem `allow-top-navigation`: a página fica numa origem opaca, sem acesso ao documento do app, e o preload só existe no quadro principal, então `window.mdd` não existe nela. A CSP do app ganha só `frame-src mdd-page:`.
 
-Os links: o main intercepta a navegação do quadro (`will-frame-navigate`). Um endereço fora de `mdd-page:` é cancelado e, se for `https:`, `http:` ou `mailto:`, aberto com `shell.openExternal`. O `target="_blank"` já cai no `setWindowOpenHandler`, que faz o mesmo.
+Os links: a CSP do app (`frame-src mdd-page:`) barra o quadro de navegar para fora do esquema, ainda no renderer, antes de o main ser consultado (por isso o `will-frame-navigate` não serve). O script da visualização abre os links `https:`, `http:` e `mailto:` como janela nova, e o `setWindowOpenHandler` do main manda para o navegador do sistema só os endereços desses esquemas (o `target="_blank"` segue o mesmo caminho). Uma navegação para fora feita por script da página fica barrada.
 
 Alternativas descartadas:
 
@@ -55,7 +57,8 @@ Como a página fica numa origem opaca, o app não consegue ler a rolagem dela. O
 
 - a cada rolagem, avisa o app pela `postMessage` a posição (`scrollY`);
 - ao carregar, volta à posição recebida no endereço (`index.html?y=…`);
-- repassa o Ctrl+S ao app (com o foco dentro da página, as teclas não chegam ao app).
+- repassa o Ctrl+S ao app (com o foco dentro da página, as teclas não chegam ao app);
+- abre os links para fora (`https:`, `http:` e `mailto:`) como janela nova, que vai para o navegador do sistema.
 
 O app só aceita mensagens que vêm do `<iframe>` da aba (`event.source`) e com o formato esperado.
 
@@ -97,7 +100,7 @@ O renderer entrega a página ao main (canal `setPreviewPage`) e recarrega o `<if
 
 - meio segundo depois da última mudança no que entra nela: o texto de um fragmento aberto (inclusive a moldura), o modelo, os assets, as decisões e os valores da configuração aberta, ou a troca da configuração;
 - no botão Recarregar e quando a janela volta ao foco, para pegar os arquivos mudados por fora;
-- ao entrar na aba.
+- ao entrar na aba, na hora, sem o meio segundo: o main ainda guarda a página da última visita.
 
 Uma montagem que termina depois de outra mais nova é descartada, como a conferência dos fragmentos.
 
@@ -109,32 +112,43 @@ Na aba Páginas vale só o Ctrl+S, como no configurador. Com o foco dentro da p�
 
 **Processo main e IPC:**
 
-- `src/main/page-preview.ts`: o registro do esquema (antes do `app.whenReady`), a resposta com a página na memória ou com um arquivo do projeto, o script da visualização e a interceptação da navegação do quadro.
-- `src/shared/ipc.ts`: o canal `setPreviewPage(html)` e a origem `mdd-page://pagina/`.
+- `src/main/page-preview.ts`: o registro do esquema (antes do `app.whenReady`), a resposta com a página na memória ou com um arquivo do projeto (sem cache, para "Recarregar" pegar o arquivo mudado) e o script da visualização. O `setWindowOpenHandler` do `src/main/index.ts` passa a abrir no sistema só `https:`, `http:` e `mailto:`.
+- `src/shared/ipc.ts`: o canal `setPreviewPage(html)` e as constantes `PREVIEW_SCHEME`, `PREVIEW_HOST` e `PREVIEW_ADDRESS` (`mdd-page://pagina/index.html`); o preload o expõe.
 - `src/renderer/index.html`: `frame-src mdd-page:` na CSP.
+
+**Domínio:** `projectHasPage(catalog)`, em `domain/pages/page-assembly.ts`, que o plano da geração passa a usar.
 
 **Aplicação:**
 
-- porta `PagePreviewHost`: `show(html)`, que entrega a página ao main;
-- `EditedFragmentsStorage`: o `ProjectStorage` com o texto dos fragmentos abertos com alteração;
-- caso de uso `PreviewPage`: o plano, o deriver no modo de visualização e o resultado (página e problemas, ou o motivo de não haver página).
+- portas `PagePreviewer` (`preview(plan, edited)`, com a página, os problemas e se a moldura é a padrão) e `PagePreviewHost` (`address` e `show(html)`);
+- `EditedFragmentsStorage` (`application/fragments/`): o `ProjectStorage` com o texto dos fragmentos abertos com alteração, comparados sem caixa;
+- caso de uso `PreviewPage`: sem configuração, sem página, bloqueada (incompleta) ou a página, com o endereço e os problemas.
 
-**Infraestrutura:** o `HtmlPageDeriver` ganha o modo de visualização (monta mesmo com problemas; não confere se os arquivos citados existem, porque o navegador mostra a falta); o `ElectronPagePreviewHost`.
+**Infraestrutura:** o `HtmlPageDeriver` implementa também o `PagePreviewer`. As duas saídas passam por uma montagem só (`build`): na visualização, os arquivos citados não são conferidos, e uma moldura que não pôde ser lida dá lugar à padrão (antes, a moldura era o primeiro arquivo preparado, o que só valia porque a geração parava em qualquer problema). Os problemas de cada arquivo saem na ordem das linhas. O `ElectronPagePreviewHost` recebe o endereço da composition root.
 
 **Interface:**
 
-- `ui/screens/pages/`: `PagesWorkspace`, `PageFrame` (o `<iframe>`, as mensagens e a rolagem), `PageBar` e `PageProblems`;
-- `ui/stores/pages-actions.ts`: a página, os problemas, a largura, a rolagem e a montagem com o atraso e o descarte;
-- telas que já existem: `ViewRail` (a aba), `ProjectScreen`, `GenerationBanner` ("Abrir no navegador") e `fragments-actions.ts` (abrir um arquivo numa linha).
+- `ui/screens/pages/`: `PagesWorkspace`, `PageFrame` (o `<iframe>` com sandbox, as mensagens e a rolagem; um contorno em vez de borda, para a largura de 375 px ser exata), `PageBar` e `PageProblems`;
+- `ui/stores/pages-actions.ts`: a página, a largura e a rolagem; as montagens pedidas durante outra se juntam numa só; a rolagem volta ao topo ao trocar de configuração;
+- telas que já existem: `ViewRail` (a aba), `ProjectScreen` (a aba, os atalhos para a aba Fragmentos e "Criar moldura", que relê as pastas antes e abre a moldura se ela já existir), `GenerateButton` (sai do `ConfiguratorWorkspace`, para as duas abas), `GenerationBanner` ("Abrir no navegador", pelo `AssetOpener`), `ConfigurationList` (sem "Nova" quando só serve para escolher), `fragments-actions.ts`, `FragmentsWorkspace` e `FragmentEditor` (abrir um arquivo numa linha).
+
+**O que o protótipo respondeu:**
+
+- **O isolamento funciona como previsto:** a página é um alvo `iframe` à parte, em origem opaca (`self.origin` é `null`); `window.mdd` não existe nela; ler o `parent` dá `SecurityError`; as imagens do projeto chegam pelo esquema; e tudo isso vale igual no `mdd.exe`.
+- **Os links para fora não passam pelo main:** a CSP do app barra a navegação do quadro antes. O script da visualização os abre como janela nova (veja "O isolamento").
+- **Ao voltar à aba**, o quadro mostrava por meio segundo a página da última visita; agora a montagem é imediata ao entrar.
+- **"Criar moldura"** recusava o caminho quando a lista da aba Fragmentos ainda tinha uma moldura apagada por fora; agora relê as pastas antes.
+- **A largura "Celular"** dava 373 px por causa da borda do quadro; com um contorno, dá 375.
 
 ## Verificação
 
 Sem testes automatizados (ADR 0008). Roteiros em `.checks/`:
 
 - `edited-storage-check.mts`: o texto do editor no lugar do disco, só para os fragmentos abertos com alteração;
+- `pages-store-check.mts`: as montagens que se juntam, a mais nova que fica, a rolagem ao trocar de configuração e o fechamento durante uma montagem;
 - `page-preview-check.mts`: a página do herby na memória, com um fragmento editado e não salvo, com um problema (a página sai assim mesmo) e com a configuração incompleta;
 - `aba-paginas-ui.mjs`, pelo protocolo de depuração, no modo de desenvolvimento e no `mdd.exe`: a página no `<iframe>` (lida pelo quadro dela no protocolo), a atualização ao editar, a rolagem mantida, o isolamento (`window.mdd` e `parent`), um link externo (com o `shell.openExternal` trocado por um registrador), as larguras, a barra de problemas, "Criar moldura" e "Abrir no navegador";
-- regressão: `paginas-ui.mjs` (Fase 7), `fragmentos-ui.mjs`, `geracao-ui.mjs`, `configurador-ui.mjs` e as stores.
+- regressão: os roteiros sem janela das Fases 3 a 7, e os de interface `paginas-ui.mjs` (Fase 7, com "Abrir no navegador" na faixa), `fragmentos-ui.mjs`, `geracao-ui.mjs`, `assets-ui.mjs`, `configurador-ui.mjs` e `ui-check.mjs`. O `main-process.mjs` passa a registrar também o `shell.openExternal`.
 
 ## Documentos
 
