@@ -3,28 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{herby.titulo_tutorial}} — {{produto}}</title>
+<title>{{herby.titulo_tutorial}} | {{produto}}</title>
+<!-- As cores da rede vêm depois do herby.css, para valerem sobre as de lá. -->
+<link rel="stylesheet" href="css/herby.css">
+<style>:root { --primaria: {{herby.cor_primaria}}; --secundaria: {{herby.cor_secundaria}}; }</style>
 </head>
 <body>
-<header class="capa">
-  <p class="sobretitulo">Orientações para o uso da plataforma</p>
-  <h1>{{herby.titulo_tutorial}}</h1>
-  <p class="subtitulo"><span class="rede">{{herby.rede}}</span><span class="ano">{{herby.ano}}</span></p>
+<div class="barra-leitura" aria-hidden="true"></div>
+<header class="capa" id="topo">
+  <div class="capa-conteudo">
+    <div class="capa-texto">
+      <img class="capa-logo" src="{{herby.logo}}" alt="{{herby.rede}}">
+      <p class="sobretitulo">Orientações para o uso da plataforma</p>
+      <h1>{{herby.titulo_tutorial}}</h1>
+      <p class="subtitulo"><span class="rede">{{herby.rede}}</span><span class="ano">{{herby.ano}}</span></p>
+      <a class="botao" href="#funcionalidades">Ver funcionalidades</a>
+    </div>
+    <img class="capa-foto" src="{{herby.imagem_capa}}" alt="{{herby.descricao_imagem_capa}}">
+  </div>
 </header>
 <main>
-<section class="agenda">
+<section class="agenda" id="funcionalidades">
   <h2>Funcionalidades</h2>
 {{sumario}}
 </section>
 {{conteudo}}
 </main>
 <footer class="encerramento">
-  <h2>Obrigado(a)!</h2>
-  <ul class="contatos">
-    <li><a href="https://{{herby.site}}">{{herby.site}}</a></li>
-    <li>Nosso número de WhatsApp: {{herby.contato_whatsapp}}</li>
-    <li>Nosso e-mail para contato: <a href="mailto:{{herby.contato_email}}">{{herby.contato_email}}</a></li>
-  </ul>
+  <div class="encerramento-conteudo">
+    <h2>Obrigado(a)!</h2>
+    <ul class="contatos">
+      <li><span class="contato-rotulo">Site</span><a href="https://{{herby.site}}">{{herby.site}}</a></li>
+      <li><span class="contato-rotulo">WhatsApp</span><span class="contato-valor" data-copiar>{{herby.contato_whatsapp}}</span></li>
+      <li><span class="contato-rotulo">E-mail para contato</span><a href="mailto:{{herby.contato_email}}">{{herby.contato_email}}</a></li>
+    </ul>
+  </div>
 </footer>
+<a class="voltar-topo" href="#topo" aria-label="Voltar ao topo"></a>
 </body>
 </html>

@@ -1,0 +1,108 @@
+<h4>Informações Gerais da Avaliação</h4>
+<p class="resumo">Cadernos, cartões e dias de aplicação de cada etapa, e o cronograma das atividades da avaliação.</p>
+
+<template data-perfis="completa-atibaia">
+  <section class="secao" id="informacoes-gerais-01">
+    <h5>Cadernos e dias de aplicação</h5>
+    <p>Materiais e componentes de cada dia da {{informacoes_gerais.avaliacao}}, por etapa.</p>
+    <div class="abas">
+      <section>
+        <h6>1º e 2º Ano</h6>
+        <ol class="dias">
+          <li>
+            <strong>Dia 1</strong>
+            <span>Língua Portuguesa + Produção de texto</span>
+            <ul class="etiquetas">
+              <li>Caderno de Língua Portuguesa</li>
+              <li>Cartão-resposta objetivo</li>
+              <li>Cartão de Produção de Texto</li>
+              <li>Caderno do Aplicador LP + Mat</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Dia 2</strong>
+            <span>Matemática</span>
+            <ul class="etiquetas">
+              <li>Caderno de Matemática</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Dia 3</strong>
+            <span>Ciências Humanas e da Natureza</span>
+            <ul class="etiquetas">
+              <li>Caderno de CHN</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
+      <section>
+        <h6>3º Ano</h6>
+        <ol class="dias">
+          <li>
+            <strong>Dia 1</strong>
+            <span>Língua Portuguesa + Produção de texto</span>
+            <ul class="etiquetas">
+              <li>Caderno de Língua Portuguesa</li>
+              <li>Cartão-resposta objetivo</li>
+              <li>Cartão de Produção de Texto</li>
+              <li>Orientação de Produção de Texto</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Dia 2</strong>
+            <span>Matemática</span>
+            <ul class="etiquetas">
+              <li>Caderno de Matemática</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Dia 3</strong>
+            <span>Ciências Humanas e da Natureza</span>
+            <ul class="etiquetas">
+              <li>Caderno de CHN</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
+      <section>
+        <h6>4º e 5º Ano</h6>
+        <ol class="dias">
+          <li>
+            <strong>Dia 1</strong>
+            <span>Língua Portuguesa + Matemática + Produção de texto</span>
+            <ul class="etiquetas">
+              <li>Caderno de LP + Mat</li>
+              <li>Cartão-resposta objetivo</li>
+              <li>Cartão de Produção de Texto</li>
+              <li>Orientação de Produção de Texto</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Dia 2</strong>
+            <span>Ciências Humanas e da Natureza</span>
+            <ul class="etiquetas">
+              <li>Caderno de CHN</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
+    </div>
+    <aside class="aviso lembrete">
+      <ul>
+        <li><strong>Cartão-resposta objetivo:</strong> único por estudante, válido para todos os dias.</li>
+        <li><strong>Cartão de Produção de Texto:</strong> 1 por aluno, no Dia 1.</li>
+      </ul>
+    </aside>
+  </section>
+</template>
+
+<template data-perfis="rondonia-paic-proalfa">
+  <section class="secao" id="informacoes-gerais-02">
+    <h5>Atividades e cronograma</h5>
+    <ol class="cronograma">
+      <li><strong>{{informacoes_gerais.data_treinamento}}</strong> Treinamento para preenchimento do template com os dados de matrícula</li>
+      <li><strong>até {{informacoes_gerais.prazo_envio_template}}</strong> Preenchimento e envio do template</li>
+      <li><strong>{{informacoes_gerais.data_liberacao_cartoes}}</strong> Liberação dos cartões para impressão e envio dos links de acesso à plataforma</li>
+    </ol>
+  </section>
+</template>

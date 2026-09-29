@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<featureModel xmlns="urn:mdd:feature-model" schemaVersion="1" name="Carro">
+  <feature id="carro" name="Carro">
+    <description>Raiz da linha de produtos de um carro de passeio: cada configuração é uma versão à venda.</description>
+    <attribute id="ano_modelo" name="Ano/modelo" type="number" default="2027" configurable="false"/>
+    <attribute id="nome_versao" name="Nome da versão" type="string"/>
+    <feature id="carroceria" name="Carroceria" variability="mandatory">
+      <group min="1" max="1">
+        <feature id="hatch" name="Hatch"/>
+        <feature id="seda" name="Sedã"/>
+        <feature id="suv" name="SUV"/>
+        <feature id="picape" name="Picape"/>
+      </group>
+    </feature>
+    <feature id="motor" name="Motor" variability="mandatory">
+      <group min="1" max="1">
+        <feature id="motor_flex" name="Flex">
+          <attribute id="cilindrada" name="Cilindrada" type="enum" default="1.0">
+            <option value="1.0"/>
+            <option value="1.0 turbo"/>
+            <option value="1.6"/>
+            <option value="2.0"/>
+          </attribute>
+        </feature>
+        <feature id="motor_diesel" name="Diesel">
+          <attribute id="potencia_cv" name="Potência (cv)" type="number" default="180" min="150" max="250"/>
+        </feature>
+        <feature id="motor_hibrido" name="Híbrido"/>
+        <feature id="motor_eletrico" name="Elétrico">
+          <attribute id="autonomia_km" name="Autonomia (km)" type="number" default="400" min="250" max="700"/>
+        </feature>
+      </group>
+    </feature>
+    <feature id="cambio" name="Câmbio" variability="mandatory">
+      <group min="1" max="1">
+        <feature id="cambio_manual" name="Manual"/>
+        <feature id="cambio_automatico" name="Automático"/>
+        <feature id="cambio_cvt" name="CVT"/>
+      </group>
+    </feature>
+    <feature id="tracao" name="Tração" variability="mandatory">
+      <group min="1" max="1">
+        <feature id="tracao_dianteira" name="Dianteira"/>
+        <feature id="tracao_traseira" name="Traseira"/>
+        <feature id="tracao_4x4" name="4x4"/>
+      </group>
+    </feature>
+    <feature id="seguranca" name="Segurança" variability="mandatory">
+      <feature id="airbags" name="Airbags" variability="mandatory">
+        <attribute id="quantidade" name="Quantidade" type="number" default="2" min="2" max="8"/>
+      </feature>
+      <feature id="freios_abs" name="Freios ABS" variability="mandatory"/>
+      <feature id="controle_estabilidade" name="Controle de estabilidade" variability="optional"/>
+      <feature id="assistencias" name="Assistências ao motorista" variability="optional">
+        <group min="1" max="*">
+          <feature id="frenagem_autonoma" name="Frenagem autônoma"/>
+          <feature id="alerta_ponto_cego" name="Alerta de ponto cego"/>
+          <feature id="assistente_faixa" name="Assistente de faixa"/>
+          <feature id="piloto_adaptativo" name="Piloto automático adaptativo"/>
+        </group>
+      </feature>
+    </feature>
+    <feature id="conforto" name="Conforto" variability="optional">
+      <feature id="ar_condicionado" name="Ar-condicionado" variability="mandatory">
+        <group min="1" max="1">
+          <feature id="ar_manual" name="Manual"/>
+          <feature id="ar_digital" name="Digital"/>
+        </group>
+      </feature>
+      <feature id="bancos_couro" name="Bancos de couro" variability="optional"/>
+      <feature id="teto_solar" name="Teto solar" variability="optional"/>
+    </feature>
+    <feature id="multimidia" name="Multimídia" variability="optional">
+      <attribute id="tela_pol" name="Tela (pol.)" type="number" default="8" min="7" max="15"/>
+      <attribute id="som_premium" name="Som premium" type="boolean" default="false"/>
+      <group min="1" max="*">
+        <feature id="android_auto" name="Android Auto"/>
+        <feature id="apple_carplay" name="Apple CarPlay"/>
+        <feature id="navegador_gps" name="Navegador GPS"/>
+      </group>
+    </feature>
+    <feature id="rodas" name="Rodas" variability="mandatory">
+      <attribute id="aro" name="Aro" type="enum" default="15">
+        <option value="15"/>
+        <option value="16"/>
+        <option value="17"/>
+        <option value="18"/>
+        <option value="20"/>
+      </attribute>
+      <group min="1" max="1">
+        <feature id="rodas_aco" name="Aço com calota"/>
+        <feature id="rodas_liga" name="Liga leve"/>
+      </group>
+    </feature>
+    <feature id="pintura" name="Pintura" variability="mandatory">
+      <attribute id="cor" name="Cor" type="enum">
+        <option value="branco"/>
+        <option value="preto"/>
+        <option value="prata"/>
+        <option value="cinza"/>
+        <option value="vermelho"/>
+        <option value="azul"/>
+      </attribute>
+      <attribute id="metalica" name="Metálica" type="boolean" default="false"/>
+    </feature>
+    <feature id="pacote_premium" name="Pacote Premium" variability="optional">
+      <description>Pacote comercial dos opcionais de topo de linha.</description>
+    </feature>
+  </feature>
+  <constraints>
+    <constraint id="c1" description="Picape tem tração traseira ou 4x4">
+      <expression>picape implies tracao_traseira or tracao_4x4</expression>
+    </constraint>
+    <constraint id="c2" description="Tração 4x4 só em SUV ou picape">
+      <expression>tracao_4x4 implies suv or picape</expression>
+    </constraint>
+    <constraint id="c3" description="Motor diesel só em SUV ou picape">
+      <expression>motor_diesel implies suv or picape</expression>
+    </constraint>
+    <constraint id="c4" description="Motor elétrico usa câmbio automático">
+      <expression>motor_eletrico implies cambio_automatico</expression>
+    </constraint>
+    <constraint id="c5" description="Motor híbrido não tem câmbio manual">
+      <expression>motor_hibrido implies not cambio_manual</expression>
+    </constraint>
+    <constraint id="c6" description="Piloto adaptativo não funciona com câmbio manual">
+      <expression>piloto_adaptativo implies not cambio_manual</expression>
+    </constraint>
+    <constraint id="c7" description="Frenagem autônoma exige controle de estabilidade">
+      <expression>frenagem_autonoma implies controle_estabilidade</expression>
+    </constraint>
+    <constraint id="c8" description="Picape não tem teto solar">
+      <expression>not (picape and teto_solar)</expression>
+    </constraint>
+    <constraint id="c9" description="Pacote Premium é couro, teto solar, ar digital e rodas de liga leve">
+      <expression>pacote_premium iff bancos_couro and teto_solar and ar_digital and rodas_liga</expression>
+    </constraint>
+  </constraints>
+</featureModel>

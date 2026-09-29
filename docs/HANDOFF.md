@@ -219,6 +219,49 @@ O desenho está em [docs/superpowers/specs/2026-09-28-fase-8-aba-paginas-design.
 
 **Checagem à mão** (Tarefa 4, Passo 3): **adiada a pedido do usuário**, que pediu o merge na `main` em 28/09/2026. A cópia está em `.checks/aceitacao-herby`, e os quatro passos estão no plano.
 
+## Redesenho visual do exemplo herby (feito em 28/09/2026)
+
+A pedido do usuário, a página do herby ficou mais moderna e menos estática, com componentes (carrossel, abas, sanfona, passos numerados, molduras de celular, imagem ampliada). **Só o exemplo mudou; o `src/` não foi tocado.**
+
+- **O que mudou em `docs/examples/herby/`:** o `css/herby.css` reescrito, com o guia dos componentes no topo; o `js/herby.js` novo, anexado como recurso de `herby` no `assets.xml`, que só acrescenta interação (tudo continua legível sem ele); o `css/fonte-figtree.css` com a fonte Figtree embutida como `data:` (a licença OFL ao lado); a `moldura.html` com capa e foto, sumário fixo ao lado nas telas largas e rodapé em cartões; e 18 dos 23 fragmentos remarcados com os componentes.
+- **O conteúdo foi preservado:** os mesmos `id`, marcadores e imagens, e os mesmos perfis em cada bloco (conferido por script contra os originais). As únicas junções foram de `<template>` com os mesmos perfis: os quatro do "Testar áudio" viraram um, e os dois da lixeira também. Os ajustes de texto foram mínimos: títulos nos passos que estavam vazios ("Passo 1 — "), o "Passo N — " trocado pelo número automático, as imagens repetidas tiradas dos avisos e alguns erros de digitação.
+- **A fonte vai embutida** porque, na aba Páginas, a página tem origem nula, e o esquema `mdd-page:` não manda `Access-Control-Allow-Origin`: um `.woff2` separado era barrado. Se um projeto quiser fontes em arquivo na visualização, o esquema precisa mandar esse cabeçalho.
+- **A referência `produto-esperado/herby-completa-atibaia/index.html` foi gerada de novo** com o `.checks/herby-generate-all.mts`, e as 13 configurações geram sem problema.
+- **Conferência:** capturas por script no Electron, em 1280 px e 390 px, nos temas claro e escuro, sem JS, num `<iframe>` com o mesmo `sandbox` da aba Páginas e com o conteúdo dos `<template>` à mostra, sem erro no console e sem rolagem para o lado. **Não foi conferido no `mdd.exe`.**
+- **Cuidado:** o `.checks/herby-convert.mts` (Fase 7) grava os fragmentos em `docs/examples/herby/` a partir do original. Rodá-lo de novo desfaz este redesenho.
+- **Imagens do original que parecem restos da extração dos slides**, mantidas como estavam: `avaliacao-fluencia-04.png` e `processamento-foto-05.png` (retângulo cinza), `processamento-foto-08.png` (só um círculo laranja), `gestao-base-dados-04.png` (563×13 px) e `correcao-ia-fluencia-05.jpg` (dois ícones soltos).
+
+## Customização por rede do exemplo herby (feita em 28/09/2026)
+
+A pedido do usuário, cada configuração do herby pode trocar as cores e algumas imagens pelos atributos. As decisões foram tomadas numa sessão de perguntas. **Só o exemplo mudou; o `src/` não foi tocado**: os marcadores dentro de `<style>` e de `src` já funcionavam.
+
+- **Os atributos novos**, todos `string`: na raiz, `cor_primaria` (botões, links e destaques, padrão `#1463b0`), `cor_secundaria` (capa e títulos, padrão `#0d2c4f`), `imagem_capa`, `descricao_imagem_capa` e `logo` (padrão vazio); em `impressao_no_saev`, `imagem_acessar_sistema` e `imagem_baixar_cartoes`, as duas capturas que mostram o sistema e o município da rede. Os padrões são as cores e os caminhos de antes.
+- **Os caminhos de imagem nos atributos valem sempre a partir da raiz do projeto.** Na moldura isso já acontece; no fragmento, o marcador vem depois de `../../` (`src="../../{{impressao_no_saev.imagem_acessar_sistema}}"`). Se o fragmento mudar de profundidade, o prefixo muda junto.
+- **As cores:** a `moldura.html` cita o `css/herby.css` e, depois dele, um `<style>` que troca `--primaria` e `--secundaria`. No `herby.css`, os outros tons saem dessas duas com `color-mix(in oklab, …)`, também no modo escuro, e as cores da marca que estavam escritas fora do `:root` (gradiente da capa, sombras, texto da capa) viraram misturas. As porcentagens foram ajustadas para, com as cores padrão, ficar a 1–6 pontos RGB dos tons de antes; o acento do modo escuro e o brilho da capa ficaram um pouco menos saturados. Nenhum controle de contraste: a primária e a secundária precisam ser escuras.
+- **O logo** fica acima do sobretítulo, sobre uma placa clara. Com o atributo vazio, o `src` sai vazio e o CSS esconde a imagem.
+- **A configuração `personalizada`** usa outras cores, a foto `avaliacao-fluencia-02.jpg` na capa, o logo genérico `img/redes/exemplo/logo.svg` e outra captura no acesso ao sistema. A referência dela é o `produto-esperado/herby-personalizada/index.html`, e a de `completa-atibaia` foi gerada de novo (só ganhou o `<link>`, o `<style>` e o logo vazio).
+- **Conferência:** as 14 configurações geram sem problema pelo `.checks/herby-generate-all.mts`, com as mesmas listas de arquivos de antes nas 13 antigas. Um caminho de logo que não existe faz a geração recusar (`moldura.html:16 O arquivo citado não existe`). No navegador, nos temas claro e escuro: nenhuma imagem quebrada, as cores calculadas vêm da rede e o contraste no escuro ficou acima de 8:1. **Não foi conferido no `mdd.exe`.**
+- **Limitação:** a foto da capa é recortada em 5:4 com o foco (`object-position: 74% 45%`) ajustado para a foto padrão. Uma foto em retrato perde parte do assunto, como a da `personalizada`. Se for um problema, a saída é um atributo para o foco ou recortar a foto antes.
+
+## Só duas configurações no herby, t1 e t2 (feito em 28/09/2026)
+
+A pedido do usuário, as 14 configurações do herby (as 13 antigas e a `personalizada`) foram apagadas, e ficaram só a `t1` e a `t2`, opostas de propósito para mostrar a ferramenta. **O `src/` não foi tocado.**
+
+- **`t1`:** rede estadual, com toda a preparação (inclusive lixeira e sincronização), impressão na Herby, correção por foto com educação especial, todos os resultados e o visual padrão (sem atributo de cor nem logo). São 20 seções e 72 arquivos.
+- **`t2`:** rede municipal, só com informações gerais (com outras datas), impressão pelo sistema da rede, fluência com correção por IA, progresso e relatórios, e as cores, a foto da capa e o logo da rede nos atributos. São 12 seções e 42 arquivos.
+- **A interação de features:** o bloco "Fotos pendentes" do Progresso só faz sentido com a correção por foto. Ele estava num `<template data-perfis>` (que nunca aparece na página) e virou o fragmento `progresso-fotos-pendentes.html`, ancorado em `progresso` com a condição `progresso and processamento_por_foto`. Entra na `t1` e não na `t2`. O resumo do `progresso.html` perdeu o trecho sobre fotos pendentes, que agora é do fragmento da interação.
+- **As referências** `produto-esperado/herby-completa-atibaia/` e `herby-personalizada/` deram lugar a `herby-t1/` e `herby-t2/`, e a SPEC aponta para elas (os critérios das Fases 7 e 8 dizem que, na aceitação, a configuração era a `completa-atibaia`).
+- **Os `data-perfis` dos fragmentos** continuam com os nomes das configurações antigas: são só anotação, e a variabilidade anotativa ainda não foi decidida.
+- **O logo genérico** `img/redes/exemplo/logo.svg` ficou para a `t2`.
+
+## Exemplo carro (feito em 28/09/2026)
+
+A pedido do usuário, `docs/examples/carro/` tem só o `model.xml`, sem assets, configurações nem fragmentos. **O `src/` não foi tocado.**
+
+- **O modelo:** 43 features. Carroceria, motor, câmbio, tração e rodas são alternatives obrigatórios; assistências ao motorista e multimídia são or; conforto, multimídia e Pacote Premium são opcionais. Tem atributos dos quatro tipos, um fixo (`ano_modelo`) e dois sem `default` (`nome_versao` e `pintura.cor`), que a configuração precisa preencher para ficar completa.
+- **As 9 restrições** usam `implies`, `not`, `or`, `and` e `iff`. A `c9` (`pacote_premium iff …`) seleciona o Pacote Premium sozinho quando couro, teto solar, ar digital e rodas de liga estão todos presentes.
+- **Conferência** por script, com o código do app: XSD e M1–M5 sem problema, o modelo admite produto, nenhuma feature morta, e decodificar e codificar de novo dá o arquivo idêntico. **Não foi aberto no `mdd.exe`.**
+
 ## Próximo passo
 
 As fases 0 a 8 estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo).

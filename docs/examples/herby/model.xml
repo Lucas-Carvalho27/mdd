@@ -10,6 +10,11 @@
     <attribute id="rede" name="Rede de ensino atendida" type="string" default=""/>
     <attribute id="ano" name="Ano da avaliação" type="string" default="2026"/>
     <attribute id="sistema_externo" name="Sistema da rede usado para baixar os cartões" type="string" default="SAEV"/>
+    <attribute id="cor_primaria" name="Cor primária (botões, links e destaques)" type="string" default="#1463b0"/>
+    <attribute id="cor_secundaria" name="Cor secundária (capa e títulos)" type="string" default="#0d2c4f"/>
+    <attribute id="imagem_capa" name="Foto da capa" type="string" default="fragmentos/aplicacao-correcao/img/processamento-foto/processamento-foto-01.png"/>
+    <attribute id="descricao_imagem_capa" name="Descrição da foto da capa" type="string" default="Professoras corrigindo cartões de respostas pelo celular"/>
+    <attribute id="logo" name="Logo da rede (caminho no projeto)" type="string" default=""/>
     <feature id="preparacao" name="Preparação" variability="optional">
       <feature id="acesso_a_plataforma" name="Acesso à Plataforma" variability="optional">
         <description>06</description>
@@ -39,7 +44,10 @@
     <feature id="impressao_dos_cartoes" name="Impressão dos Cartões" variability="optional">
       <group min="1" max="1">
         <feature id="impressao_na_herby" name="Impressão na Herby"/>
-        <feature id="impressao_no_saev" name="Impressão no SAEV"/>
+        <feature id="impressao_no_saev" name="Impressão no SAEV">
+          <attribute id="imagem_acessar_sistema" name="Captura do acesso ao sistema (caminho no projeto)" type="string" default="fragmentos/impressao/img/impressao-sistema-externo/impressao-sistema-externo-01.png"/>
+          <attribute id="imagem_baixar_cartoes" name="Captura do download dos cartões (caminho no projeto)" type="string" default="fragmentos/impressao/img/impressao-sistema-externo/impressao-sistema-externo-02.png"/>
+        </feature>
       </group>
     </feature>
     <feature id="aplicacao_e_correcao" name="Aplicação e Correção" variability="optional">

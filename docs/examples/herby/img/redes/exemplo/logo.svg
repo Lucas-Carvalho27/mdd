@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 268 56" width="268" height="56" role="img" aria-label="Rede Exemplo">
+  <rect x="4" y="4" width="48" height="48" rx="14" fill="#13795b"/>
+  <path d="M17 40V16h11.5a7.5 7.5 0 0 1 1.6 14.8L37 40h-6.4l-6.1-8.8H22.6V40Zm5.6-13.4h5.4a3 3 0 0 0 0-6h-5.4Z" fill="#fdfeff"/>
+  <text x="64" y="26" font-family="system-ui, 'Segoe UI', Roboto, sans-serif" font-size="19" font-weight="700" fill="#3b1e54">Rede Exemplo</text>
+  <text x="64" y="44" font-family="system-ui, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" letter-spacing="1.4" fill="#13795b">SECRETARIA DE EDUCAÇÃO</text>
+</svg>

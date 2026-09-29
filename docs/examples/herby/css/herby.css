@@ -1,213 +1,781 @@
-/* O visual dos tutoriais da Herby: sóbrio, com o azul-marinho da plataforma. */
+/*
+ * O visual dos tutoriais da Herby: claro e direto, com o azul-marinho da plataforma.
+ *
+ * Os componentes que os fragmentos podem usar. Todos funcionam sem o js/herby.js: o script
+ * só acrescenta os botões, o teclado e a imagem ampliada.
+ *
+ *   .fluxo        <ol> de etapas lado a lado (<li><strong>Título</strong> texto</li>)
+ *   .passos       <div> com <section class="passo">; cada passo ganha o número sozinho,
+ *                 e a imagem de celular ou de documento vai para o lado do texto
+ *   .carrossel    os filhos viram slides; sem o script, uma fileira que rola para o lado
+ *   .carrossel.telas   slides que são só capturas de celular
+ *   .subpasso     <section> dentro de um carrossel de um passo: o texto e, embaixo, as telas
+ *   .fileira      <div> com várias capturas de celular lado a lado
+ *   .abas         os filhos (<section> com <h5> ou <h6> no início) viram abas
+ *   .sanfonas     <div> com <details class="sanfona">, o título dentro do <summary>
+ *   .dividido     <section> com o texto à esquerda e a última imagem à direita;
+ *                 .dividido.invertido põe a imagem à esquerda
+ *   .par          duas imagens ou <figure> lado a lado; .par.sequencia põe uma seta no meio,
+ *                 e .par.pilha, dentro de um aviso, empilha as duas
+ *   .escala       <ol> dos níveis, como uma régua
+ *   .etiquetas    <ul> de rótulos curtos
+ *   .motivos      <ol> com números grandes
+ *   .dias         <ol> de cartões por dia de aplicação
+ *   .cronograma   <ol> de <li><strong>data</strong> atividade</li>
+ *   .copiavel     <p> com um endereço ou e-mail; o script põe o botão Copiar
+ *
+ * As imagens: img.celular (captura de celular, com a moldura do aparelho), img.documento
+ * (cartão ou folha impressa), img.foto (fotografia), img.ilustracao (desenho sobre fundo
+ * branco). As demais são capturas do painel.
+ *
+ * As formas: botões e etiquetas em pílula; cartões e painéis com 14px; capturas com 12px.
+ * As camadas (z-index): 10 o botão de voltar ao topo, 20 a barra de leitura. A imagem
+ * ampliada é um <dialog>, que fica acima de tudo.
+ *
+ * A fonte Figtree fica em css/fonte-figtree.css, embutida.
+ *
+ * A customização por rede: a moldura cita este arquivo e, depois dele, um <style> que troca
+ * --primaria (botões, links e destaques) e --secundaria (capa e títulos) pelos atributos
+ * cor_primaria e cor_secundaria da raiz. Os outros tons saem dessas duas com color-mix(),
+ * também no modo escuro; por isso nenhuma cor da marca fica escrita fora do :root. A primária
+ * precisa ser escura o bastante para o texto claro dos botões, e a secundária, para o texto
+ * claro da capa. O logo (img.capa-logo) é opcional: com o atributo vazio, o src fica vazio e
+ * a imagem some.
+ */
 
 :root {
-  --marinho: #0d2c4f;
-  --marinho-claro: #e8eef5;
-  --texto: #1f2933;
-  --texto-suave: #52606d;
-  --borda: #d9e2ec;
-  --atencao: #b7791f;
-  --atencao-fundo: #fdf6e3;
-  --sucesso: #2f855a;
-  --sucesso-fundo: #eef8f2;
-  --importante: #c53030;
-  --importante-fundo: #fdf0f0;
-  --lembrete: #2b6cb0;
-  --lembrete-fundo: #edf4fb;
+  color-scheme: light dark;
+
+  /* As duas cores da rede; a moldura as troca. */
+  --primaria: #1463b0;
+  --secundaria: #0d2c4f;
+
+  --marinho: var(--secundaria);
+  --titulo: var(--secundaria);
+  --acento: var(--primaria);
+  --acento-forte: color-mix(in oklab, var(--primaria) 86%, black);
+  --acento-suave: color-mix(in oklab, var(--primaria) 9%, white);
+  --sobre-acento: #fdfeff;
+
+  --fundo: #f6f8fb;
+  --superficie: #fdfeff;
+  --superficie-2: #eef2f7;
+  --borda: #dde4ec;
+  --borda-forte: #c3cfdb;
+  --texto: #16212d;
+  --texto-suave: #4c5c6e;
+
+  --atencao: #95600f;
+  --atencao-fundo: #fdf6e8;
+  --sucesso: #1f7548;
+  --sucesso-fundo: #ecf7f1;
+  --importante: #b1292b;
+  --importante-fundo: #fcf0f0;
+  --lembrete: var(--acento);
+  --lembrete-fundo: color-mix(in oklab, var(--primaria) 8%, white);
+  --sobre-cor: #fdfeff;
+
+  --capa-fundo: var(--secundaria);
+  --capa-texto: color-mix(in oklab, var(--secundaria) 5%, white);
+  --capa-texto-suave: color-mix(in oklab, var(--capa-texto) 76%, transparent);
+  --capa-brilho: color-mix(in oklab, var(--primaria) 78%, white);
+  --moldura-celular: #121b26;
+  --escala-texto-forte: #fdfeff;
+
+  --sombra-leve: 0 1px 2px color-mix(in oklab, var(--secundaria) 6%, transparent);
+  --sombra:
+    0 1px 2px color-mix(in oklab, var(--secundaria) 5%, transparent),
+    0 12px 32px -14px color-mix(in oklab, var(--secundaria) 22%, transparent);
+  --r-cartao: 14px;
+  --r-tela: 12px;
+  --r-pilula: 999px;
+
+  --fonte: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mola: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --titulo: color-mix(in oklab, var(--secundaria) 11%, white);
+    --acento: color-mix(in oklab, var(--primaria) 54%, white);
+    --acento-forte: color-mix(in oklab, var(--primaria) 35%, white);
+    --acento-suave: color-mix(in oklab, var(--primaria) 37%, var(--fundo));
+    --sobre-acento: #08111b;
+
+    --fundo: #0b131c;
+    --superficie: #111c28;
+    --superficie-2: #172534;
+    --borda: #223345;
+    --borda-forte: #30465c;
+    --texto: #e2e9f1;
+    --texto-suave: #9eafc1;
+
+    --atencao: #e5b45c;
+    --atencao-fundo: #231b0e;
+    --sucesso: #62c894;
+    --sucesso-fundo: #0f2419;
+    --importante: #f18f8f;
+    --importante-fundo: #2b1415;
+    --lembrete-fundo: color-mix(in oklab, var(--primaria) 22%, var(--fundo));
+    --sobre-cor: #08111b;
+
+    --capa-fundo: color-mix(in oklab, var(--secundaria) 81%, black);
+    --moldura-celular: #03070b;
+    --escala-texto-forte: #08111b;
+
+    --sombra-leve: 0 1px 2px rgb(0 0 0 / 0.35);
+    --sombra: 0 1px 2px rgb(0 0 0 / 0.3), 0 14px 34px -14px rgb(0 0 0 / 0.6);
+  }
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Um painel de aba escondido some mesmo quando o componente dele usa display próprio. */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   margin: 0;
-  background: #fff;
+  background: var(--fundo);
   color: var(--texto);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.6;
+  font-family: var(--fonte);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Capa e encerramento: faixas azuis de ponta a ponta, com o texto na largura da página. */
-
-.capa,
-.encerramento {
-  background: var(--marinho);
-  color: #fff;
-  padding: 3rem 1.5rem 2.5rem;
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
 }
 
-.capa > *,
-.encerramento > * {
-  max-width: 46rem;
-  margin-inline: auto;
+/* A barra de leitura, no topo: cresce com a rolagem da página. */
+
+.barra-leitura {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20;
+  height: 3px;
+  background: var(--acento);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .barra-leitura {
+    animation: leitura linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@keyframes leitura {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* A capa */
+
+.capa {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      56rem 30rem at 100% -20%,
+      color-mix(in oklab, var(--capa-brilho) 30%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      36rem 22rem at -8% 115%,
+      color-mix(in oklab, var(--primaria) 26%, transparent),
+      transparent 60%
+    ),
+    var(--capa-fundo);
+  color: var(--capa-texto);
+}
+
+.capa-conteudo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  max-width: 84rem;
+  margin: 0 auto;
+  padding: clamp(2.75rem, 6vw, 5rem) 1.5rem clamp(3rem, 6.5vw, 5.5rem);
+}
+
+/* O logo da rede, sobre uma placa clara para ficar legível em qualquer cor secundária. */
+.capa-logo {
+  display: block;
+  width: auto;
+  max-width: min(100%, 15rem);
+  height: 4rem;
+  margin: 0 0 1.75rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--r-tela);
+  background: #fdfeff;
+  object-fit: contain;
+  box-shadow: 0 12px 30px -16px rgb(0 0 0 / 0.6);
+}
+
+/* Sem logo configurado, o src fica vazio e a imagem some. */
+.capa-logo[src=''] {
+  display: none;
 }
 
 .sobretitulo {
-  margin-top: 0;
-  margin-bottom: 0;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  opacity: 0.8;
+  margin: 0 0 1rem;
+  color: var(--capa-texto-suave);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .capa h1 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
-  line-height: 1.2;
+  margin: 0;
+  color: #f4f8fc;
+  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .subtitulo {
-  margin-top: 0;
-  margin-bottom: 0;
-  opacity: 0.9;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.4rem 0 0;
 }
 
-/* Sem rede, o subtítulo fica só com o ano, sem o separador. */
-.rede:not(:empty)::after {
-  content: ' · ';
+.subtitulo > span:empty {
+  display: none;
 }
 
-.encerramento {
-  margin-top: 3rem;
-  padding-block: 2rem;
+.subtitulo > span:not(:empty) {
+  padding: 0.3rem 0.85rem;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: var(--r-pilula);
+  background: rgb(255 255 255 / 0.08);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
-.encerramento h2 {
-  margin-top: 0;
-  color: #fff;
+.capa .botao {
+  margin-top: 2.25rem;
+  background: #f1f6fb;
+  color: var(--secundaria);
+  box-shadow: 0 12px 30px -14px rgb(0 0 0 / 0.6);
 }
 
-.encerramento a {
-  color: #fff;
+.capa .botao:hover {
+  background: #fdfeff;
 }
 
-.contatos {
+.capa-foto {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  object-position: 74% 45%;
+  border-radius: 22px;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 34px 70px -34px rgb(0 0 0 / 0.7);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .capa-texto > * {
+    animation: subir 0.8s var(--mola) both;
+  }
+
+  .capa-texto > :nth-child(2) {
+    animation-delay: 0.06s;
+  }
+
+  .capa-texto > :nth-child(3) {
+    animation-delay: 0.12s;
+  }
+
+  .capa-texto > :nth-child(4) {
+    animation-delay: 0.18s;
+  }
+
+  .capa-texto > :nth-child(5) {
+    animation-delay: 0.24s;
+  }
+
+  .capa-foto {
+    animation: surgir 1s var(--mola) 0.1s both;
+  }
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (max-width: 820px) {
+  .capa-conteudo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .capa-foto {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+/* Botões */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 1.4rem;
+  border: 0;
+  border-radius: var(--r-pilula);
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font: inherit;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 10px 22px -12px color-mix(in oklab, var(--primaria) 70%, transparent);
+  transition:
+    transform 0.3s var(--mola),
+    background-color 0.2s;
+}
+
+.botao:hover {
+  background: var(--acento-forte);
+  transform: translateY(-1px);
+}
+
+.botao:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* A seta de "ir para baixo" ou "abrir fora". */
+.botao::after {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.botao[href^='http']::after {
+  transform: rotate(-45deg);
+}
+
+.botao-redondo {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--borda-forte);
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--titulo);
+  cursor: pointer;
+  transition:
+    transform 0.25s var(--mola),
+    background-color 0.2s,
+    opacity 0.2s;
+}
+
+.botao-redondo:hover:not(:disabled) {
+  background: var(--acento-suave);
+}
+
+.botao-redondo:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.botao-redondo:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* As setas desenhadas com duas bordas. */
+.seta-anterior::before,
+.seta-proxima::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+
+.seta-anterior::before {
+  transform: translateX(2px) rotate(-135deg);
+}
+
+.seta-proxima::before {
+  transform: translateX(-2px) rotate(45deg);
+}
+
+/* O conteúdo: o sumário fixo ao lado nas telas largas. */
+
+main {
+  max-width: 84rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 4vw, 3.5rem) 1.5rem 5rem;
+}
+
+main > section:not(.agenda) {
+  min-width: 0;
+  max-width: 54rem;
+}
+
+.agenda {
+  margin: 0 0 3rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-cartao);
+  background: var(--superficie);
+}
+
+.agenda h2 {
+  margin: 0 0 0.75rem;
+  color: var(--texto-suave);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sumario ol {
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* O conteúdo */
-
-main {
-  max-width: 46rem;
-  margin: 0 auto;
-  padding: 1.5rem;
+.sumario ol ol {
+  margin: 0.15rem 0 0.5rem 0.65rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--borda);
 }
 
+.sumario li {
+  max-width: none;
+  margin: 0;
+}
+
+.sumario a {
+  display: block;
+  padding: 0.32rem 0.65rem;
+  border-radius: 8px;
+  color: var(--texto-suave);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.sumario > ol > li > a {
+  color: var(--titulo);
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.sumario a:hover {
+  background: var(--superficie-2);
+  color: var(--titulo);
+}
+
+.sumario a.ativo {
+  background: var(--acento-suave);
+  color: var(--acento-forte);
+  font-weight: 650;
+}
+
+@media (min-width: 640px) and (max-width: 1099px) {
+  .sumario > ol {
+    column-gap: 1.5rem;
+    columns: 2;
+  }
+
+  .sumario > ol > li {
+    break-inside: avoid;
+  }
+}
+
+@media (min-width: 1100px) {
+  main {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: clamp(3rem, 5vw, 5.5rem);
+  }
+
+  .agenda {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100dvh - 3rem);
+    margin: 0 0 0 -0.4rem;
+    padding: 0 0.25rem 1rem 0.4rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    background: none;
+    scrollbar-width: thin;
+  }
+}
+
+/* Os títulos. As seções das features são as sem classe, montadas pela geração. */
+
+h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  margin: 2rem 0 0.5rem;
-  color: var(--marinho);
-  line-height: 1.3;
+  color: var(--titulo);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
-h2 {
+section[id],
+details[id] {
+  scroll-margin-top: 1.5rem;
+}
+
+section[id]:not([class]) > :is(h2, h3, h4, h5, h6):first-child {
+  margin: 0 0 0.6rem;
+}
+
+main > section:not(.agenda) > h2:first-child {
+  font-size: clamp(2rem, 3.6vw, 2.7rem);
+  letter-spacing: -0.03em;
+}
+
+/* Abertura de capítulo. */
+section[id]:not([class]):has(> h3:first-child) {
+  margin-top: clamp(4.5rem, 9vw, 7rem);
+}
+
+section[id]:not([class]) > h3:first-child {
+  font-size: clamp(1.85rem, 3.2vw, 2.4rem);
+  letter-spacing: -0.028em;
+}
+
+section[id]:not([class]) > h3:first-child::before {
+  content: '';
+  display: block;
+  width: 2.75rem;
+  height: 4px;
+  margin-bottom: 1.1rem;
+  border-radius: var(--r-pilula);
+  background: var(--acento);
+}
+
+section[id]:not([class]):has(> h4:first-child) {
+  margin-top: 4rem;
+  padding-top: 2.75rem;
+  border-top: 1px solid var(--borda);
+}
+
+section[id]:not([class]) > h4:first-child {
   font-size: 1.6rem;
+  letter-spacing: -0.022em;
 }
 
-h3 {
-  padding-bottom: 0.25rem;
-  border-bottom: 2px solid var(--borda);
-  font-size: 1.35rem;
+section[id]:not([class]):has(> h5:first-child) {
+  margin-top: 3.5rem;
 }
 
-h4 {
-  font-size: 1.2rem;
-}
-
-h5 {
-  font-size: 1.05rem;
-}
-
-h6 {
-  font-size: 1rem;
-}
-
-section[id] {
-  scroll-margin-top: 1rem;
+section[id]:not([class]) > h5:first-child {
+  font-size: 1.3rem;
 }
 
 .resumo {
-  margin-top: 0;
+  max-width: 62ch;
+  margin: 0 0 1.75rem;
   color: var(--texto-suave);
-  font-size: 1.05rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
 }
+
+:is(h2, h3):first-child + .resumo {
+  font-size: 1.2rem;
+}
+
+/* O texto */
+
+p {
+  max-width: 68ch;
+  margin: 0.75rem 0;
+}
+
+ol,
+ul {
+  padding-left: 1.3rem;
+}
+
+li {
+  max-width: 66ch;
+  margin: 0.35rem 0;
+}
+
+li::marker {
+  color: var(--acento);
+  font-weight: 700;
+}
+
+a {
+  color: var(--acento);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+/* Nomes de botões e telas da plataforma. */
+.ui {
+  padding: 0.05em 0.45em;
+  border: 1px solid color-mix(in srgb, var(--acento) 20%, transparent);
+  border-radius: 6px;
+  background: var(--acento-suave);
+  color: var(--acento-forte);
+  font-size: 0.94em;
+  font-weight: 650;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.secao {
+  margin: 2.5rem 0;
+}
+
+.secao > :is(h5, h6):first-child {
+  margin: 0 0 0.5rem;
+  font-size: 1.175rem;
+}
+
+.secao > :is(h3, h4):first-child {
+  margin: 0 0 0.5rem;
+  font-size: 1.4rem;
+}
+
+/* As imagens: capturas do painel com um passe-partout, celulares com a moldura do aparelho. */
 
 img {
   display: block;
   max-width: 100%;
   height: auto;
-  margin: 1rem 0;
+}
+
+main img {
+  width: auto;
+  max-height: 40rem;
+  margin: 1.25rem 0;
+  padding: 5px;
   border: 1px solid var(--borda);
-  border-radius: 6px;
+  border-radius: var(--r-tela);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+
+main img.celular {
+  width: 15rem;
+  max-height: none;
+  padding: 0;
+  border: 7px solid var(--moldura-celular);
+  border-radius: 30px;
+  background: var(--moldura-celular);
+}
+
+main img.documento {
+  width: 17rem;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  background: #fdfeff;
+  box-shadow:
+    var(--sombra),
+    6px 6px 0 -1px var(--superficie-2),
+    6px 6px 0 0 var(--borda);
+}
+
+main img.foto {
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-cartao);
+}
+
+main img.ilustracao {
+  width: min(100%, 24rem);
+  padding: 1rem;
+}
+
+.ampliavel {
+  cursor: zoom-in;
+  transition:
+    transform 0.35s var(--mola),
+    box-shadow 0.35s var(--mola);
+}
+
+.ampliavel:hover {
+  transform: translateY(-2px);
 }
 
 figure {
-  margin: 1rem 0;
+  margin: 1.25rem 0;
 }
 
-figure img {
+figure img,
+main figure img {
   margin: 0;
 }
 
 figcaption,
 .legenda {
-  margin-top: 0.35rem;
+  margin-top: 0.6rem;
   color: var(--texto-suave);
   font-size: 0.9rem;
-  white-space: pre-wrap;
+  line-height: 1.45;
 }
 
-/* Nomes de botões e telas da plataforma. */
-.ui {
-  padding: 0 0.3em;
-  border-radius: 4px;
-  background: var(--marinho-claro);
-  color: var(--marinho);
-  font-weight: 600;
-}
-
-.aviso {
-  margin: 1.25rem 0;
-  padding: 0.75rem 1rem;
-  border-left: 4px solid var(--lembrete);
-  border-radius: 0 6px 6px 0;
-  background: var(--lembrete-fundo);
-}
-
-.aviso > :first-child {
-  margin-top: 0;
-}
-
-.aviso > :last-child {
-  margin-bottom: 0;
-}
-
-.aviso.atencao {
-  border-left-color: var(--atencao);
-  background: var(--atencao-fundo);
-}
-
-.aviso.sucesso {
-  border-left-color: var(--sucesso);
-  background: var(--sucesso-fundo);
-}
-
-.aviso.importante {
-  border-left-color: var(--importante);
-  background: var(--importante-fundo);
-}
+/* Tabelas (a moldura continua podendo usar). */
 
 table {
   display: block;
   width: 100%;
-  margin: 1rem 0;
+  margin: 1.25rem 0;
   overflow-x: auto;
   border-collapse: collapse;
   font-size: 0.95rem;
@@ -215,59 +783,1417 @@ table {
 
 th,
 td {
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--borda);
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--borda);
   text-align: left;
   vertical-align: top;
 }
 
 th {
-  background: var(--marinho-claro);
-  color: var(--marinho);
+  color: var(--titulo);
+  font-weight: 700;
 }
 
-/* A agenda ("Funcionalidades"), montada pelo sumário. */
+/* Texto de um lado, imagem do outro: .dividido, os passos e os avisos com imagem.
+ * A imagem ocupa a coluna da direita em todas as linhas; a última linha, flexível,
+ * absorve a altura que sobra, e o texto fica junto no alto. */
 
-.agenda {
-  margin: 1rem 0 2rem;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  background: var(--marinho-claro);
+.dividido,
+.passo:has(> :is(img.celular, img.documento, figure, .telas)),
+.aviso:has(> :is(img, figure, .par)) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: repeat(10, auto) 1fr;
+  column-gap: 2rem;
 }
 
-.agenda h2 {
+:is(.dividido, .passo, .aviso) > * {
+  grid-column: 1;
+}
+
+.dividido > :is(img, figure),
+.passo > :is(img.celular, img.documento, figure, .telas),
+.aviso > :is(img, figure, .par) {
+  grid-row: 1 / -1;
+  grid-column: 2;
+  align-self: start;
+  margin: 0;
+}
+
+.dividido {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.dividido > :is(img, figure) {
+  align-self: center;
+}
+
+.dividido > :first-child {
   margin-top: 0;
 }
 
-.sumario ol {
-  margin: 0.25rem 0;
-  padding-left: 1.25rem;
+/* .dividido.invertido: a imagem à esquerda. */
+.dividido.invertido > * {
+  grid-column: 2;
 }
 
-.sumario > ol > li {
+.dividido.invertido > :is(img, figure) {
+  grid-column: 1;
+}
+
+.dividido > img:not(.celular, .documento) {
+  width: 100%;
+}
+
+.dividido > img.foto {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.dividido > img:is(.celular, .documento) {
+  justify-self: center;
+}
+
+.dividido > img.ilustracao {
+  justify-self: center;
+  width: min(100%, 20rem);
+}
+
+.secao > .dividido {
+  margin: 0.75rem 0 0;
+}
+
+@media (max-width: 720px) {
+  .dividido,
+  .passo:has(> :is(img.celular, img.documento, figure, .telas)),
+  .aviso:has(> :is(img, figure, .par)) {
+    display: block;
+  }
+
+  .dividido > :is(img, figure) {
+    margin-top: 1.25rem;
+  }
+
+  .passo > :is(img, figure, .telas),
+  .aviso > :is(img, figure, .par) {
+    margin: 1.25rem auto 0;
+  }
+}
+
+/* .fluxo */
+
+.fluxo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: etapa;
+}
+
+.fluxo > li {
+  position: relative;
+  max-width: none;
+  margin: 0;
+  padding: 1.2rem 1.15rem 1.25rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-cartao);
+  background: var(--superficie);
+  box-shadow: var(--sombra-leve);
+  color: var(--texto-suave);
+  font-size: 0.97rem;
+  line-height: 1.5;
+  counter-increment: etapa;
+}
+
+.fluxo > li::before {
+  content: counter(etapa);
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  margin-bottom: 0.9rem;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 750;
+}
+
+.fluxo > li:not(:has(strong)) {
+  color: var(--titulo);
   font-weight: 600;
 }
 
-.sumario ol ol {
-  font-weight: 400;
+.fluxo > li strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--titulo);
+  font-size: 1.08rem;
+  font-weight: 700;
 }
 
-.sumario a {
-  color: var(--marinho);
-  text-decoration: none;
+/* No celular, o número fica ao lado do texto. */
+@media (max-width: 759px) {
+  .fluxo > li {
+    display: grid;
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.9rem;
+    padding: 1rem 1.1rem;
+  }
+
+  .fluxo > li::before {
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+
+  .fluxo > li strong {
+    margin-top: 0.2rem;
+  }
+
+  .fluxo > li:not(:has(strong)) {
+    align-items: center;
+    min-height: 4.2rem;
+  }
 }
 
-.sumario a:hover {
-  text-decoration: underline;
+@media (min-width: 760px) {
+  .fluxo {
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+  }
+
+  /* A linha que liga uma etapa à seguinte, na altura do número. */
+  .fluxo > li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: calc(1.2rem + 1.1rem - 1px);
+    right: calc(-1rem - 1px);
+    left: calc(1.15rem + 2.2rem + 0.6rem);
+    height: 2px;
+    background: linear-gradient(to right, var(--borda-forte), var(--acento));
+    opacity: 0.6;
+  }
+}
+
+/* .passos */
+
+.passos {
+  margin: 2.25rem 0;
+  counter-reset: passo;
+}
+
+.passo {
+  position: relative;
+  margin: 0;
+  padding: 0 0 2.75rem 3.6rem;
+  counter-increment: passo;
+}
+
+.passo::before {
+  content: counter(passo);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-size: 1.05rem;
+  font-weight: 750;
+  box-shadow: 0 0 0 6px var(--fundo);
+}
+
+.passo::after {
+  content: '';
+  position: absolute;
+  top: 2.5rem;
+  bottom: 0.4rem;
+  left: calc(1.25rem - 1px);
+  width: 2px;
+  background: var(--borda-forte);
+}
+
+.passo:not(:has(~ .passo))::after {
+  display: none;
+}
+
+.passo > :is(h5, h6):first-child {
+  margin: 0.35rem 0 0.6rem;
+  font-size: 1.2rem;
+}
+
+.passo > :is(ol, ul, p) {
+  margin-block: 0 0.75rem;
+}
+
+/* Sem título, o texto começa na altura do número. */
+.passo > p:first-child {
+  margin-top: 0.45rem;
+}
+
+.passo > :is(img.celular, figure, .telas) {
+  width: 14rem;
+}
+
+.passo > figure img.celular {
+  width: 100%;
+}
+
+.passo > img.documento {
+  width: 15rem;
+}
+
+/* Um passo sozinho (os outros estão em perfis que não entraram) não leva número. */
+.passos > .passo:only-of-type {
+  padding: 0;
+}
+
+.passos > .passo:only-of-type::before,
+.passos > .passo:only-of-type::after {
+  display: none;
+}
+
+/* .subpasso: um slide de um passo, com o texto em cima e as telas embaixo. */
+.subpasso > img.celular {
+  width: 10.5rem;
+  margin: 1.25rem 0 0;
+}
+
+/* .fileira: várias telas de celular lado a lado; rola para o lado se não couberem. */
+.fileira {
+  display: flex;
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+  padding-bottom: 0.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+
+.fileira > * {
+  flex: none;
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.fileira > img.celular {
+  flex: 0 1 10.5rem;
+  width: auto;
+  min-width: 0;
+}
+
+/* .carrossel */
+
+.carrossel {
+  position: relative;
+  display: grid;
+  grid-auto-columns: 100%;
+  grid-auto-flow: column;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+  padding-bottom: 0.3rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .carrossel {
+    scroll-behavior: smooth;
+  }
+}
+
+.carrossel > * {
+  min-width: 0;
+  margin: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.carrossel > :is(section, figure, div) {
+  padding: 1.3rem 1.4rem 1.4rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-cartao);
+  background: var(--superficie);
+}
+
+.carrossel > * > :first-child {
+  margin-top: 0;
+}
+
+.carrossel > * > :last-child {
+  margin-bottom: 0;
+}
+
+.carrossel > * > :is(h5, h6):first-child {
+  margin-bottom: 0.4rem;
+  font-size: 1.1rem;
+}
+
+.carrossel > * img:not(.celular, .documento) {
+  width: 100%;
+}
+
+.carrossel.telas > img {
+  justify-self: center;
+  margin: 0;
+}
+
+.carrossel.telas > img {
+  width: 100%;
+}
+
+.carrossel.telas > img.documento {
+  box-shadow: var(--sombra-leve);
+}
+
+.carrossel > img:not(.celular, .documento) {
+  width: 100%;
+}
+
+.js .carrossel {
+  padding-bottom: 0;
+  scrollbar-width: none;
+}
+
+.js .carrossel::-webkit-scrollbar {
+  display: none;
+}
+
+.carrossel-bloco {
+  margin: 1.5rem 0 0;
+}
+
+.carrossel-bloco > .carrossel {
+  margin: 0;
+}
+
+.carrossel-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.carrossel-pontos {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.carrossel-ponto {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pilula);
+  background: var(--borda-forte);
+  cursor: pointer;
+  transition:
+    width 0.35s var(--mola),
+    background-color 0.25s;
+}
+
+.carrossel-ponto[aria-current='true'] {
+  width: 1.4rem;
+  background: var(--acento);
+}
+
+.carrossel-contador {
+  min-width: 3.5rem;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.telas .carrossel-contador {
+  display: none;
+}
+
+/* .abas */
+
+.abas {
+  margin: 1.75rem 0;
+}
+
+.abas:not(.pronta) > * + * {
+  margin-top: 2rem;
+}
+
+.abas-lista {
+  display: flex;
+  gap: 0.3rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 1.4rem;
+  padding: 0.3rem;
+  overflow-x: auto;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-pilula);
+  background: var(--superficie-2);
+  scrollbar-width: none;
+}
+
+.abas-lista::-webkit-scrollbar {
+  display: none;
+}
+
+.aba {
+  flex: none;
+  padding: 0.5rem 1.05rem;
+  border: 0;
+  border-radius: var(--r-pilula);
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+
+.aba:hover {
+  color: var(--titulo);
+}
+
+.aba[aria-selected='true'] {
+  background: var(--superficie);
+  color: var(--acento-forte);
+  box-shadow:
+    0 0 0 1px var(--borda),
+    var(--sombra-leve);
+}
+
+.abas.pronta > [role='tabpanel'] {
+  margin: 0;
+}
+
+.abas.pronta > [role='tabpanel'] > :is(h5, h6):first-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.abas.pronta > [role='tabpanel'] > :nth-child(2) {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .abas.pronta > [role='tabpanel']:not([hidden]) {
+    animation: subir 0.45s var(--mola);
+  }
+}
+
+/* .sanfonas */
+
+.sanfonas {
+  margin: 1.75rem 0;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-cartao);
+  background: var(--superficie);
+}
+
+.sanfona + .sanfona {
+  border-top: 1px solid var(--borda);
+}
+
+.sanfona > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.3rem;
+  list-style: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sanfona > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sanfona > summary:hover {
+  background: var(--superficie-2);
+}
+
+.sanfona > summary > :is(h5, h6) {
+  margin: 0;
+  font-size: 1.06rem;
+}
+
+.sanfona > summary::after {
+  content: '';
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid var(--acento);
+  border-bottom: 2px solid var(--acento);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.35s var(--mola);
+}
+
+.sanfona[open] > summary::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+.sanfona > :not(summary) {
+  margin-inline: 1.3rem;
+}
+
+/* A margem dos lados não pode empurrar a imagem para fora da sanfona. */
+.sanfona > img {
+  max-width: calc(100% - 2.6rem);
+}
+
+.sanfona > :not(summary):last-child {
+  margin-bottom: 1.3rem;
+}
+
+.sanfona > p:nth-child(2) {
+  margin-top: 0.25rem;
+}
+
+@supports (interpolate-size: allow-keywords) {
+  @media (prefers-reduced-motion: no-preference) {
+    .sanfona {
+      interpolate-size: allow-keywords;
+    }
+
+    .sanfona::details-content {
+      height: 0;
+      overflow: clip;
+      transition:
+        height 0.4s var(--mola),
+        content-visibility 0.4s allow-discrete;
+    }
+
+    .sanfona[open]::details-content {
+      height: auto;
+    }
+  }
+}
+
+/* .par */
+
+.par {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.par > * {
+  margin: 0;
+}
+
+.par figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.par :is(img.celular, img.documento) {
+  justify-self: center;
+  width: min(100%, 13rem);
+}
+
+.par.sequencia {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.par.sequencia > :nth-child(1 of :not(template)) {
+  grid-column: 1;
+}
+
+.par.sequencia > :nth-child(2 of :not(template)) {
+  grid-column: 3;
+}
+
+.par.sequencia::before {
+  content: '→' / '';
+  grid-row: 1;
+  grid-column: 2;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--acento-suave);
+  color: var(--acento-forte);
+  font-family: system-ui, 'Segoe UI', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.aviso > .par {
+  width: 22rem;
+}
+
+.aviso > .par.pilha {
+  grid-template-columns: minmax(0, 1fr);
+  width: 15rem;
+}
+
+.aviso > figure {
+  width: 10.5rem;
+}
+
+.aviso > figure img.celular {
+  width: 100%;
+}
+
+.aviso figcaption {
+  font-size: 0.82rem;
+}
+
+@media (max-width: 560px) {
+  .par,
+  .par.sequencia {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .par.sequencia > * {
+    grid-column: 1 !important;
+  }
+
+  .par.sequencia::before {
+    content: '↓' / '';
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: center;
+  }
+
+  .par.sequencia > :nth-child(2 of :not(template)) {
+    grid-row: 3;
+  }
+
+  .aviso > .par {
+    width: auto;
+  }
+}
+
+/* .escala */
+
+.escala {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 3px;
+  margin: 1.5rem 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.escala > li {
+  --tom: 12%;
+  max-width: none;
+  margin: 0;
+  padding: 0.75rem 0.7rem 0.8rem;
+  background: color-mix(in srgb, var(--acento) var(--tom), var(--superficie));
+  color: var(--texto);
+  font-size: 0.86rem;
+  line-height: 1.3;
+}
+
+.escala > li:first-child {
+  border-radius: var(--r-cartao) 0 0 var(--r-cartao);
+}
+
+.escala > li:last-child {
+  border-radius: 0 var(--r-cartao) var(--r-cartao) 0;
+}
+
+.escala > li:nth-child(2) {
+  --tom: 26%;
+}
+
+.escala > li:nth-child(3) {
+  --tom: 42%;
+}
+
+.escala > li:nth-child(4) {
+  --tom: 60%;
+  color: var(--escala-texto-forte);
+}
+
+.escala > li:nth-child(5) {
+  --tom: 78%;
+  color: var(--escala-texto-forte);
+}
+
+.escala > li:nth-child(6) {
+  --tom: 100%;
+  color: var(--escala-texto-forte);
+}
+
+.escala strong {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+  .escala {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .escala > li {
+    border-radius: 0 !important;
+  }
+
+  .escala > li:first-child {
+    border-top-left-radius: var(--r-cartao) !important;
+  }
+
+  .escala > li:nth-child(2) {
+    border-top-right-radius: var(--r-cartao) !important;
+  }
+
+  .escala > li:nth-child(5) {
+    border-bottom-left-radius: var(--r-cartao) !important;
+  }
+
+  .escala > li:last-child {
+    border-bottom-right-radius: var(--r-cartao) !important;
+  }
+}
+
+/* .etiquetas, .motivos, .dias, .cronograma */
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.etiquetas > li {
+  max-width: none;
+  margin: 0;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-pilula);
+  background: var(--superficie-2);
+  color: var(--titulo);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.motivos {
+  display: grid;
+  gap: 1.1rem;
+  margin: 1.4rem 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: motivo;
+}
+
+.motivos > li {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+  counter-increment: motivo;
+}
+
+.motivos > li::before {
+  content: counter(motivo);
+  color: var(--acento);
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dias > li {
+  max-width: none;
+  margin: 0;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--r-cartao);
+  background: var(--superficie);
+}
+
+.dias > li > strong {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  padding: 0.15rem 0.65rem;
+  border-radius: var(--r-pilula);
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-size: 0.8rem;
+}
+
+.dias > li > span {
+  display: block;
+  color: var(--titulo);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.dias .etiquetas {
+  margin: 0.75rem 0 0;
+}
+
+.cronograma {
+  margin: 1.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cronograma > li {
+  position: relative;
+  margin: 0;
+  padding: 0 0 1.5rem 2rem;
+}
+
+.cronograma > li::before {
+  content: '';
+  position: absolute;
+  top: 0.3rem;
+  left: 0;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid var(--acento);
+  border-radius: 50%;
+  background: var(--superficie);
+}
+
+.cronograma > li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 1.35rem;
+  bottom: 0.2rem;
+  left: calc(0.45rem - 1px);
+  width: 2px;
+  background: var(--borda-forte);
+}
+
+.cronograma strong {
+  display: block;
+  color: var(--acento-forte);
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+/* .copiavel */
+
+.copiavel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 100%;
+  padding: 0.6rem 0.6rem 0.6rem 1rem;
+  border: 1px dashed var(--borda-forte);
+  border-radius: var(--r-tela);
+  background: var(--superficie);
+  color: var(--titulo);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.copiavel > span {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.copiar {
+  flex: none;
+  margin-left: auto;
+  padding: 0.45rem 0.95rem;
+  border: 1px solid var(--borda-forte);
+  border-radius: var(--r-pilula);
+  background: var(--superficie-2);
+  color: var(--titulo);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    transform 0.25s var(--mola);
+}
+
+.copiar:hover {
+  background: var(--acento-suave);
+}
+
+.copiar:active {
+  transform: scale(0.96);
+}
+
+.copiar[data-estado='ok'] {
+  border-color: currentColor;
+  background: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+/* Os avisos */
+
+.aviso {
+  --cor: var(--lembrete);
+  --cor-fundo: var(--lembrete-fundo);
+  position: relative;
+  margin: 2rem 0;
+  padding: 1.2rem 1.4rem 1.3rem;
+  border: 1px solid color-mix(in srgb, var(--cor) 26%, transparent);
+  border-radius: var(--r-cartao);
+  background: var(--cor-fundo);
+}
+
+.aviso::before {
+  content: 'Lembrete';
+  justify-self: start;
+  display: inline-block;
+  margin-bottom: 0.65rem;
+  padding: 0.12rem 0.7rem;
+  border-radius: var(--r-pilula);
+  background: var(--cor);
+  color: var(--sobre-cor);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.aviso.atencao {
+  --cor: var(--atencao);
+  --cor-fundo: var(--atencao-fundo);
+}
+
+.aviso.atencao::before {
+  content: 'Atenção';
+}
+
+.aviso.sucesso {
+  --cor: var(--sucesso);
+  --cor-fundo: var(--sucesso-fundo);
+}
+
+.aviso.sucesso::before {
+  content: 'Tudo certo';
+}
+
+.aviso.importante {
+  --cor: var(--importante);
+  --cor-fundo: var(--importante-fundo);
+}
+
+.aviso.importante::before {
+  content: 'Importante';
+}
+
+.aviso > :is(p, ol, ul) {
+  margin-block: 0 0.6rem;
+}
+
+.aviso > :is(p, ol, ul):last-child,
+.aviso > :is(p, ol, ul):nth-last-child(1 of :not(img, figure, .par, template)) {
+  margin-bottom: 0;
+}
+
+.aviso > img {
+  width: 15rem;
+}
+
+.aviso > img.celular {
+  width: 10.5rem;
+}
+
+.aviso :is(ol, ul) {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: item;
+}
+
+.aviso li {
+  position: relative;
+  margin: 0;
+  padding-left: 2.1rem;
+}
+
+.aviso ol > li::before {
+  content: counter(item);
+  position: absolute;
+  top: 0.12em;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--cor) 16%, transparent);
+  color: var(--cor);
+  font-size: 0.78rem;
+  font-weight: 750;
+  counter-increment: item;
+}
+
+/* Um tique: duas bordas de um retângulo girado. */
+.aviso ul > li::before {
+  content: '';
+  position: absolute;
+  top: 0.3em;
+  left: 0.45rem;
+  width: 0.4rem;
+  height: 0.75rem;
+  border-right: 2px solid var(--cor);
+  border-bottom: 2px solid var(--cor);
+  transform: rotate(45deg);
+}
+
+/* A imagem ampliada */
+
+html:has(.zoom[open]) {
+  overflow: hidden;
+}
+
+.zoom {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #eef4fa;
+}
+
+.zoom::backdrop {
+  background: rgb(5 12 20 / 0.9);
+  backdrop-filter: blur(6px);
+}
+
+.zoom-quadro {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 4.25rem clamp(1rem, 6vw, 5rem) 4rem;
+}
+
+.zoom-quadro img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-tela);
+  background: none;
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.8);
+  cursor: zoom-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .zoom[open] .zoom-quadro img {
+    animation: surgir 0.4s var(--mola);
+  }
+}
+
+.zoom-legenda {
+  position: absolute;
+  right: 1rem;
+  bottom: 1.1rem;
+  left: 1rem;
+  margin: 0 auto;
+  font-size: 0.92rem;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.zoom .botao-redondo {
+  position: absolute;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-color: rgb(255 255 255 / 0.2);
+  background: rgb(255 255 255 / 0.1);
+  color: #eef4fa;
+}
+
+.zoom .botao-redondo:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.2);
+}
+
+.zoom-fechar {
+  top: 1rem;
+  right: 1rem;
+}
+
+/* O X: duas barras cruzadas. */
+.zoom-fechar::before,
+.zoom-fechar::after {
+  content: '';
+  grid-area: 1 / 1;
+  width: 1.1rem;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.zoom-fechar::after {
+  transform: rotate(-45deg);
+}
+
+.zoom-anterior,
+.zoom-proxima {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.zoom-anterior {
+  left: 1rem;
+}
+
+.zoom-proxima {
+  right: 1rem;
+}
+
+/* Voltar ao topo: aparece depois da capa, pela rolagem, sem script. */
+
+.voltar-topo {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--sobre-acento);
+  box-shadow: 0 12px 28px -12px color-mix(in oklab, var(--secundaria) 70%, transparent);
+  transition: transform 0.3s var(--mola);
+}
+
+.voltar-topo:hover {
+  transform: translateY(-2px);
+}
+
+.voltar-topo::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  transform: translateY(2px) rotate(45deg);
+}
+
+@supports (animation-timeline: scroll()) {
+  .voltar-topo {
+    animation: mostrar-topo linear both;
+    animation-timeline: scroll(root);
+    animation-range: 25rem 40rem;
+  }
+}
+
+@keyframes mostrar-topo {
+  from {
+    visibility: hidden;
+    opacity: 0;
+    scale: 0.85;
+  }
+
+  to {
+    visibility: visible;
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* O encerramento */
+
+.encerramento {
+  margin-top: 2rem;
+  background: var(--capa-fundo);
+  color: var(--capa-texto);
+}
+
+.encerramento-conteudo {
+  max-width: 84rem;
+  margin: 0 auto;
+  padding: clamp(3rem, 6vw, 4.5rem) 1.5rem;
+}
+
+.encerramento h2 {
+  margin: 0 0 1.75rem;
+  color: #f4f8fc;
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  letter-spacing: -0.025em;
+}
+
+.contatos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contatos > li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: none;
+  margin: 0;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: var(--r-cartao);
+  background: rgb(255 255 255 / 0.05);
+}
+
+.contato-rotulo {
+  color: var(--capa-texto-suave);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.contatos a,
+.contato-valor {
+  color: #f4f8fc;
+  font-size: 1.05rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.contatos a {
+  text-decoration-color: rgb(255 255 255 / 0.35);
+}
+
+.contatos a:hover {
+  text-decoration-color: currentColor;
+}
+
+.contatos .copiar {
+  align-self: flex-start;
+  margin: 0.35rem 0 0;
+  border-color: rgb(255 255 255 / 0.22);
+  background: rgb(255 255 255 / 0.08);
+  color: #eef4fa;
+}
+
+.contatos .copiar:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.contatos .copiar[data-estado='ok'] {
+  background: rgb(98 200 148 / 0.18);
+  color: #9fe3bf;
+}
+
+/* A entrada dos blocos ao rolar, sem script. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    section[id]:not([class]) > :is(.secao, .aviso, .abas, .sanfonas, .fluxo, .dividido, .par),
+    .passos > .passo {
+      animation: subir linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 28%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
 
 @media (max-width: 600px) {
-  main {
-    padding: 1rem;
+  body {
+    font-size: 1rem;
   }
 
-  .capa,
-  .encerramento {
+  main {
     padding-inline: 1rem;
+  }
+
+  .capa-conteudo,
+  .encerramento-conteudo {
+    padding-inline: 1rem;
+  }
+
+  .passo {
+    padding-left: 3.1rem;
+  }
+
+  .aviso {
+    padding: 1.1rem 1.1rem 1.2rem;
+  }
+}
+
+/* Na impressão: tudo aberto e empilhado. */
+
+@media print {
+  .barra-leitura,
+  .voltar-topo,
+  .carrossel-controles,
+  .abas-lista,
+  .copiar {
+    display: none !important;
+  }
+
+  .carrossel {
+    display: block;
+    overflow: visible;
+  }
+
+  .carrossel > * + * {
+    margin-top: 1rem;
+  }
+
+  .abas > [hidden] {
+    display: block !important;
+  }
+
+  .agenda {
+    position: static;
   }
 }
