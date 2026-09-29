@@ -254,6 +254,14 @@ A pedido do usuário, as 14 configurações do herby (as 13 antigas e a `persona
 - **Os `data-perfis` dos fragmentos** continuam com os nomes das configurações antigas: são só anotação, e a variabilidade anotativa ainda não foi decidida.
 - **O logo genérico** `img/redes/exemplo/logo.svg` ficou para a `t2`.
 
+## Exemplo carro (feito em 28/09/2026)
+
+A pedido do usuário, `docs/examples/carro/` tem só o `model.xml`, sem assets, configurações nem fragmentos. **O `src/` não foi tocado.**
+
+- **O modelo:** 43 features. Carroceria, motor, câmbio, tração e rodas são alternatives obrigatórios; assistências ao motorista e multimídia são or; conforto, multimídia e Pacote Premium são opcionais. Tem atributos dos quatro tipos, um fixo (`ano_modelo`) e dois sem `default` (`nome_versao` e `pintura.cor`), que a configuração precisa preencher para ficar completa.
+- **As 9 restrições** usam `implies`, `not`, `or`, `and` e `iff`. A `c9` (`pacote_premium iff …`) seleciona o Pacote Premium sozinho quando couro, teto solar, ar digital e rodas de liga estão todos presentes.
+- **Conferência** por script, com o código do app: XSD e M1–M5 sem problema, o modelo admite produto, nenhuma feature morta, e decodificar e codificar de novo dá o arquivo idêntico. **Não foi aberto no `mdd.exe`.**
+
 ## Próximo passo
 
 As fases 0 a 8 estão concluídas, e as checagens manuais das Fases 0 e 1 também (veja abaixo).
